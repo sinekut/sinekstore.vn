@@ -554,7 +554,7 @@
             document.getElementById(id).style.display = 'none';
         }
 
-        // ĐÃ SỬA: KIỂM TRA TRÙNG TÊN TÀI KHOẢN TUYỆT ĐỐI
+        // KIỂM TRA TRÙNG TÊN TÀI KHOẢN TUYỆT ĐỐI KHI ĐĂNG KÝ
         function thucHienDangKy() {
             let u = document.getElementById('authUsername').value.trim();
             let p = document.getElementById('authPassword').value.trim();
@@ -770,6 +770,7 @@
             }
         }
 
+        // ĐÃ KHẮC PHỤC LỖI NẠP TIỀN ADMIN: TỰ ĐỘNG KHỞI TẠO TÀI KHOẢN NẾU CHƯA CÓ TRÊN HỆ THỐNG
         function adminNapTien() {
             let targetUser = document.getElementById('adUserTarget').value.trim();
             let amount = parseInt(document.getElementById('adAmountTarget').value);
@@ -779,15 +780,16 @@
                 return;
             }
 
-            let currentBal = localStorage.getItem('sinek_bal_' + targetUser);
-            if(currentBal === null) {
-                alert('Tên tài khoản khách hàng không tồn tại trên hệ thống!');
-                return;
+            let balKey = 'sinek_bal_' + targetUser;
+            let currentBal = parseInt(localStorage.getItem(balKey) || '0');
+            
+            let newBal = currentBal + amount;
+            localStorage.setItem(balKey, newBal);
+            
+            if(!localStorage.getItem('sinek_user_' + targetUser)) {
+                localStorage.setItem('sinek_user_' + targetUser, '123456');
             }
 
-            let newBal = parseInt(currentBal) + amount;
-            localStorage.setItem('sinek_bal_' + targetUser, newBal);
-            
             if(currentUser === targetUser) {
                 capNhatGiaoDienUser();
             }
