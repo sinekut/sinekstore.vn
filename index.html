@@ -401,7 +401,7 @@
         </div>
     </div>
 
-    <!-- MODAL ĐĂNG NHẬP / ĐĂNG KÝ -->
+    <!-- MODAL ĐĂNG NHẬP / ĐĂNG KÝ (ĐÃ CÓ NÚT XEM MẬT KHẨU) -->
     <div class="modal" id="modalAuth">
         <div class="modal-content">
             <div class="modal-title-custom">Tài Khoản Sinek Store</div>
@@ -411,7 +411,10 @@
             </div>
             <div class="form-group">
                 <label>Mật khẩu:</label>
-                <input type="password" id="authPassword" class="form-control" placeholder="Nhập mật khẩu">
+                <div style="display: flex; gap: 5px;">
+                    <input type="password" id="authPassword" class="form-control" placeholder="Nhập mật khẩu">
+                    <button type="button" onclick="hienThiMatKhau()" style="background: #1e293b; border: 1px solid #334155; color: #38bdf8; padding: 0 10px; border-radius: 6px; cursor: pointer; font-size: 12px;">👁️</button>
+                </div>
             </div>
             <div class="modal-buttons">
                 <button class="btn-submit" onclick="thucHienDangKy()">Đăng Ký</button>
@@ -481,6 +484,16 @@
 
         function lienHeFB() {
             window.location.href = "https://www.facebook.com/share/1Dy3Rqke3P/";
+        }
+
+        // HÀM HIỆN / ẨN MẬT KHẨU ĐỂ TRÁNH GÕ SAI
+        function hienThiMatKhau() {
+            let pwdInput = document.getElementById('authPassword');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+            } else {
+                pwdInput.type = 'password';
+            }
         }
 
         const databaseSanPham = {
@@ -554,7 +567,6 @@
             document.getElementById(id).style.display = 'none';
         }
 
-        // KIỂM TRA TRÙNG TÊN TÀI KHOẢN TUYỆT ĐỐI KHI ĐĂNG KÝ
         function thucHienDangKy() {
             let u = document.getElementById('authUsername').value.trim();
             let p = document.getElementById('authPassword').value.trim();
@@ -569,7 +581,7 @@
             localStorage.setItem(storageKey, p);
             localStorage.setItem('sinek_bal_' + u, '0');
             localStorage.setItem('sinek_history_' + u, JSON.stringify([]));
-            alert('Đăng ký thành công! Bạn có thể đăng nhập ngay.');
+            alert('Đăng ký thành công! Bạn có thể bấm đăng nhập ngay.');
         }
 
         function thucHienDangNhap() {
@@ -584,7 +596,7 @@
                 dongModal('modalAuth');
                 capNhatGiaoDienUser();
             } else {
-                alert('Sai tên đăng nhập hoặc mật khẩu!');
+                alert('Sai tên đăng nhập hoặc mật khẩu! (Hoặc tài khoản chưa được đăng ký trước đó).');
             }
         }
 
@@ -770,7 +782,6 @@
             }
         }
 
-        // ĐÃ KHẮC PHỤC LỖI NẠP TIỀN ADMIN: TỰ ĐỘNG KHỞI TẠO TÀI KHOẢN NẾU CHƯA CÓ TRÊN HỆ THỐNG
         function adminNapTien() {
             let targetUser = document.getElementById('adUserTarget').value.trim();
             let amount = parseInt(document.getElementById('adAmountTarget').value);
