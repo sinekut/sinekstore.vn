@@ -78,13 +78,14 @@
         .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 14px; text-align: center; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; }
         .card:hover { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56,189,248,0.3); transform: translateY(-2px); }
+        .card-icon { font-size: 36px; margin-bottom: 8px; }
         .card-img { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
         .card-title { font-size: 14px; font-weight: bold; margin-bottom: 6px; color: #f8fafc; }
         .card-desc { font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
         .action-btn { width: 100%; background: #0284c7; color: #fff; border: none; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .action-btn:hover { background: #38bdf8; color: #0f172a; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(5px); align-items: center; justify-content: center; z-index: 2000; padding: 15px; }
-        .modal-content { background: #0f172a; border: 1px solid #0284c7; border-radius: 14px; width: 100%; max-width: 380px; padding: 20px; box-shadow: 0 0 25px rgba(2, 132, 199, 0.4); }
+        .modal-content { background: #0f172a; border: 1px solid #0284c7; border-radius: 14px; width: 100%; max-width: 380px; padding: 20px; box-shadow: 0 0 25px rgba(2, 132, 199, 0.4); max-height: 90vh; overflow-y: auto; }
         .modal-title-custom { font-size: 18px; font-weight: bold; color: #38bdf8; margin-bottom: 15px; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
@@ -310,7 +311,9 @@
         <div class="modal-content">
             <div class="modal-title-custom">Đặt Đơn Cày Thuê</div>
             <div class="form-group"><label>Sản phẩm:</label><input type="text" id="ctProductName" class="form-control" readonly></div>
-            <div class="form-group"><label>Giá tiền:</label><input type="text" id="ctProductPrice" class="form-control" readonly></div>
+            <div class="form-group"><label>Đơn giá:</label><input type="text" id="ctProductPrice" class="form-control" readonly></div>
+            <div class="form-group"><label>Số lượng (Gói / Lần / Số level):</label><input type="number" id="ctQuantity" class="form-control" value="1" min="1" oninput="tinhTienCayThue()"></div>
+            <div class="form-group"><label>Tổng tiền thanh toán:</label><input type="text" id="ctTotalMoney" class="form-control" style="color: #38bdf8; font-weight: bold;" readonly></div>
             <div class="form-group"><label>Tài khoản game (Tên acc):</label><input type="text" id="ctGameUser" class="form-control" placeholder="Tên đăng nhập game"></div>
             <div class="form-group"><label>Mật khẩu game (Mk acc):</label><input type="password" id="ctGamePass" class="form-control" placeholder="Mật khẩu game"></div>
             <div class="form-group"><label>Ghi chú thêm:</label><input type="text" id="ctNote" class="form-control" placeholder="Ghi chú..."></div>
@@ -325,7 +328,9 @@
         <div class="modal-content">
             <div class="modal-title-custom">Đặt Đơn Mua Item</div>
             <div class="form-group"><label>Sản phẩm:</label><input type="text" id="itProductName" class="form-control" readonly></div>
-            <div class="form-group"><label>Giá tiền:</label><input type="text" id="itProductPrice" class="form-control" readonly></div>
+            <div class="form-group"><label>Đơn giá:</label><input type="text" id="itProductPrice" class="form-control" readonly></div>
+            <div class="form-group"><label>Số lượng cần mua:</label><input type="number" id="itQuantity" class="form-control" value="1" min="1" oninput="tinhTienItem()"></div>
+            <div class="form-group"><label>Tổng tiền thanh toán:</label><input type="text" id="itTotalMoney" class="form-control" style="color: #38bdf8; font-weight: bold;" readonly></div>
             <div class="form-group"><label>Tên đăng nhập Roblox:</label><input type="text" id="itGameUser" class="form-control" placeholder="Tên đăng nhập Roblox"></div>
             <div class="form-group"><label>Số điện thoại:</label><input type="text" id="itPhone" class="form-control" placeholder="Số điện thoại"></div>
             <div class="modal-buttons">
@@ -597,9 +602,11 @@
         }
 
         function moModalCayThue(ten, gia) {
-            sanphamDangChon = { name: ten, price: gia };
+            sanphamDangChon = { name: ten, price: gia, basePrice: gia };
             document.getElementById('ctProductName').value = ten;
             document.getElementById('ctProductPrice').value = gia.toLocaleString() + ' đ';
+            document.getElementById('ctQuantity').value = 1;
+            document.getElementById('ctTotalMoney').value = gia.toLocaleString() + ' đ';
             document.getElementById('ctGameUser').value = '';
             document.getElementById('ctGamePass').value = '';
             document.getElementById('ctNote').value = '';
@@ -607,13 +614,31 @@
             document.getElementById('modalCayThue').style.display = 'flex';
         }
 
+        function tinhTienCayThue() {
+            let qty = parseInt(document.getElementById('ctQuantity').value) || 1;
+            if(qty < 1) qty = 1;
+            let total = sanphamDangChon.basePrice * qty;
+            sanphamDangChon.price = total;
+            document.getElementById('ctTotalMoney').value = total.toLocaleString() + ' đ';
+        }
+
         function moModalItem(ten, gia) {
-            sanphamDangChon = { name: ten, price: gia };
+            sanphamDangChon = { name: ten, price: gia, basePrice: gia };
             document.getElementById('itProductName').value = ten;
             document.getElementById('itProductPrice').value = gia.toLocaleString() + ' đ';
+            document.getElementById('itQuantity').value = 1;
+            document.getElementById('itTotalMoney').value = gia.toLocaleString() + ' đ';
             document.getElementById('itGameUser').value = '';
             document.getElementById('itPhone').value = '';
             document.getElementById('modalItem').style.display = 'flex';
+        }
+
+        function tinhTienItem() {
+            let qty = parseInt(document.getElementById('itQuantity').value) || 1;
+            if(qty < 1) qty = 1;
+            let total = sanphamDangChon.basePrice * qty;
+            sanphamDangChon.price = total;
+            document.getElementById('itTotalMoney').value = total.toLocaleString() + ' đ';
         }
 
         function luuVaTaoDonHang(chiTietDon) {
@@ -653,7 +678,7 @@
                 time: timeNow
             });
 
-            let noiDungGui = `[ĐƠN MUA ACC VIP - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Mã Acc: ${accCode}\n- Giá: ${sanphamDangChon.price.toLocaleString()}đ\n- SĐT: ${phone}`;
+            let noiDungGui = `[ĐƠN MUA ACC VIP - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Mã Acc: ${accCode}\n- Tổng tiền: ${sanphamDangChon.price.toLocaleString()}đ\n- SĐT: ${phone}`;
             
             navigator.clipboard.writeText(noiDungGui).then(() => {
                 alert(`Đặt đơn thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
@@ -663,6 +688,7 @@
         }
 
         function xacNhanThanhToanCayThue() {
+            let qty = document.getElementById('ctQuantity').value;
             let gUser = document.getElementById('ctGameUser').value.trim();
             let gPass = document.getElementById('ctGamePass').value.trim();
             let note = document.getElementById('ctNote').value.trim() || 'Không có';
@@ -683,19 +709,19 @@
 
             let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
             let timeNow = new Date().toLocaleString('vi-VN');
-            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Tên Acc game: ${gUser}\n- Mật khẩu: ${gPass}\n- Ghi chú: ${note}\n- SĐT: ${phone}`;
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Số lượng: ${qty}\n- Tên Acc game: ${gUser}\n- Mật khẩu: ${gPass}\n- Ghi chú: ${note}\n- SĐT: ${phone}`;
             
             luuVaTaoDonHang({
                 code: randomCode,
                 webUser: currentUser || 'Khách vãng lai',
-                item: sanphamDangChon.name,
+                item: sanphamDangChon.name + ` (Số lượng: ${qty})`,
                 price: sanphamDangChon.price,
                 details: chiTiet,
                 status: '⏳ Chờ Duyệt',
                 time: timeNow
             });
 
-            let noiDungGui = `[ĐƠN CÀY THUÊ KING LEGACY - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Giá: ${sanphamDangChon.price.toLocaleString()}đ\n${chiTiet}`;
+            let noiDungGui = `[ĐƠN CÀY THUÊ KING LEGACY - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Số lượng: ${qty}\n- Tổng tiền: ${sanphamDangChon.price.toLocaleString()}đ\n${chiTiet}`;
             
             navigator.clipboard.writeText(noiDungGui).then(() => {
                 alert(`Đặt đơn thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
@@ -705,6 +731,7 @@
         }
 
         function xacNhanThanhToanItem() {
+            let qty = document.getElementById('itQuantity').value;
             let gUser = document.getElementById('itGameUser').value.trim();
             let phone = document.getElementById('itPhone').value.trim();
             if(!gUser || !phone) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
@@ -723,19 +750,19 @@
 
             let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
             let timeNow = new Date().toLocaleString('vi-VN');
-            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Tên Roblox: ${gUser}\n- SĐT: ${phone}`;
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Số lượng: ${qty}\n- Tên Roblox: ${gUser}\n- SĐT: ${phone}`;
             
             luuVaTaoDonHang({
                 code: randomCode,
                 webUser: currentUser || 'Khách vãng lai',
-                item: sanphamDangChon.name,
+                item: sanphamDangChon.name + ` (Số lượng: ${qty})`,
                 price: sanphamDangChon.price,
                 details: chiTiet,
                 status: '⏳ Chờ Duyệt',
                 time: timeNow
             });
 
-            let noiDungGui = `[ĐƠN MUA ITEM - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Giá: ${sanphamDangChon.price.toLocaleString()}đ\n${chiTiet}`;
+            let noiDungGui = `[ĐƠN MUA ITEM - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Số lượng: ${qty}\n- Tổng tiền: ${sanphamDangChon.price.toLocaleString()}đ\n${chiTiet}`;
             
             navigator.clipboard.writeText(noiDungGui).then(() => {
                 alert(`Đặt đơn thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
@@ -754,7 +781,7 @@
                 let badgeColor = h.status === '⏳ Chờ Duyệt' ? '#fbbf24' : (h.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
                 html += `<div style="background:#0f172a; border:1px solid #334155; padding:10px; border-radius:8px; margin-bottom:8px; text-align:left;">
                     <b style="color:#38bdf8;">Mã đơn: ${h.code}</b> | Trạng thái: <b style="color:${badgeColor};">${h.status}</b><br>
-                    <span>Sản phẩm: ${h.item}</span><br><span>Giá: ${h.price.toLocaleString()}đ</span><br>
+                    <span>Sản phẩm: ${h.item}</span><br><span>Tổng giá: ${h.price.toLocaleString()}đ</span><br>
                     <pre style="font-size:11px; color:#94a3b8; font-family:inherit; white-space:pre-wrap; margin-top:4px;">${h.details}</pre>
                     <span style="font-size:10px; color:#64748b;">Thời gian: ${h.time}</span></div>`;
             });
