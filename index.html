@@ -79,6 +79,7 @@
         .card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 14px; text-align: center; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; }
         .card:hover { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56,189,248,0.3); transform: translateY(-2px); }
         .card-icon { font-size: 32px; margin-bottom: 8px; }
+        .card-img { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
         .card-title { font-size: 14px; font-weight: bold; margin-bottom: 6px; color: #f8fafc; }
         .card-desc { font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
         .action-btn { width: 100%; background: #0284c7; color: #fff; border: none; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
@@ -139,7 +140,7 @@
                     <img src="https://i.ibb.co/6V8qTFz/FB-IMG-1791121966996.jpg" alt="Admin Avatar" class="admin-avatar">
                 </div>
                 <div class="admin-info">
-                    <span class="admin-label">Liên Hệ</span>
+                    <span class="admin-label" id="adminHeaderStatusLabel">Online</span>
                     <span class="admin-name">Admin Shop</span>
                 </div>
             </div>
@@ -151,21 +152,8 @@
     </div>
     <div class="container" onclick="dongMenuBenNgoai(event)">
         <div id="pageHome" class="page-view">
-            <div class="section-title">Danh Mục King Legacy</div>
-            <div class="grid-container">
-                <div class="card" onclick="moDanhMuc('caythue')">
-                    <div class="card-icon">👑</div>
-                    <div class="card-title">Cày Thuê King Legacy</div>
-                    <div class="card-desc">Cày level, quái, sea king fin...</div>
-                    <button class="action-btn">Xem Sản Phẩm</button>
-                </div>
-                <div class="card" onclick="moDanhMuc('itemnguyenlieu')">
-                    <div class="card-icon">💎</div>
-                    <div class="card-title">Item & Nguyên Liệu</div>
-                    <div class="card-desc">Kiếm, phụ kiện, nguyên liệu hiếm</div>
-                    <button class="action-btn">Xem Sản Phẩm</button>
-                </div>
-            </div>
+            <div class="section-title">Danh Mục Sinek Store</div>
+            <div class="grid-container" id="categoryGrid"></div>
         </div>
         <div id="pageProducts" class="page-view" style="display: none;">
             <button onclick="veTrangChu()" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:15px; font-weight:bold;">← Quay lại danh mục</button>
@@ -208,7 +196,7 @@
                     <label>Mã Thẻ (Mã nạp):</label>
                     <input type="text" id="cardPin" class="form-control" placeholder="Nhập mã thẻ cào">
                 </div>
-                <div style="font-size:11px; color:#f87171; margin-bottom:12px;">⚠️ Cảnh báo: Nhập sai mất giá trị thẻ shop không chịu trách nhiệm!</div>
+                <div style="font-size:11px; color:#f87171; margin-bottom:12px;">⚠ Cảnh báo: Nhập sai mất giá trị thẻ shop không chịu trách nhiệm!</div>
                 <div style="display: flex; gap: 8px;">
                     <button class="action-btn" style="background:#0284c7;" onclick="guiTheCaoZalo()">Gửi Thẻ Qua Zalo</button>
                     <button class="action-btn" style="background:#2563eb;" onclick="guiTheCaoFB()">Gửi Thẻ Qua FB</button>
@@ -229,33 +217,113 @@
                 <button class="action-btn" style="background:#f87171;" onclick="kiemTraAdmin()">Đăng Nhập QTV</button>
             </div>
             <div id="adminPanelBox" style="display:none;">
+                <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3 style="font-size:14px; color:#38bdf8; margin-bottom:3px;">Trạng thái Admin Shop</h3>
+                        <p style="font-size:11px; color:#94a3b8;">Bật để hiện Online, tắt để hiện Offline</p>
+                    </div>
+                    <button class="action-btn" id="btnToggleAdminStatus" style="width: 100px; background: #10b981;" onclick="toggleAdminStatus()">Online</button>
+                </div>
                 <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
-                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">1. Nạp Tiền Thủ Công Cho Khách</h3>
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">🖼 Tải Ảnh Cho Danh Mục</h3>
+                    <div class="form-group">
+                        <label>Chọn danh mục:</label>
+                        <select id="editCatKey" class="form-control">
+                            <option value="muaacc">Acc King Legacy VIP</option>
+                            <option value="caythue">Cày Thuê King Legacy</option>
+                            <option value="itemnguyenlieu">Item & Nguyên Liệu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Chọn ảnh từ thư viện máy:</label>
+                        <input type="file" id="editCatImgFile" class="form-control" accept="image/*" style="padding: 6px;">
+                    </div>
+                    <button class="action-btn" style="background:#10b981;" onclick="adminDoiAnhDanhMuc()">Lưu Ảnh Danh Mục</button>
+                </div>
+                <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">📦 Quản Lý Đơn Hàng Khách Đặt</h3>
+                    <div id="adminOrderList" style="font-size:12px; color:#94a3b8;">Chưa có đơn hàng nào chờ duyệt.</div>
+                </div>
+                <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">1. Thêm Sản Phẩm Mới</h3>
+                    <div class="form-group">
+                        <label>Chọn danh mục:</label>
+                        <select id="newProCategory" class="form-control">
+                            <option value="muaacc">Acc King Legacy VIP</option>
+                            <option value="caythue">Cày Thuê King Legacy</option>
+                            <option value="itemnguyenlieu">Item & Nguyên Liệu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tên sản phẩm / Mã Acc:</label>
+                        <input type="text" id="newProName" class="form-control" placeholder="Nhập tên sản phẩm hoặc mã acc">
+                    </div>
+                    <div class="form-group">
+                        <label>Giá tiền (VNĐ):</label>
+                        <input type="number" id="newProPrice" class="form-control" placeholder="Nhập giá tiền">
+                    </div>
+                    <div class="form-group">
+                        <label>Ảnh sản phẩm (Chọn từ thư viện):</label>
+                        <input type="file" id="newProImgFile" class="form-control" accept="image/*" style="padding: 6px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng kho:</label>
+                        <input type="number" id="newProStock" class="form-control" placeholder="Nhập số lượng kho" value="1">
+                    </div>
+                    <button class="action-btn" style="background:#0284c7;" onclick="adminThemSanPhamMoi()">Thêm Sản Phẩm</button>
+                </div>
+                <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">2. Biến Động Số Dư Khách Hàng</h3>
                     <div class="form-group">
                         <label>Tên tài khoản khách:</label>
                         <input type="text" id="adUserTarget" class="form-control" placeholder="Nhập username khách">
                     </div>
                     <div class="form-group">
-                        <label>Số tiền muốn nạp (VNĐ):</label>
-                        <input type="number" id="adAmountTarget" class="form-control" placeholder="Ví dụ: 50000">
+                        <label>Số tiền (VNĐ):</label>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="action-btn" id="btnAdminMode" style="width: 50px; background: #10b981; font-size: 18px;" onclick="toggleAdminMode()" title="Bấm để đổi Cộng/Trừ">+</button>
+                            <input type="number" id="adAmountTarget" class="form-control" placeholder="Nhập số tiền">
+                        </div>
                     </div>
-                    <button class="action-btn" onclick="adminNapTien()">Cộng Tiền Cho Khách</button>
+                    <button class="action-btn" style="background: #0284c7; margin-top: 5px;" onclick="adminXuLyTien()">Xác Nhận Thay Đổi Số Dư</button>
                 </div>
                 <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px;">
-                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">2. Quản Lý Kho & Trạng Thái Sản Phẩm</h3>
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">3. Quản Lý, Sửa & Xóa Sản Phẩm</h3>
                     <div class="form-group">
                         <label>Chọn sản phẩm:</label>
                         <select id="adSelectProduct" class="form-control" onchange="loadThongTinSanPhamAdmin()"></select>
                     </div>
                     <div class="form-group">
-                        <label>Chỉnh sửa số lượng kho:</label>
-                        <input type="number" id="adProductStock" class="form-control" placeholder="Nhập số lượng mới">
+                        <label>Tên sản phẩm mới:</label>
+                        <input type="text" id="adProductNameEdit" class="form-control" placeholder="Sửa tên sản phẩm">
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button class="action-btn" style="background: #10b981; flex: 1;" onclick="adminLuuSoLuong()">Lưu Số Lượng</button>
-                        <button class="action-btn" id="btnToggleSoldOut" style="background: #f59e0b; flex: 1;" onclick="adminToggleHetHang()">Chuyển Hết Hàng</button>
+                    <div class="form-group">
+                        <label>Giá tiền mới (VNĐ):</label>
+                        <input type="number" id="adProductPriceEdit" class="form-control" placeholder="Sửa giá tiền">
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng kho mới:</label>
+                        <input type="number" id="adProductStock" class="form-control" placeholder="Sửa số lượng kho">
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                        <button class="action-btn" style="background: #10b981; flex: 1;" onclick="adminLuuThongTinSanPham()">Lưu Thay Đổi</button>
+                        <button class="action-btn" id="btnToggleSoldOut" style="background: #f59e0b; flex: 1;" onclick="adminToggleHetHang()">Hết Hàng</button>
+                        <button class="action-btn" style="background: #ef4444; flex: 1;" onclick="adminXoaSanPham()">Xóa SP</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="modalMuaAcc">
+        <div class="modal-content">
+            <div class="modal-title-custom">Mua Acc King Legacy</div>
+            <div class="form-group"><label>Sản phẩm:</label><input type="text" id="accProductName" class="form-control" readonly></div>
+            <div class="form-group"><label>Giá tiền:</label><input type="text" id="accProductPrice" class="form-control" readonly></div>
+            <div class="form-group"><label>Mã acc cần mua:</label><input type="text" id="accCodeInput" class="form-control" placeholder="Nhập mã acc (VD: ACC-123 hoặc tên acc)"></div>
+            <div class="form-group"><label>Số điện thoại liên hệ:</label><input type="text" id="accPhone" class="form-control" placeholder="Số điện thoại của bạn"></div>
+            <div class="modal-buttons">
+                <button class="btn-close" onclick="dongModal('modalMuaAcc')">Hủy</button>
+                <button class="btn-submit" onclick="xacNhanThanhToanMuaAcc()">Xác Nhận & Gửi Zalo</button>
             </div>
         </div>
     </div>
@@ -320,7 +388,11 @@
         }
         setInterval(createShootingStar, 1800);
 
-        function dongPopupNotice() { document.getElementById('popupNotice').style.display = 'none'; }
+        function dongPopupNotice() { 
+            let popup = document.getElementById('popupNotice');
+            if(popup) { popup.style.display = 'none'; }
+        }
+
         function toggleMenuLeft(event) {
             event.stopPropagation();
             let menu = document.getElementById('dropdownMenuLeft');
@@ -357,33 +429,88 @@
                 selectAmount.appendChild(opt);
             });
         }
-
         const defaultDatabaseSanPham = {
+            muaacc: [
+                { id: 101, name: "Acc King Legacy Max Level + Godhuman", price: 150000, img: "https://i.ibb.co/6V8qTFz/FB-IMG-1791121966996.jpg", stock: 1, soldOut: false }
+            ],
             caythue: [
-                { id: 1, name: "Cày Level Max King Legacy", price: 50000, icon: "👑", stock: 99, soldOut: false },
-                { id: 2, name: "Săn Sea King Fin", price: 16000, icon: "⚔️", stock: 99, soldOut: false },
-                { id: 3, name: "Cày Beli / Thợ Săn Biển", price: 30000, icon: "💰", stock: 99, soldOut: false }
+                { id: 1, name: "Cày Level Max King Legacy", price: 50000, img: "https://i.ibb.co/tPsgyfKT/IMG-20261004-214345.jpg", stock: 99, soldOut: false },
+                { id: 2, name: "Săn Sea King Fin", price: 16000, img: "https://i.ibb.co/6V8qTFz/FB-IMG-1791121966996.jpg", stock: 99, soldOut: false }
             ],
             itemnguyenlieu: [
-                { id: 4, name: "Donate ĐTP King Legacy", price: 1000, icon: "💎", stock: 50, soldOut: false },
-                { id: 5, name: "Kiếm Hiếm / Phụ Kiện King Legacy", price: 45000, icon: "🗡", stock: 12, soldOut: false },
-                { id: 6, name: "Nguyên Liệu Đột Phá", price: 20000, icon: "📦", stock: 25, soldOut: false }
+                { id: 4, name: "Donate ĐTP King Legacy", price: 1000, img: "https://i.ibb.co/tPsgyfKT/IMG-20261004-214345.jpg", stock: 50, soldOut: false }
             ]
         };
 
         let databaseSanPham = JSON.parse(localStorage.getItem('sinek_shop_db')) || defaultDatabaseSanPham;
         function saveDatabase() { localStorage.setItem('sinek_shop_db', JSON.stringify(databaseSanPham)); }
+
+        let defaultCategoryImages = {
+            muaacc: "https://i.ibb.co/6V8qTFz/FB-IMG-1791121966996.jpg",
+            caythue: "https://i.ibb.co/tPsgyfKT/IMG-20261004-214345.jpg",
+            itemnguyenlieu: "https://i.ibb.co/6V8qTFz/FB-IMG-1791121966996.jpg"
+        };
+        let categoryImages = JSON.parse(localStorage.getItem('sinek_cat_images')) || defaultCategoryImages;
+        function saveCategoryImages() { localStorage.setItem('sinek_cat_images', JSON.stringify(categoryImages)); }
+
         let currentUser = localStorage.getItem('sinek_logged_user') || null;
+        let adminStatus = localStorage.getItem('sinek_admin_status') === 'false' ? false : true;
+
+        function capNhatGiaoDienTrangThaiAdmin() {
+            let label = document.getElementById('adminHeaderStatusLabel');
+            let btnToggle = document.getElementById('btnToggleAdminStatus');
+            if(adminStatus) {
+                if(label) label.innerText = "Online";
+                if(btnToggle) { btnToggle.innerText = "Online"; btnToggle.style.background = "#10b981"; }
+            } else {
+                if(label) label.innerText = "Offline";
+                if(btnToggle) { btnToggle.innerText = "Offline"; btnToggle.style.background = "#ef4444"; }
+            }
+        }
+
+        function toggleAdminStatus() {
+            adminStatus = !adminStatus;
+            localStorage.setItem('sinek_admin_status', adminStatus);
+            capNhatGiaoDienTrangThaiAdmin();
+        }
 
         window.onload = function() {
             capNhatGiaoDienUser();
             capNhatDanhSachMenhGia();
+            capNhatGiaoDienTrangThaiAdmin();
+            renderCategoryGrid();
+            kiemTraQuyenQTVDaLuu();
         };
 
+        function renderCategoryGrid() {
+            let grid = document.getElementById('categoryGrid');
+            if(!grid) return;
+            grid.innerHTML = `
+                <div class="card" onclick="moDanhMuc('muaacc')">
+                    <img src="${categoryImages.muaacc}" alt="Acc King Legacy" class="card-img">
+                    <div class="card-title">Acc King Legacy VIP</div>
+                    <div class="card-desc">Acc ngon, level max, nhiều item hiếm</div>
+                    <button class="action-btn">Xem Sản Phẩm</button>
+                </div>
+                <div class="card" onclick="moDanhMuc('caythue')">
+                    <img src="${categoryImages.caythue}" alt="Cày Thuê" class="card-img">
+                    <div class="card-title">Cày Thuê King Legacy</div>
+                    <div class="card-desc">Cày level, quái, sea king fin...</div>
+                    <button class="action-btn">Xem Sản Phẩm</button>
+                </div>
+                <div class="card" onclick="moDanhMuc('itemnguyenlieu')">
+                    <img src="${categoryImages.itemnguyenlieu}" alt="Item" class="card-img">
+                    <div class="card-title">Item & Nguyên Liệu</div>
+                    <div class="card-desc">Kiếm, phụ kiện, nguyên liệu hiếm</div>
+                    <button class="action-btn">Xem Sản Phẩm</button>
+                </div>
+            `;
+        }
         function chuyenTab(tabName) {
             document.querySelectorAll('.page-view').forEach(el => el.style.display = 'none');
             if(tabName === 'home') {
                 document.getElementById('pageHome').style.display = 'block';
+                renderCategoryGrid();
             } else if(tabName === 'deposit') {
                 document.getElementById('pageDeposit').style.display = 'block';
                 let syntaxUser = currentUser ? currentUser : "vãng_lai";
@@ -393,6 +520,7 @@
                 hienThiLichSu();
             } else if(tabName === 'admin') {
                 document.getElementById('pageAdmin').style.display = 'block';
+                loadQuanLyDonHangAdmin();
             }
         }
 
@@ -401,16 +529,17 @@
             document.getElementById('pageProducts').style.display = 'block';
             let listHTML = '';
             let danhSach = databaseSanPham[keyDM] || [];
-            document.getElementById('categoryTitle').innerText = keyDM === 'caythue' ? 'Cày Thuê King Legacy' : 'Item & Nguyên Liệu King Legacy';
+            document.getElementById('categoryTitle').innerText = keyDM === 'muaacc' ? 'Acc King Legacy VIP' : (keyDM === 'caythue' ? 'Cày Thuê King Legacy' : 'Item & Nguyên Liệu King Legacy');
             danhSach.forEach(sp => {
                 let isSoldOut = sp.soldOut;
                 let btnText = isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn';
                 let btnStyle = isSoldOut ? 'background: #64748b; cursor: not-allowed;' : '';
-                let onclickAttr = isSoldOut ? '' : `onclick="${keyDM === 'caythue' ? `moModalCayThue('${sp.name}',${sp.price})` : `moModalItem('${sp.name}',${sp.price})`}"`;
-                let stockHTML = (keyDM === 'itemnguyenlieu') ? `<div style="font-size: 11px; color: #fbbf24; margin-bottom: 6px;">Kho còn: <b>${sp.stock}</b> cái</div>` : '';
+                let onclickAttr = isSoldOut ? '' : `onclick="${keyDM === 'muaacc' ? `moModalMuaAcc('${sp.name}', ${sp.price})` : (keyDM === 'caythue' ? `moModalCayThue('${sp.name}', ${sp.price})` : `moModalItem('${sp.name}', ${sp.price})`)}"`;
+                let mediaHTML = sp.img ? `<img src="${sp.img}" class="card-img">` : `<div class="card-icon">👑</div>`;
+                let stockHTML = `<div style="font-size: 11px; color: #fbbf24; margin-bottom: 6px;">Kho còn: <b>${sp.stock}</b></div>`;
                 listHTML += `
                     <div class="card" ${isSoldOut ? 'style="opacity: 0.6;"' : ''}>
-                        <div class="card-icon">${sp.icon}</div>
+                        ${mediaHTML}
                         <div class="card-title">${sp.name}</div>
                         <div class="card-desc" style="color: #38bdf8; font-weight: bold;">${sp.price.toLocaleString()} đ</div>
                         ${stockHTML}
@@ -424,6 +553,7 @@
         function veTrangChu() {
             document.getElementById('pageProducts').style.display = 'none';
             document.getElementById('pageHome').style.display = 'block';
+            renderCategoryGrid();
         }
 
         function moModalAuth() { document.getElementById('modalAuth').style.display = 'flex'; }
@@ -435,7 +565,7 @@
             if(!u || !p) { alert('Vui lòng điền đầy đủ tài khoản và mật khẩu!'); return; }
             let storageKey = 'sinek_user_' + u;
             if(localStorage.getItem(storageKey) !== null) {
-                alert('Tên tài khoản này đã tồn tại trên hệ thống! Vui lòng chọn tên khác.');
+                alert('Tên tài khoản này đã tồn tại trên hệ thống!');
                 return;
             }
             localStorage.setItem(storageKey, p);
@@ -476,8 +606,16 @@
                 document.getElementById('authBtn').onclick = moModalAuth;
             }
         }
-
         let sanphamDangChon = {};
+        function moModalMuaAcc(ten, gia) {
+            sanphamDangChon = { name: ten, price: gia };
+            document.getElementById('accProductName').value = ten;
+            document.getElementById('accProductPrice').value = gia.toLocaleString() + ' đ';
+            document.getElementById('accCodeInput').value = '';
+            document.getElementById('accPhone').value = '';
+            document.getElementById('modalMuaAcc').style.display = 'flex';
+        }
+
         function moModalCayThue(ten, gia) {
             sanphamDangChon = { name: ten, price: gia };
             document.getElementById('ctProductName').value = ten;
@@ -498,23 +636,89 @@
             document.getElementById('modalItem').style.display = 'flex';
         }
 
+        function luuVaTaoDonHang(chiTietDon) {
+            let allOrders = JSON.parse(localStorage.getItem('sinek_all_orders') || '[]');
+            allOrders.unshift(chiTietDon);
+            localStorage.setItem('sinek_all_orders', JSON.stringify(allOrders));
+        }
+
+        function xacNhanThanhToanMuaAcc() {
+            let accCode = document.getElementById('accCodeInput').value.trim();
+            let phone = document.getElementById('accPhone').value.trim();
+            if(!accCode || !phone) { alert('Vui lòng điền đầy đủ Mã Acc và Số Điện Thoại!'); return; }
+
+            if(currentUser) {
+                let balKey = 'sinek_bal_' + currentUser;
+                let currentBal = parseInt(localStorage.getItem(balKey) || '0');
+                if(currentBal < sanphamDangChon.price) {
+                    alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
+                    return;
+                }
+                let newBal = currentBal - sanphamDangChon.price;
+                localStorage.setItem(balKey, newBal);
+                capNhatGiaoDienUser();
+            }
+
+            let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
+            let timeNow = new Date().toLocaleString('vi-VN');
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Mã Acc cần mua: ${accCode}\n- SĐT: ${phone}`;
+            
+            luuVaTaoDonHang({
+                code: randomCode,
+                webUser: currentUser || 'Khách vãng lai',
+                item: sanphamDangChon.name,
+                price: sanphamDangChon.price,
+                details: chiTiet,
+                status: '⏳ Chờ Duyệt',
+                time: timeNow
+            });
+
+            let noiDungGui = `[ĐƠN MUA ACC VIP - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Mã Acc: ${accCode}\n- Giá: ${sanphamDangChon.price.toLocaleString()}đ\n- SĐT: ${phone}`;
+            
+            navigator.clipboard.writeText(noiDungGui).then(() => {
+                alert(`Đặt đơn thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
+                window.location.href = "https://zalo.me/0794221549";
+            });
+            dongModal('modalMuaAcc');
+        }
+
         function xacNhanThanhToanCayThue() {
             let gUser = document.getElementById('ctGameUser').value.trim();
             let gPass = document.getElementById('ctGamePass').value.trim();
             let note = document.getElementById('ctNote').value.trim() || 'Không có';
             let phone = document.getElementById('ctPhone').value.trim();
             if(!gUser || !gPass || !phone) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
+
+            if(currentUser) {
+                let balKey = 'sinek_bal_' + currentUser;
+                let currentBal = parseInt(localStorage.getItem(balKey) || '0');
+                if(currentBal < sanphamDangChon.price) {
+                    alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
+                    return;
+                }
+                let newBal = currentBal - sanphamDangChon.price;
+                localStorage.setItem(balKey, newBal);
+                capNhatGiaoDienUser();
+            }
+
             let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
             let timeNow = new Date().toLocaleString('vi-VN');
-            let noiDungGui = `[ĐƠN CÀY THUÊ KING LEGACY - ${randomCode}]\n- Khách hàng: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Giá: ${sanphamDangChon.price.toLocaleString()}đ\n- Tên Acc: ${gUser}\n- Mật Khẩu: ${gPass}\n- Ghi chú: ${note}\n- SĐT: ${phone}`;
-            if(currentUser) {
-                let historyKey = 'sinek_history_' + currentUser;
-                let listHist = JSON.parse(localStorage.getItem(historyKey) || '[]');
-                listHist.unshift({ code: randomCode, item: sanphamDangChon.name, price: sanphamDangChon.price, time: timeNow });
-                localStorage.setItem(historyKey, JSON.stringify(listHist));
-            }
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Tên Acc game: ${gUser}\n- Mật khẩu: ${gPass}\n- Ghi chú: ${note}\n- SĐT: ${phone}`;
+            
+            luuVaTaoDonHang({
+                code: randomCode,
+                webUser: currentUser || 'Khách vãng lai',
+                item: sanphamDangChon.name,
+                price: sanphamDangChon.price,
+                details: chiTiet,
+                status: '⏳ Chờ Duyệt',
+                time: timeNow
+            });
+
+            let noiDungGui = `[ĐƠN CÀY THUÊ KING LEGACY - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Giá: ${sanphamDangChon.price.toLocaleString()}đ\n${chiTiet}`;
+            
             navigator.clipboard.writeText(noiDungGui).then(() => {
-                alert(`Đã tạo đơn: ${randomCode}\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
+                alert(`Đặt đơn thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
                 window.location.href = "https://zalo.me/0794221549";
             });
             dongModal('modalCayThue');
@@ -524,30 +728,54 @@
             let gUser = document.getElementById('itGameUser').value.trim();
             let phone = document.getElementById('itPhone').value.trim();
             if(!gUser || !phone) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
+
+            if(currentUser) {
+                let balKey = 'sinek_bal_' + currentUser;
+                let currentBal = parseInt(localStorage.getItem(balKey) || '0');
+                if(currentBal < sanphamDangChon.price) {
+                    alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
+                    return;
+                }
+                let newBal = currentBal - sanphamDangChon.price;
+                localStorage.setItem(balKey, newBal);
+                capNhatGiaoDienUser();
+            }
+
             let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
             let timeNow = new Date().toLocaleString('vi-VN');
-            let noiDungGui = `[ĐƠN MUA ITEM - ${randomCode}]\n- Khách hàng: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Giá: ${sanphamDangChon.price.toLocaleString()}đ\n- Tên Roblox: ${gUser}\n- SĐT: ${phone}`;
-            if(currentUser) {
-                let historyKey = 'sinek_history_' + currentUser;
-                let listHist = JSON.parse(localStorage.getItem(historyKey) || '[]');
-                listHist.unshift({ code: randomCode, item: sanphamDangChon.name, price: sanphamDangChon.price, time: timeNow });
-                localStorage.setItem(historyKey, JSON.stringify(listHist));
-            }
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Tên Roblox: ${gUser}\n- SĐT: ${phone}`;
+            
+            luuVaTaoDonHang({
+                code: randomCode,
+                webUser: currentUser || 'Khách vãng lai',
+                item: sanphamDangChon.name,
+                price: sanphamDangChon.price,
+                details: chiTiet,
+                status: '⏳ Chờ Duyệt',
+                time: timeNow
+            });
+
+            let noiDungGui = `[ĐƠN MUA ITEM - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Giá: ${sanphamDangChon.price.toLocaleString()}đ\n${chiTiet}`;
+            
             navigator.clipboard.writeText(noiDungGui).then(() => {
-                alert(`Đã tạo đơn: ${randomCode}\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
+                alert(`Đặt đơn thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
                 window.location.href = "https://zalo.me/0794221549";
             });
             dongModal('modalItem');
         }
-
         function hienThiLichSu() {
             if(!currentUser) { document.getElementById('historyList').innerHTML = 'Vui lòng đăng nhập để xem lịch sử.'; return; }
-            let listHist = JSON.parse(localStorage.getItem('sinek_history_' + currentUser) || '[]');
-            if(listHist.length === 0) { document.getElementById('historyList').innerHTML = 'Chưa có đơn hàng nào.'; return; }
+            let allOrders = JSON.parse(localStorage.getItem('sinek_all_orders') || '[]');
+            let userOrders = allOrders.filter(o => o.webUser === currentUser);
+            if(userOrders.length === 0) { document.getElementById('historyList').innerHTML = 'Chưa có đơn hàng nào.'; return; }
             let html = '';
-            listHist.forEach(h => {
+            userOrders.forEach(h => {
+                let badgeColor = h.status === '⏳ Chờ Duyệt' ? '#fbbf24' : (h.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
                 html += `<div style="background:#0f172a; border:1px solid #334155; padding:10px; border-radius:8px; margin-bottom:8px; text-align:left;">
-                    <b style="color:#38bdf8;">Mã đơn: ${h.code}</b><br><span>Sản phẩm: ${h.item}</span><br><span>Giá: ${h.price.toLocaleString()}đ</span><br><span style="font-size:10px; color:#94a3b8;">Thời gian: ${h.time}</span></div>`;
+                    <b style="color:#38bdf8;">Mã đơn: ${h.code}</b> | Trạng thái: <b style="color:${badgeColor};">${h.status}</b><br>
+                    <span>Sản phẩm: ${h.item}</span><br><span>Giá: ${h.price.toLocaleString()}đ</span><br>
+                    <pre style="font-size:11px; color:#94a3b8; font-family:inherit; white-space:pre-wrap; margin-top:4px;">${h.details}</pre>
+                    <span style="font-size:10px; color:#64748b;">Thời gian: ${h.time}</span></div>`;
             });
             document.getElementById('historyList').innerHTML = html;
         }
@@ -585,29 +813,161 @@
         function kiemTraAdmin() {
             let pass = document.getElementById('adminPassInput').value;
             if(pass === 'sinekadmin123') {
-                document.getElementById('adminLoginBox').style.display = 'none';
-                document.getElementById('adminPanelBox').style.display = 'block';
-                loadDanhSachSanPhamAdmin();
+                localStorage.setItem('sinek_is_admin', 'true');
+                hienThiGiaoDienAdmin();
                 alert('Đăng nhập Quản Trị Viên thành công!');
             } else {
                 alert('Sai mật khẩu quản trị viên!');
             }
         }
 
-        function adminNapTien() {
+        function kiemTraQuyenQTVDaLuu() {
+            if(localStorage.getItem('sinek_is_admin') === 'true') {
+                hienThiGiaoDienAdmin();
+            }
+        }
+
+        function hienThiGiaoDienAdmin() {
+            document.getElementById('adminLoginBox').style.display = 'none';
+            document.getElementById('adminPanelBox').style.display = 'block';
+            loadDanhSachSanPhamAdmin();
+            loadQuanLyDonHangAdmin();
+        }
+
+        function adminDoiAnhDanhMuc() {
+            let catKey = document.getElementById('editCatKey').value;
+            let fileInput = document.getElementById('editCatImgFile');
+            if(!fileInput.files || !fileInput.files[0]) {
+                alert('Vui lòng chọn ảnh từ thư viện trước!');
+                return;
+            }
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                categoryImages[catKey] = e.target.result;
+                saveCategoryImages();
+                renderCategoryGrid();
+                alert('Đã cập nhật ảnh danh mục thành công!');
+                document.getElementById('editCatImgFile').value = '';
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+        function loadQuanLyDonHangAdmin() {
+            let allOrders = JSON.parse(localStorage.getItem('sinek_all_orders') || '[]');
+            let listEl = document.getElementById('adminOrderList');
+            if(allOrders.length === 0) { listEl.innerHTML = 'Chưa có đơn hàng nào chờ duyệt.'; return; }
+            let html = '';
+            allOrders.forEach((o, index) => {
+                let badgeColor = o.status === '⏳ Chờ Duyệt' ? '#fbbf24' : (o.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
+                html += `<div style="background:#1e293b; border:1px solid #334155; padding:10px; border-radius:8px; margin-bottom:8px; text-align:left;">
+                    <b style="color:#38bdf8;">Mã đơn: ${o.code}</b> | Trạng thái: <b style="color:${badgeColor};">${o.status}</b><br>
+                    <span>Khách đặt: <b>${o.webUser}</b></span><br><span>Sản phẩm: ${o.item} (${o.price.toLocaleString()}đ)</span><br>
+                    <pre style="font-size:11px; color:#cbd5e1; font-family:inherit; white-space:pre-wrap; margin-top:4px; background:#0f172a; padding:6px; border-radius:4px;">${o.details}</pre>
+                    <div style="display:flex; gap:6px; margin-top:8px;">
+                        <button class="action-btn" style="background:#38bdf8; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '🔄 Đang Xử Lý')">Xác Nhận</button>
+                        <button class="action-btn" style="background:#10b981; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '✅ Thành Công')">Hoàn Thành</button>
+                        <button class="action-btn" style="background:#ef4444; font-size:11px; padding:4px;" onclick="adminXoaDonHang(${index})">Xóa</button>
+                    </div></div>`;
+            });
+            listEl.innerHTML = html;
+        }
+
+        function adminDoiTrangThaiDon(index, trangThaiMoi) {
+            let allOrders = JSON.parse(localStorage.getItem('sinek_all_orders') || '[]');
+            allOrders[index].status = trangThaiMoi;
+            localStorage.setItem('sinek_all_orders', JSON.stringify(allOrders));
+            loadQuanLyDonHangAdmin();
+            alert('Đã cập nhật trạng thái đơn hàng thành: ' + trangThaiMoi);
+        }
+
+        function adminXoaDonHang(index) {
+            if(confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
+                let allOrders = JSON.parse(localStorage.getItem('sinek_all_orders') || '[]');
+                allOrders.splice(index, 1);
+                localStorage.setItem('sinek_all_orders', JSON.stringify(allOrders));
+                loadQuanLyDonHangAdmin();
+            }
+        }
+
+        let adminMoneyMode = '+';
+        function toggleAdminMode() {
+            let btnMode = document.getElementById('btnAdminMode');
+            if(adminMoneyMode === '+') {
+                adminMoneyMode = '-';
+                btnMode.innerText = '-';
+                btnMode.style.background = '#ef4444';
+            } else {
+                adminMoneyMode = '+';
+                btnMode.innerText = '+';
+                btnMode.style.background = '#10b981';
+            }
+        }
+
+        function adminXuLyTien() {
             let targetUser = document.getElementById('adUserTarget').value.trim();
             let amount = parseInt(document.getElementById('adAmountTarget').value);
             if(!targetUser || isNaN(amount)) { alert('Vui lòng nhập đúng tên tài khoản và số tiền!'); return; }
+            
             let balKey = 'sinek_bal_' + targetUser;
-            let newBal = parseInt(localStorage.getItem(balKey) || '0') + amount;
-            localStorage.setItem(balKey, newBal);
-            if(!localStorage.getItem('sinek_user_' + targetUser)) {
-                localStorage.setItem('sinek_user_' + targetUser, '123456');
+            let currentBal = parseInt(localStorage.getItem(balKey) || '0');
+            let newBal = 0;
+
+            if(adminMoneyMode === '+') {
+                newBal = currentBal + amount;
+                localStorage.setItem(balKey, newBal);
+                if(!localStorage.getItem('sinek_user_' + targetUser)) {
+                    localStorage.setItem('sinek_user_' + targetUser, '123456');
+                }
+                alert(`Đã cộng thành công ${amount.toLocaleString()}đ cho tài khoản: ${targetUser}\nSố dư mới: ${newBal.toLocaleString()}đ`);
+            } else {
+                newBal = currentBal - amount;
+                if(newBal < 0) newBal = 0;
+                localStorage.setItem(balKey, newBal);
+                alert(`Đã trừ thành công ${amount.toLocaleString()}đ của tài khoản: ${targetUser}\nSố dư còn lại: ${newBal.toLocaleString()}đ`);
             }
+
             if(currentUser === targetUser) { capNhatGiaoDienUser(); }
-            alert(`Đã nạp thành công ${amount.toLocaleString()}đ cho tài khoản: ${targetUser}\nSố dư mới: ${newBal.toLocaleString()}đ`);
             document.getElementById('adUserTarget').value = '';
             document.getElementById('adAmountTarget').value = '';
+        }
+
+        function adminThemSanPhamMoi() {
+            let cat = document.getElementById('newProCategory').value;
+            let name = document.getElementById('newProName').value.trim();
+            let price = parseInt(document.getElementById('newProPrice').value);
+            let stock = parseInt(document.getElementById('newProStock').value) || 1;
+            let fileInput = document.getElementById('newProImgFile');
+
+            if(!name || isNaN(price)) {
+                alert('Vui lòng điền đầy đủ tên và giá sản phẩm!');
+                return;
+            }
+
+            // Đảm bảo danh mục luôn tồn tại (Tránh lỗi undefined push)
+            if(!databaseSanPham[cat]) {
+                databaseSanPham[cat] = [];
+            }
+
+            if(fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let base64Img = e.target.result;
+                    luuSanPhamVaoDb(cat, name, price, stock, base64Img);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                luuSanPhamVaoDb(cat, name, price, stock, "https://i.ibb.co/6V8qTFz/FB-IMG-1791121966996.jpg");
+            }
+        }
+
+        function luuSanPhamVaoDb(cat, name, price, stock, imgSrc) {
+            let newId = Date.now();
+            databaseSanPham[cat].push({ id: newId, name: name, price: price, img: imgSrc, stock: stock, soldOut: false });
+            saveDatabase();
+            loadDanhSachSanPhamAdmin();
+            alert(`Thêm sản phẩm "${name}" thành công!`);
+            document.getElementById('newProName').value = '';
+            document.getElementById('newProPrice').value = '';
+            document.getElementById('newProImgFile').value = '';
         }
 
         function loadDanhSachSanPhamAdmin() {
@@ -626,6 +986,7 @@
 
         function timSanPhamHienTai() {
             let val = document.getElementById('adSelectProduct').value;
+            if(!val) return { dm: null, id: null, spObj: null };
             let parts = val.split('_');
             let dm = parts[0];
             let id = parseInt(parts[1]);
@@ -636,33 +997,58 @@
         function loadThongTinSanPhamAdmin() {
             let { spObj } = timSanPhamHienTai();
             if(spObj) {
+                document.getElementById('adProductNameEdit').value = spObj.name;
+                document.getElementById('adProductPriceEdit').value = spObj.price;
                 document.getElementById('adProductStock').value = spObj.stock;
                 let btn = document.getElementById('btnToggleSoldOut');
                 if(spObj.soldOut) {
-                    btn.innerText = "Mở Bán Lại";
-                    btn.style.background = "#ef4444";
+                    btn.innerText = "Mở Bán";
+                    btn.style.background = "#10b981";
                 } else {
-                    btn.innerText = "Chuyển Hết Hàng";
+                    btn.innerText = "Hết Hàng";
                     btn.style.background = "#f59e0b";
                 }
             }
         }
 
-        function adminLuuSoLuong() {
-            let { dm, id, spObj } = timSanPhamHienTai();
+        function adminLuuThongTinSanPham() {
+            let { spObj } = timSanPhamHienTai();
+            if(!spObj) { alert('Chưa chọn sản phẩm nào!'); return; }
+            let newName = document.getElementById('adProductNameEdit').value.trim();
+            let newPrice = parseInt(document.getElementById('adProductPriceEdit').value);
             let newStock = parseInt(document.getElementById('adProductStock').value);
-            if(isNaN(newStock)) { alert('Vui lòng nhập số lượng hợp lệ!'); return; }
+
+            if(!newName || isNaN(newPrice) || isNaN(newStock)) {
+                alert('Vui lòng nhập đầy đủ thông tin hợp lệ!');
+                return;
+            }
+
+            spObj.name = newName;
+            spObj.price = newPrice;
             spObj.stock = newStock;
             saveDatabase();
-            alert(`Đã cập nhật số lượng cho "${spObj.name}" thành ${newStock}!`);
+            loadDanhSachSanPhamAdmin();
+            alert(`Cập nhật thành công thông tin sản phẩm "${newName}"!`);
         }
 
         function adminToggleHetHang() {
-            let { dm, id, spObj } = timSanPhamHienTai();
+            let { spObj } = timSanPhamHienTai();
+            if(!spObj) return;
             spObj.soldOut = !spObj.soldOut;
             saveDatabase();
             loadThongTinSanPhamAdmin();
-            alert(`Đã chuyển trạng thái sản phẩm "${spObj.name}" sang: ${spObj.soldOut ? 'HẾT HÀNG (Tạm ngưng bán)' : 'ĐANG MỞ BÁN'}`);
+            alert(`Đã đổi trạng thái sản phẩm "${spObj.name}" thành: ${spObj.soldOut ? 'HẾT HÀNG' : 'ĐANG MỞ BÁN'}`);
+        }
+
+        function adminXoaSanPham() {
+            let { dm, id, spObj } = timSanPhamHienTai();
+            if(!spObj) return;
+            if(confirm(`Bạn có chắc chắn muốn XÓA sản phẩm "${spObj.name}" không?`)) {
+                databaseSanPham[dm] = databaseSanPham[dm].filter(item => item.id !== id);
+                saveDatabase();
+                loadDanhSachSanPhamAdmin();
+                alert('Đã xóa sản phẩm thành công!');
+            }
         }
     </script>
 </body>
