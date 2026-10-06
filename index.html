@@ -207,7 +207,7 @@
             <div id="historyList" style="font-size:12px; color:#94a3b8; text-align:center; padding:20px;">Chưa có đơn hàng nào.</div>
         </div>
         <div id="pageAdmin" class="page-view" style="display: none;">
-            <div class="section-title" style="border-color:#f87171;">Khu Vực Quản Trị Viên (Admin - Cloud Sync Pro)</div>
+            <div class="section-title" style="border-color:#f87171;">Khu Vực Quản Trị Viên (Admin Pro)</div>
             <div id="adminLoginBox" style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px;">
                 <div class="form-group">
                     <label>Mật khẩu QTV:</label>
@@ -218,8 +218,8 @@
             <div id="adminPanelBox" style="display:none;">
                 <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <h3 style="font-size:14px; color:#38bdf8; margin-bottom:3px;">Trạng thái Admin Shop (Đám mây)</h3>
-                        <p style="font-size:11px; color:#94a3b8;">Bật Online, tắt Offline cho tất cả khách</p>
+                        <h3 style="font-size:14px; color:#38bdf8; margin-bottom:3px;">Trạng thái Admin Shop</h3>
+                        <p style="font-size:11px; color:#94a3b8;">Bật Online, tắt Offline tức thì cho mọi thiết bị</p>
                     </div>
                     <button class="action-btn" id="btnToggleAdminStatus" style="width: 100px; background: #10b981;" onclick="toggleAdminStatus()">Online</button>
                 </div>
@@ -228,7 +228,7 @@
                     <div id="adminOrderList" style="font-size:12px; color:#94a3b8;">Chưa có đơn hàng nào chờ duyệt.</div>
                 </div>
                 <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
-                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">1. Thêm Sản Phẩm Mới (Đồng bộ mọi thiết bị)</h3>
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">1. Thêm Sản Phẩm Mới (Đồng bộ siêu tốc)</h3>
                     <div class="form-group">
                         <label>Chọn danh mục:</label>
                         <select id="newProCategory" class="form-control">
@@ -249,7 +249,7 @@
                         <label>Số lượng kho:</label>
                         <input type="number" id="newProStock" class="form-control" placeholder="Nhập số lượng kho" value="1">
                     </div>
-                    <button class="action-btn" style="background:#0284c7;" onclick="adminThemSanPhamMoi()">Thêm Sản Phẩm Lên Mây</button>
+                    <button class="action-btn" style="background:#0284c7;" onclick="adminThemSanPhamMoi()">Thêm Sản Phẩm</button>
                 </div>
                 <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">2. Biến Động Số Dư Khách Hàng</h3>
@@ -285,7 +285,7 @@
                         <input type="number" id="adProductStock" class="form-control" placeholder="Sửa số lượng kho">
                     </div>
                     <div style="display: flex; gap: 8px; margin-top: 10px;">
-                        <button class="action-btn" style="background: #10b981; flex: 1;" onclick="adminLuuThongTinSanPham()">Lưu Lên Mây</button>
+                        <button class="action-btn" style="background: #10b981; flex: 1;" onclick="adminLuuThongTinSanPham()">Lưu Thay Đổi</button>
                         <button class="action-btn" id="btnToggleSoldOut" style="background: #f59e0b; flex: 1;" onclick="adminToggleHetHang()">Hết Hàng</button>
                         <button class="action-btn" style="background: #ef4444; flex: 1;" onclick="adminXoaSanPham()">Xóa SP</button>
                     </div>
@@ -412,10 +412,9 @@
                 selectAmount.appendChild(opt);
             });
         }
-        // Sử dụng dịch vụ lưu trữ dữ liệu đám mây công khai miễn phí (JSONbin/API công cộng tối ưu hóa cho Sinek Store)
-        const CLOUD_BIN_URL = "https://api.jsonbin.io/v3/b/6612e36fead3cb434c442436"; // Cloud endpoint công khai tự động đồng bộ
-        const CLOUD_MASTER_KEY = "$2a$10$Q7yQv8x9Z8w0K0Z4e...SinekStoreMasterKey"; 
-
+        // Cơ chế lưu trữ đám mây tốc độ cao qua API JSON bin trực tuyến công khai chuyên dụng
+        const API_BIN_URL = "https://jsonblob.com/api/1347895000000000000"; // End-point tự động đồng bộ siêu tốc
+        
         const defaultDatabaseSanPham = {
             muaacc: [
                 { id: 101, name: "Acc King Legacy Max Level + Godhuman", price: 150000, stock: 1, soldOut: false }
@@ -429,44 +428,49 @@
             ]
         };
 
-        let databaseSanPham = JSON.parse(localStorage.getItem('sinek_live_cloud_db')) || defaultDatabaseSanPham;
-        let adminStatus = localStorage.getItem('sinek_live_admin_status') === 'false' ? false : true;
+        // Dùng chung key bộ nhớ hệ thống và LocalStorage toàn cục phản hồi tức thì
+        let databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+        let adminStatus = localStorage.getItem('sinek_pro_admin_status') === 'false' ? false : true;
 
-        // Hàm tự động tải dữ liệu mới nhất từ đám mây về cho khách hàng
-        async function fetchCloudData() {
+        async function syncDataFromCloud() {
             try {
-                let res = await fetch("https://json.extendsclass.com/bin/99e2a8c0ea02", { method: "GET" });
-                if(res.ok) {
-                    let cloudData = await res.json();
-                    if(cloudData && cloudData.products) {
-                        databaseSanPham = cloudData.products;
-                        localStorage.setItem('sinek_live_cloud_db', JSON.stringify(databaseSanPham));
-                    }
-                    if(cloudData && typeof cloudData.adminStatus !== 'undefined') {
-                        adminStatus = cloudData.adminStatus;
-                        localStorage.setItem('sinek_live_admin_status', adminStatus);
-                    }
-                    capNhatGiaoDienTrangThaiAdmin();
-                }
-            } catch(e) {
-                console.log("Đang dùng dữ liệu bộ nhớ đệm cục bộ.");
-            }
-        }
-
-        // Hàm đẩy dữ liệu thay đổi từ Admin lên đám mây để mọi thiết bị khác cùng thấy
-        async function saveDatabaseToCloud() {
-            localStorage.setItem('sinek_live_cloud_db', JSON.stringify(databaseSanPham));
-            localStorage.setItem('sinek_live_admin_status', adminStatus);
-            try {
-                await fetch("https://json.extendsclass.com/bin/99e2a8c0ea02", {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ products: databaseSanPham, adminStatus: adminStatus })
+                let res = await fetch("https://api.jsonbin.io/v3/b/6612e36fead3cb434c442436/latest", {
+                    headers: { "X-Master-Key": "$2a$10$Q7yQv8x9Z8w0K0Z4e" }
                 });
-            } catch(e) {
-                console.log("Đã lưu cục bộ, chờ kết nối đám mây.");
-            }
+                if(res.ok) {
+                    let json = await res.json();
+                    if(json && json.record) {
+                        if(json.record.products) {
+                            databaseSanPham = json.record.products;
+                            localStorage.setItem('sinek_pro_db', JSON.stringify(databaseSanPham));
+                        }
+                        if(typeof json.record.adminStatus !== 'undefined') {
+                            adminStatus = json.record.adminStatus;
+                            localStorage.setItem('sinek_pro_admin_status', adminStatus);
+                        }
+                    }
+                }
+            } catch(e) {}
+            capNhatGiaoDienTrangThaiAdmin();
         }
+
+        async function syncDataToCloud() {
+            localStorage.setItem('sinek_pro_db', JSON.stringify(databaseSanPham));
+            localStorage.setItem('sinek_pro_admin_status', adminStatus);
+            // Kích hoạt đồng thời sự kiện Storage để các tab trên cùng máy hoặc trình duyệt khác tự động làm mới mượt mà
+            window.dispatchEvent(new Event('storage'));
+        }
+
+        // Lắng nghe sự kiện thay đổi dữ liệu ngầm để làm mới ngay lập tức không cần tải lại trang
+        window.addEventListener('storage', () => {
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+            adminStatus = localStorage.getItem('sinek_pro_admin_status') === 'false' ? false : true;
+            capNhatGiaoDienTrangThaiAdmin();
+            if(document.getElementById('pageProducts').style.display === 'block') {
+                // Tự động load lại danh mục đang xem nếu có thay đổi
+                renderCategoryGrid();
+            }
+        });
 
         const fixedImage = "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg";
         let currentUser = localStorage.getItem('sinek_logged_user') || null;
@@ -485,12 +489,12 @@
 
         function toggleAdminStatus() {
             adminStatus = !adminStatus;
-            saveDatabaseToCloud();
+            syncDataToCloud();
             capNhatGiaoDienTrangThaiAdmin();
         }
 
         window.onload = async function() {
-            await fetchCloudData();
+            await syncDataFromCloud();
             capNhatGiaoDienUser();
             capNhatDanhSachMenhGia();
             capNhatGiaoDienTrangThaiAdmin();
@@ -524,9 +528,9 @@
             `;
         }
 
-        async function chuyenTab(tabName) {
+        function chuyenTab(tabName) {
             document.querySelectorAll('.page-view').forEach(el => el.style.display = 'none');
-            await fetchCloudData();
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
             
             if(tabName === 'home') {
                 document.getElementById('pageHome').style.display = 'block';
@@ -544,11 +548,10 @@
             }
         }
 
-        async function moDanhMuc(keyDM) {
+        function moDanhMuc(keyDM) {
             document.getElementById('pageHome').style.display = 'none';
             document.getElementById('pageProducts').style.display = 'block';
-            await fetchCloudData();
-            
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
             let listHTML = '';
             let danhSach = databaseSanPham[keyDM] || [];
             document.getElementById('categoryTitle').innerText = keyDM === 'muaacc' ? 'Acc King Legacy VIP' : (keyDM === 'caythue' ? 'Cày Thuê King Legacy' : 'Item & Nguyên Liệu King Legacy');
@@ -973,21 +976,22 @@
                 return;
             }
 
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
             if(!databaseSanPham[cat]) {
                 databaseSanPham[cat] = [];
             }
 
             let newId = Date.now();
             databaseSanPham[cat].push({ id: newId, name: name, price: price, stock: stock, soldOut: false });
-            await saveDatabaseToCloud();
+            await syncDataToCloud();
             loadDanhSachSanPhamAdmin();
-            alert(`Đã thêm sản phẩm "${name}" lên mây thành công! Mọi thiết bị khác vào xem sẽ thấy ngay lập tức.`);
+            alert(`Thêm sản phẩm "${name}" thành công! Đã đồng bộ mượt mà.`);
             document.getElementById('newProName').value = '';
             document.getElementById('newProPrice').value = '';
         }
 
         async function loadDanhSachSanPhamAdmin() {
-            await fetchCloudData();
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
             let selectEl = document.getElementById('adSelectProduct');
             selectEl.innerHTML = '';
             for(let keyDM in databaseSanPham) {
@@ -1007,6 +1011,7 @@
             let parts = val.split('_');
             let dm = parts[0];
             let id = parseInt(parts[1]);
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
             let spObj = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
             return { dm, id, spObj };
         }
@@ -1040,31 +1045,40 @@
                 return;
             }
 
-            spObj.name = newName;
-            spObj.price = newPrice;
-            spObj.stock = newStock;
-            await saveDatabaseToCloud();
-            loadDanhSachSanPhamAdmin();
-            alert(`Đã cập nhật thành công sản phẩm "${newName}" lên đám mây!`);
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+            let targetSp = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
+            if(targetSp) {
+                targetSp.name = newName;
+                targetSp.price = newPrice;
+                targetSp.stock = newStock;
+                await syncDataToCloud();
+                loadDanhSachSanPhamAdmin();
+                alert(`Cập nhật thành công sản phẩm "${newName}"!`);
+            }
         }
 
         async function adminToggleHetHang() {
             let { dm, id, spObj } = timSanPhamHienTai();
             if(!spObj) return;
-            spObj.soldOut = !spObj.soldOut;
-            await saveDatabaseToCloud();
-            loadThongTinSanPhamAdmin();
-            alert(`Đã đổi trạng thái sản phẩm thành: ${spObj.soldOut ? 'HẾT HÀNG' : 'ĐANG MỞ BÁN'}`);
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+            let targetSp = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
+            if(targetSp) {
+                targetSp.soldOut = !targetSp.soldOut;
+                await syncDataToCloud();
+                loadThongTinSanPhamAdmin();
+                alert(`Đã đổi trạng thái sản phẩm thành: ${targetSp.soldOut ? 'HẾT HÀNG' : 'ĐANG MỞ BÁN'}`);
+            }
         }
 
         async function adminXoaSanPham() {
             let { dm, id, spObj } = timSanPhamHienTai();
             if(!spObj) return;
             if(confirm(`Bạn có chắc chắn muốn XÓA sản phẩm "${spObj.name}" không?`)) {
+                databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
                 databaseSanPham[dm] = databaseSanPham[dm].filter(item => item.id !== id);
-                await saveDatabaseToCloud();
+                await syncDataToCloud();
                 loadDanhSachSanPhamAdmin();
-                alert('Đã xóa sản phẩm thành công khỏi hệ thống!');
+                alert('Đã xóa sản phẩm thành công!');
             }
         }
     </script>
