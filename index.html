@@ -412,9 +412,6 @@
                 selectAmount.appendChild(opt);
             });
         }
-        // Cơ chế lưu trữ đám mây tốc độ cao qua API JSON bin trực tuyến công khai chuyên dụng
-        const API_BIN_URL = "https://jsonblob.com/api/1347895000000000000"; // End-point tự động đồng bộ siêu tốc
-        
         const defaultDatabaseSanPham = {
             muaacc: [
                 { id: 101, name: "Acc King Legacy Max Level + Godhuman", price: 150000, stock: 1, soldOut: false }
@@ -428,46 +425,45 @@
             ]
         };
 
-        // Dùng chung key bộ nhớ hệ thống và LocalStorage toàn cục phản hồi tức thì
-        let databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
-        let adminStatus = localStorage.getItem('sinek_pro_admin_status') === 'false' ? false : true;
+        let databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
+        let adminStatus = localStorage.getItem('sinek_real_admin_status') === 'false' ? false : true;
 
-        async function syncDataFromCloud() {
+        async function fetchCloudData() {
             try {
-                let res = await fetch("https://api.jsonbin.io/v3/b/6612e36fead3cb434c442436/latest", {
-                    headers: { "X-Master-Key": "$2a$10$Q7yQv8x9Z8w0K0Z4e" }
-                });
+                let res = await fetch("https://api.npoint.io/e3b0c44298fc1c149afbf", { method: "GET" });
                 if(res.ok) {
-                    let json = await res.json();
-                    if(json && json.record) {
-                        if(json.record.products) {
-                            databaseSanPham = json.record.products;
-                            localStorage.setItem('sinek_pro_db', JSON.stringify(databaseSanPham));
-                        }
-                        if(typeof json.record.adminStatus !== 'undefined') {
-                            adminStatus = json.record.adminStatus;
-                            localStorage.setItem('sinek_pro_admin_status', adminStatus);
-                        }
+                    let cloudData = await res.json();
+                    if(cloudData && cloudData.products) {
+                        databaseSanPham = cloudData.products;
+                        localStorage.setItem('sinek_real_cloud_db', JSON.stringify(databaseSanPham));
                     }
+                    if(cloudData && typeof cloudData.adminStatus !== 'undefined') {
+                        adminStatus = cloudData.adminStatus;
+                        localStorage.setItem('sinek_real_admin_status', adminStatus);
+                    }
+                    capNhatGiaoDienTrangThaiAdmin();
                 }
             } catch(e) {}
-            capNhatGiaoDienTrangThaiAdmin();
         }
 
-        async function syncDataToCloud() {
-            localStorage.setItem('sinek_pro_db', JSON.stringify(databaseSanPham));
-            localStorage.setItem('sinek_pro_admin_status', adminStatus);
-            // Kích hoạt đồng thời sự kiện Storage để các tab trên cùng máy hoặc trình duyệt khác tự động làm mới mượt mà
+        async function saveDatabaseToCloud() {
+            localStorage.setItem('sinek_real_cloud_db', JSON.stringify(databaseSanPham));
+            localStorage.setItem('sinek_real_admin_status', adminStatus);
+            try {
+                await fetch("https://api.npoint.io/e3b0c44298fc1c149afbf", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ products: databaseSanPham, adminStatus: adminStatus })
+                });
+            } catch(e) {}
             window.dispatchEvent(new Event('storage'));
         }
 
-        // Lắng nghe sự kiện thay đổi dữ liệu ngầm để làm mới ngay lập tức không cần tải lại trang
         window.addEventListener('storage', () => {
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
-            adminStatus = localStorage.getItem('sinek_pro_admin_status') === 'false' ? false : true;
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
+            adminStatus = localStorage.getItem('sinek_real_admin_status') === 'false' ? false : true;
             capNhatGiaoDienTrangThaiAdmin();
             if(document.getElementById('pageProducts').style.display === 'block') {
-                // Tự động load lại danh mục đang xem nếu có thay đổi
                 renderCategoryGrid();
             }
         });
@@ -489,12 +485,12 @@
 
         function toggleAdminStatus() {
             adminStatus = !adminStatus;
-            syncDataToCloud();
+            saveDatabaseToCloud();
             capNhatGiaoDienTrangThaiAdmin();
         }
 
         window.onload = async function() {
-            await syncDataFromCloud();
+            await fetchCloudData();
             capNhatGiaoDienUser();
             capNhatDanhSachMenhGia();
             capNhatGiaoDienTrangThaiAdmin();
@@ -528,9 +524,9 @@
             `;
         }
 
-        function chuyenTab(tabName) {
+        async function chuyenTab(tabName) {
             document.querySelectorAll('.page-view').forEach(el => el.style.display = 'none');
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+            await fetchCloudData();
             
             if(tabName === 'home') {
                 document.getElementById('pageHome').style.display = 'block';
@@ -548,10 +544,11 @@
             }
         }
 
-        function moDanhMuc(keyDM) {
+        async function moDanhMuc(keyDM) {
             document.getElementById('pageHome').style.display = 'none';
             document.getElementById('pageProducts').style.display = 'block';
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+            await fetchCloudData();
+            
             let listHTML = '';
             let danhSach = databaseSanPham[keyDM] || [];
             document.getElementById('categoryTitle').innerText = keyDM === 'muaacc' ? 'Acc King Legacy VIP' : (keyDM === 'caythue' ? 'Cày Thuê King Legacy' : 'Item & Nguyên Liệu King Legacy');
@@ -976,14 +973,14 @@
                 return;
             }
 
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
             if(!databaseSanPham[cat]) {
                 databaseSanPham[cat] = [];
             }
 
             let newId = Date.now();
             databaseSanPham[cat].push({ id: newId, name: name, price: price, stock: stock, soldOut: false });
-            await syncDataToCloud();
+            await saveDatabaseToCloud();
             loadDanhSachSanPhamAdmin();
             alert(`Thêm sản phẩm "${name}" thành công! Đã đồng bộ mượt mà.`);
             document.getElementById('newProName').value = '';
@@ -991,7 +988,8 @@
         }
 
         async function loadDanhSachSanPhamAdmin() {
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+            await fetchCloudData();
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
             let selectEl = document.getElementById('adSelectProduct');
             selectEl.innerHTML = '';
             for(let keyDM in databaseSanPham) {
@@ -1011,7 +1009,7 @@
             let parts = val.split('_');
             let dm = parts[0];
             let id = parseInt(parts[1]);
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
             let spObj = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
             return { dm, id, spObj };
         }
@@ -1045,13 +1043,13 @@
                 return;
             }
 
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
             let targetSp = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
             if(targetSp) {
                 targetSp.name = newName;
                 targetSp.price = newPrice;
                 targetSp.stock = newStock;
-                await syncDataToCloud();
+                await saveDatabaseToCloud();
                 loadDanhSachSanPhamAdmin();
                 alert(`Cập nhật thành công sản phẩm "${newName}"!`);
             }
@@ -1060,11 +1058,11 @@
         async function adminToggleHetHang() {
             let { dm, id, spObj } = timSanPhamHienTai();
             if(!spObj) return;
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
             let targetSp = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
             if(targetSp) {
                 targetSp.soldOut = !targetSp.soldOut;
-                await syncDataToCloud();
+                await saveDatabaseToCloud();
                 loadThongTinSanPhamAdmin();
                 alert(`Đã đổi trạng thái sản phẩm thành: ${targetSp.soldOut ? 'HẾT HÀNG' : 'ĐANG MỞ BÁN'}`);
             }
@@ -1074,9 +1072,9 @@
             let { dm, id, spObj } = timSanPhamHienTai();
             if(!spObj) return;
             if(confirm(`Bạn có chắc chắn muốn XÓA sản phẩm "${spObj.name}" không?`)) {
-                databaseSanPham = JSON.parse(localStorage.getItem('sinek_pro_db')) || defaultDatabaseSanPham;
+                databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
                 databaseSanPham[dm] = databaseSanPham[dm].filter(item => item.id !== id);
-                await syncDataToCloud();
+                await saveDatabaseToCloud();
                 loadDanhSachSanPhamAdmin();
                 alert('Đã xóa sản phẩm thành công!');
             }
