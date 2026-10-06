@@ -58,6 +58,20 @@
             100% { color: #38bdf8; text-shadow: 0 0 5px rgba(56,189,248,0.5); }
         }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); border-bottom: 2px solid #0284c7; position: sticky; top: 0; z-index: 100; animation: glowingBorder 4s infinite; }
+        
+        .chat-float-btn { position: fixed; bottom: 20px; right: 20px; background: #0284c7; color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 4px 15px rgba(56,189,248,0.4); z-index: 1500; border: 2px solid #38bdf8; transition: 0.3s; }
+        .chat-float-btn:hover { transform: scale(1.1); background: #38bdf8; color: #0f172a; }
+        .chat-box-container { display: none; position: fixed; bottom: 80px; right: 20px; width: 340px; height: 450px; background: #0f172a; border: 2px solid #0284c7; border-radius: 14px; z-index: 2000; flex-direction: column; box-shadow: 0 8px 30px rgba(2,132,199,0.5); overflow: hidden; }
+        .chat-header { background: #1e293b; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; font-weight: bold; color: #38bdf8; }
+        .chat-messages { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px; }
+        .chat-input-area { padding: 10px; background: #1e293b; display: flex; gap: 6px; border-top: 1px solid #334155; }
+        .chat-msg { max-width: 80%; padding: 8px 10px; border-radius: 8px; line-height: 1.4; word-break: break-word; }
+        .chat-msg.user { background: #0284c7; color: #fff; align-self: flex-end; }
+        .chat-msg.staff { background: #334155; color: #f8fafc; align-self: flex-start; }
+        .chat-msg.system { background: rgba(251,191,36,0.15); color: #fbbf24; align-self: center; text-align: center; width: 100%; font-size: 11px; border: 1px dashed #fbbf24; }
+        .waiting-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; color: #fbbf24; font-size: 11px; text-align: center; gap: 6px; background: rgba(30,41,59,0.7); border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
+        .spinner { width: 20px; height: 20px; border: 3px solid rgba(251,191,36,0.3); border-top-color: #fbbf24; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .header-left { display: flex; align-items: center; gap: 8px; position: relative; }
         .menu-hamburger-btn { background: rgba(30, 41, 59, 0.9); border: 2px solid #38bdf8; color: #38bdf8; width: 36px; height: 36px; border-radius: 8px; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; z-index: 10; }
         .menu-hamburger-btn:hover { background: #38bdf8; color: #0f172a; }
@@ -69,7 +83,7 @@
         .admin-info { display: flex; flex-direction: column; }
         .admin-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
         .admin-name { font-size: 11px; font-weight: bold; animation: shineText 3s infinite; }
-        .user-panel { display: flex; align-items: center; gap: 8px; z-index: 10; position: relative; }
+        .user-panel { display: flex; align-items: center; gap: 6px; z-index: 10; position: relative; }
         .balance-badge { background: rgba(30, 41, 59, 0.9); color: #38bdf8; padding: 6px 10px; border-radius: 20px; font-size: 12px; border: 1px solid #334155; font-weight: bold; }
         .auth-btn { background: #0284c7; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .auth-btn:hover { background: #38bdf8; color: #0f172a; }
@@ -147,6 +161,35 @@
         <div class="user-panel">
             <div class="balance-badge" id="displayBalance">0 đ</div>
             <button class="auth-btn" id="authBtn" onclick="moModalAuth()">Đăng Nhập</button>
+            <button class="auth-btn" id="changePassBtn" style="background: #f59e0b; display: none;" onclick="moModalDoiMk()">Đổi MK</button>
+        </div>
+    </div>
+
+    <!-- Nút Live Chat nổi -->
+    <div class="chat-float-btn" onclick="toggleChatBox()">💬</div>
+
+    <!-- Hộp Chat Trực Tuyến -->
+    <div class="chat-box-container" id="chatBoxContainer">
+        <div class="chat-header">
+            <span id="chatHeaderTitle">Sinek Store - Hỗ Trợ 24/7</span>
+            <button onclick="toggleChatBox()" style="background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer;">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessagesList">
+            <div class="chat-msg system">Xin chào! Hãy gửi tin nhắn, hệ thống sẽ kết nối bạn với CTV hoặc Admin ngay lập tức.</div>
+        </div>
+        <div id="waitingArea" style="display: none;">
+            <div class="waiting-loader">
+                <div class="spinner"></div>
+                <span>Đang chờ CTV hoặc Admin tham gia vào cuộc hội thoại tư vấn khách...</span>
+            </div>
+        </div>
+        <div class="chat-input-area" id="chatInputArea">
+            <input type="text" id="chatInputText" class="form-control" placeholder="Nhập tin nhắn..." style="flex:1;" onkeypress="checkEnterChat(event)">
+            <button class="action-btn" style="width: 60px;" onclick="guiTinNhanChat()">Gửi</button>
+        </div>
+        <div id="chatActionButtons" style="padding: 8px; background: #1e293b; display: none; gap: 6px;">
+            <button class="action-btn" id="btnJoinChat" style="background: #10b981; font-size: 11px;" onclick="staffJoinChat()">🤝 Nhận Tư Vấn</button>
+            <button class="action-btn" id="btnOutChat" style="background: #ef4444; font-size: 11px;" onclick="staffOutChat()">🚪 Kết Thúc / Out</button>
         </div>
     </div>
     <div class="container" onclick="dongMenuBenNgoai(event)">
@@ -210,10 +253,10 @@
             <div class="section-title" style="border-color:#f87171;">Khu Vực Quản Trị Viên (Admin Pro)</div>
             <div id="adminLoginBox" style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px;">
                 <div class="form-group">
-                    <label>Mật khẩu QTV:</label>
-                    <input type="password" id="adminPassInput" class="form-control" placeholder="Nhập mật khẩu quản trị">
+                    <label>Mật khẩu QTV / CTV:</label>
+                    <input type="password" id="adminPassInput" class="form-control" placeholder="Nhập mật khẩu quản trị hoặc CTV">
                 </div>
-                <button class="action-btn" style="background:#f87171;" onclick="kiemTraAdmin()">Đăng Nhập QTV</button>
+                <button class="action-btn" style="background:#f87171;" onclick="kiemTraAdmin()">Đăng Nhập Hệ Thống</button>
             </div>
             <div id="adminPanelBox" style="display:none;">
                 <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
@@ -227,7 +270,12 @@
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">📦 Quản Lý Đơn Hàng Khách Đặt</h3>
                     <div id="adminOrderList" style="font-size:12px; color:#94a3b8;">Chưa có đơn hàng nào chờ duyệt.</div>
                 </div>
+                <!-- Giám sát tin nhắn Live Chat -->
                 <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">💬 Giám Sát & Trả Lời Chat Khách Hàng</h3>
+                    <div id="adminChatRoomsList" style="font-size:12px; color:#94a3b8;">Chưa có đoạn chat nào đang hoạt động.</div>
+                </div>
+                <div id="khuVucThemSanPham" style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">1. Thêm Sản Phẩm Mới (Chọn ảnh từ thư viện)</h3>
                     <div class="form-group">
                         <label>Chọn danh mục:</label>
@@ -255,7 +303,7 @@
                     </div>
                     <button class="action-btn" style="background:#0284c7;" onclick="adminThemSanPhamMoi()">Thêm Sản Phẩm & Tải Ảnh</button>
                 </div>
-                <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
+                <div id="khuVucBienDongTien" style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">2. Biến Động Số Dư Khách Hàng</h3>
                     <div class="form-group">
                         <label>Tên tài khoản khách:</label>
@@ -270,7 +318,7 @@
                     </div>
                     <button class="action-btn" style="background: #0284c7; margin-top: 5px;" onclick="adminXuLyTien()">Xác Nhận Thay Đổi Số Dư</button>
                 </div>
-                <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px;">
+                <div id="khuVucQuanLySanPham" style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px;">
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">3. Quản Lý, Sửa & Xóa Sản Phẩm</h3>
                     <div class="form-group">
                         <label>Chọn sản phẩm:</label>
@@ -345,19 +393,31 @@
     <div class="modal" id="modalAuth">
         <div class="modal-content">
             <div class="modal-title-custom">Tài Khoản Sinek Store</div>
-            <div class="form-group"><label>Tên tài khoản:</label><input type="text" id="authUsername" class="form-control" placeholder="Username"></div>
+            <div class="form-group"><label>Tên tài khoản:</label><input type="text" id="authUsername" class="form-control" placeholder="Nhập username"></div>
             <div class="form-group">
                 <label>Mật khẩu:</label>
                 <div style="display: flex; gap: 5px;">
-                    <input type="password" id="authPassword" class="form-control" placeholder="Mật khẩu">
+                    <input type="password" id="authPassword" class="form-control" placeholder="Nhập mật khẩu">
                     <button type="button" onclick="hienThiMatKhau()" style="background: #1e293b; border: 1px solid #334155; color: #38bdf8; padding: 0 10px; border-radius: 6px; cursor: pointer; font-size: 12px;">👁</button>
                 </div>
             </div>
+            <div class="form-group"><label>Số điện thoại hoặc Email liên hệ (Bắt buộc):</label><input type="text" id="authContact" class="form-control" placeholder="Nhập SĐT hoặc Email của bạn"></div>
             <div class="modal-buttons">
                 <button class="btn-submit" onclick="thucHienDangKy()">Đăng Ký</button>
                 <button class="btn-submit" style="background:#10b981;" onclick="thucHienDangNhap()">Đăng Nhập</button>
             </div>
             <button class="btn-close" style="width:100%; margin-top:10px;" onclick="dongModal('modalAuth')">Đóng</button>
+        </div>
+    </div>
+    <div class="modal" id="modalDoiMk">
+        <div class="modal-content">
+            <div class="modal-title-custom">Đổi Mật Khẩu</div>
+            <div class="form-group"><label>Mật khẩu hiện tại:</label><input type="password" id="oldPassword" class="form-control" placeholder="Nhập mật khẩu cũ"></div>
+            <div class="form-group"><label>Mật khẩu mới:</label><input type="password" id="newPassword" class="form-control" placeholder="Nhập mật khẩu mới"></div>
+            <div class="modal-buttons">
+                <button class="btn-close" onclick="dongModal('modalDoiMk')">Hủy</button>
+                <button class="btn-submit" style="background:#10b981;" onclick="thucHienDoiMatKhau()">Xác Nhận Đổi</button>
+            </div>
         </div>
     </div>
     <script>
@@ -420,18 +480,25 @@
         
         const defaultDatabaseSanPham = {
             muaacc: [
-                { id: 101, name: "Acc King Legacy Max Level + Godhuman", price: 150000, stock: 1, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
+                { id: 101, name: "Acc King Legacy VIP", price: 150000, stock: 1, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ],
             caythue: [
-                { id: 1, name: "Cày Level Max King Legacy", price: 50000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
-                { id: 2, name: "Săn Sea King Fin", price: 16000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
+                { id: 1, name: "Cày Level Max King Legacy", price: 50000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ],
             itemnguyenlieu: [
                 { id: 4, name: "Donate ĐTP King Legacy", price: 1000, stock: 50, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ]
         };
 
+        const defaultDanhSachCTV = {
+            "trieu": { pass: "Tr@u#9281_Trieu", name: "CTV Phạm Văn Triều" },
+            "tung": { pass: "Tung!8832$Pro", name: "CTV Lê Mạnh Tùng" },
+            "khoi": { pass: "Khoi*5564&VIP", name: "CTV Huỳnh Khôi" },
+            "bao": { pass: "Bao#7719!Safe", name: "CTV Đặng Nguyễn Gia Bảo" }
+        };
+
         let databaseSanPham = defaultDatabaseSanPham;
+        let danhSachCTV = defaultDanhSachCTV;
         let adminStatus = true;
         let allOrders = [];
 
@@ -442,6 +509,7 @@
                     let data = await res.json();
                     if(data) {
                         if(data.products) databaseSanPham = data.products;
+                        if(data.ctvList) danhSachCTV = data.ctvList;
                         if(typeof data.adminStatus !== 'undefined') adminStatus = data.adminStatus;
                         if(data.orders) allOrders = data.orders;
                     }
@@ -457,6 +525,7 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         products: databaseSanPham,
+                        ctvList: danhSachCTV,
                         adminStatus: adminStatus,
                         orders: allOrders
                     })
@@ -582,11 +651,25 @@
 
         function moModalAuth() { document.getElementById('modalAuth').style.display = 'flex'; }
         function dongModal(id) { document.getElementById(id).style.display = 'none'; }
+        function moModalDoiMk() {
+            document.getElementById('oldPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('modalDoiMk').style.display = 'flex';
+        }
 
         async function thucHienDangKy() {
             let u = document.getElementById('authUsername').value.trim();
             let p = document.getElementById('authPassword').value.trim();
-            if(!u || !p) { alert('Vui lòng điền đầy đủ tài khoản và mật khẩu!'); return; }
+            let contact = document.getElementById('authContact').value.trim();
+
+            if(!u || !p) { 
+                alert('Vui lòng điền đầy đủ Tên tài khoản và Mật khẩu!'); 
+                return; 
+            }
+            if(!contact) {
+                alert('Vui lòng nhập Số điện thoại hoặc Email để liên hệ khi cần!');
+                return;
+            }
             
             let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + u + ".json");
             let existingUser = await res.json();
@@ -598,9 +681,10 @@
             await fetch(FIREBASE_DB_URL + "sinek_users/" + u + ".json", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password: p, balance: 0 })
+                body: JSON.stringify({ password: p, contact: contact, balance: 0 })
             });
-            alert('Đăng ký thành công! Bạn có thể bấm đăng nhập ngay.');
+            alert('Đăng ký tài khoản thành công! Bạn có thể bấm đăng nhập ngay.');
+            document.getElementById('authContact').value = '';
         }
 
         async function thucHienDangNhap() {
@@ -621,22 +705,55 @@
             }
         }
 
+        async function thucHienDoiMatKhau() {
+            if(!currentUser) { alert('Vui lòng đăng nhập trước!'); return; }
+            let oldPass = document.getElementById('oldPassword').value.trim();
+            let newPass = document.getElementById('newPassword').value.trim();
+
+            if(!oldPass || !newPass) {
+                alert('Vui lòng điền đầy đủ mật khẩu cũ và mới!');
+                return;
+            }
+
+            await fetchFirebaseData();
+            let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
+            let userData = await res.json();
+
+            if(userData && userData.password === oldPass) {
+                userData.password = newPass;
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(userData)
+                });
+                alert('Đổi mật khẩu thành công!');
+                dongModal('modalDoiMk');
+            } else {
+                alert('Mật khẩu cũ không chính xác!');
+            }
+        }
+
         async function capNhatGiaoDienUser() {
+            let changeBtn = document.getElementById('changePassBtn');
             if(currentUser) {
                 let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json");
                 let bal = await res.json();
                 let displayBal = (bal !== null) ? bal : 0;
                 document.getElementById('displayBalance').innerText = parseInt(displayBal).toLocaleString() + ' đ';
                 
+                if(changeBtn) changeBtn.style.display = 'inline-block';
+
                 let btn = document.getElementById('authBtn');
                 btn.innerText = currentUser + ' (Đăng xuất)';
                 btn.onclick = function() {
                     localStorage.removeItem('sinek_logged_user');
                     currentUser = null;
+                    if(changeBtn) changeBtn.style.display = 'none';
                     location.reload();
                 };
             } else {
                 document.getElementById('displayBalance').innerText = '0 đ';
+                if(changeBtn) changeBtn.style.display = 'none';
                 document.getElementById('authBtn').innerText = 'Đăng Nhập';
                 document.getElementById('authBtn').onclick = moModalAuth;
             }
@@ -729,6 +846,7 @@
                 price: sanphamDangChon.price,
                 details: chiTiet,
                 status: '⏳ Chờ Duyệt',
+                handledBy: null,
                 time: timeNow
             });
 
@@ -776,6 +894,7 @@
                 price: sanphamDangChon.price,
                 details: chiTiet,
                 status: '⏳ Chờ Duyệt',
+                handledBy: null,
                 time: timeNow
             });
 
@@ -821,6 +940,7 @@
                 price: sanphamDangChon.price,
                 details: chiTiet,
                 status: '⏳ Chờ Duyệt',
+                handledBy: null,
                 time: timeNow
             });
 
@@ -879,27 +999,63 @@
                 window.location.href = "https://www.facebook.com/share/1Dy3Rqke3P/";
             });
         }
-        function kiemTraAdmin() {
-            let pass = document.getElementById('adminPassInput').value;
-            if(pass === 'sinekadmin123') {
-                localStorage.setItem('sinek_is_admin', 'true');
-                hienThiGiaoDienAdmin();
-                alert('Đăng nhập Quản Trị Viên thành công!');
+        async function kiemTraAdmin() {
+            let passInput = document.getElementById('adminPassInput').value.trim();
+            if(!passInput) { alert('Vui lòng nhập mật khẩu quản lý!'); return; }
+
+            await fetchFirebaseData();
+
+            if(passInput === 'Sinek@Admin$2026#Pro') {
+                localStorage.setItem('sinek_role', 'admin');
+                localStorage.setItem('sinek_username', 'Quản Trị Viên (Admin Tổng)');
+                hienThiGiaoDienTheoQuyen('admin');
+                alert('Đăng nhập Quản Trị Viên Tổng thành công!');
+                return;
+            }
+
+            let matchedCTVName = null;
+            for(let username in danhSachCTV) {
+                if(danhSachCTV[username].pass === passInput) {
+                    matchedCTVName = danhSachCTV[username].name;
+                    break;
+                }
+            }
+
+            if(matchedCTVName) {
+                localStorage.setItem('sinek_role', 'ctv');
+                localStorage.setItem('sinek_username', matchedCTVName);
+                hienThiGiaoDienTheoQuyen('ctv');
+                alert(`Đăng nhập thành công! Chào mừng ${matchedCTVName}`);
             } else {
-                alert('Sai mật khẩu quản trị viên!');
+                alert('Mật khẩu không chính xác hoặc không có quyền truy cập!');
             }
         }
 
         function kiemTraQuyenQTVDaLuu() {
-            if(localStorage.getItem('sinek_is_admin') === 'true') {
-                hienThiGiaoDienAdmin();
+            let savedRole = localStorage.getItem('sinek_role');
+            if(savedRole === 'admin' || savedRole === 'ctv') {
+                hienThiGiaoDienTheoQuyen(savedRole);
             }
         }
 
-        function hienThiGiaoDienAdmin() {
+        function hienThiGiaoDienTheoQuyen(role) {
             document.getElementById('adminLoginBox').style.display = 'none';
             document.getElementById('adminPanelBox').style.display = 'block';
-            loadDanhSachSanPhamAdmin();
+
+            let khuVucThemSP = document.getElementById('khuVucThemSanPham');
+            let khuVucSuaTien = document.getElementById('khuVucBienDongTien');
+            let khuVucSuaSP = document.getElementById('khuVucQuanLySanPham');
+
+            if(role === 'ctv') {
+                if(khuVucThemSP) khuVucThemSP.style.display = 'none';
+                if(khuVucSuaTien) khuVucSuaTien.style.display = 'none';
+                if(khuVucSuaSP) khuVucSuaSP.style.display = 'none';
+            } else {
+                if(khuVucThemSP) khuVucThemSP.style.display = 'block';
+                if(khuVucSuaTien) khuVucSuaTien.style.display = 'block';
+                if(khuVucSuaSP) khuVucSuaSP.style.display = 'block';
+                loadDanhSachSanPhamAdmin();
+            }
             loadQuanLyDonHangAdmin();
         }
 
@@ -910,12 +1066,15 @@
             let html = '';
             allOrders.forEach((o, index) => {
                 let badgeColor = o.status === '⏳ Chờ Duyệt' ? '#fbbf24' : (o.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
+                let nguoiDuyetHTML = o.handledBy ? `<br><span style="color: #10b981; font-weight: bold;">👤 Người duyệt/xử lý: ${o.handledBy}</span>` : `<br><span style="color: #94a3b8; font-style: italic;">👤 Người duyệt: Chưa có ai nhận đơn</span>`;
+                
                 html += `<div style="background:#1e293b; border:1px solid #334155; padding:10px; border-radius:8px; margin-bottom:8px; text-align:left;">
-                    <b style="color:#38bdf8;">Mã đơn: ${o.code}</b> | Trạng thái: <b style="color:${badgeColor};">${o.status}</b><br>
+                    <b style="color:#38bdf8;">Mã đơn: ${o.code}</b> | Trạng thái: <b style="color:${badgeColor};">${o.status}</b>
+                    ${nguoiDuyetHTML}<br>
                     <span>Khách đặt: <b>${o.webUser}</b></span><br><span>Sản phẩm: ${o.item} (${o.price.toLocaleString()}đ)</span><br>
                     <pre style="font-size:11px; color:#cbd5e1; font-family:inherit; white-space:pre-wrap; margin-top:4px; background:#0f172a; padding:6px; border-radius:4px;">${o.details}</pre>
                     <div style="display:flex; gap:6px; margin-top:8px;">
-                        <button class="action-btn" style="background:#38bdf8; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '🔄 Đang Xử Lý')">Xác Nhận</button>
+                        <button class="action-btn" style="background:#38bdf8; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '🔄 Đang Xử Lý')">Nhận Đơn / Xác Nhận</button>
                         <button class="action-btn" style="background:#10b981; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '✅ Thành Công')">Hoàn Thành</button>
                         <button class="action-btn" style="background:#ef4444; font-size:11px; padding:4px;" onclick="adminXoaDonHang(${index})">Xóa</button>
                     </div></div>`;
@@ -925,7 +1084,11 @@
 
         async function adminDoiTrangThaiDon(index, trangThaiMoi) {
             await fetchFirebaseData();
+            let currentHandler = localStorage.getItem('sinek_username') || 'Nhân viên';
+            
             allOrders[index].status = trangThaiMoi;
+            allOrders[index].handledBy = currentHandler;
+            
             await saveFirebaseData();
             loadQuanLyDonHangAdmin();
             alert('Đã cập nhật trạng thái đơn hàng thành: ' + trangThaiMoi);
@@ -1036,6 +1199,7 @@
         async function loadDanhSachSanPhamAdmin() {
             await fetchFirebaseData();
             let selectEl = document.getElementById('adSelectProduct');
+            if(!selectEl) return;
             selectEl.innerHTML = '';
             for(let keyDM in databaseSanPham) {
                 databaseSanPham[keyDM].forEach(sp => {
@@ -1049,9 +1213,9 @@
         }
 
         function timSanPhamHienTai() {
-            let val = document.getElementById('adSelectProduct').value;
-            if(!val) return { dm: null, id: null, spObj: null };
-            let parts = val.split('_');
+            let selectEl = document.getElementById('adSelectProduct');
+            if(!selectEl || !selectEl.value) return { dm: null, id: null, spObj: null };
+            let parts = selectEl.value.split('_');
             let dm = parts[0];
             let id = parseInt(parts[1]);
             let spObj = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
@@ -1122,6 +1286,212 @@
                 loadDanhSachSanPhamAdmin();
                 alert('Đã xóa sản phẩm thành công!');
             }
+        }
+        let currentChatRoomId = localStorage.getItem('sinek_chat_room') || null;
+        let chatInterval = null;
+        let allChats = {};
+
+        function toggleChatBox() {
+            let box = document.getElementById('chatBoxContainer');
+            if(box.style.display === 'flex') {
+                box.style.display = 'none';
+            } else {
+                box.style.display = 'flex';
+                khoiTaoHoacTaiPhienChat();
+            }
+        }
+
+        async function khoiTaoHoacTaiPhienChat() {
+            if(!currentUser && !localStorage.getItem('sinek_guest_id')) {
+                localStorage.setItem('sinek_guest_id', 'guest_' + Math.floor(Math.random() * 10000));
+            }
+            currentChatRoomId = currentUser || localStorage.getItem('sinek_guest_id');
+
+            let role = localStorage.getItem('sinek_role');
+            if(role === 'admin' || role === 'ctv') {
+                document.getElementById('chatActionButtons').style.display = 'flex';
+            }
+
+            batDauLangNgheChat();
+        }
+
+        async function guiTinNhanChat() {
+            let txtInput = document.getElementById('chatInputText');
+            let msg = txtInput.value.trim();
+            if(!msg) return;
+
+            let senderName = localStorage.getItem('sinek_username') || (currentUser ? currentUser : 'Khách vãng lai');
+            let role = localStorage.getItem('sinek_role') || 'client';
+
+            await fetchFirebaseData();
+            if(!allChats) allChats = {};
+            if(!allChats[currentChatRoomId]) {
+                allChats[currentChatRoomId] = {
+                    messages: [],
+                    status: 'waiting',
+                    handler: null
+                };
+            }
+
+            if(role !== 'admin' && role !== 'ctv' && allChats[currentChatRoomId].status === 'closed') {
+                allChats[currentChatRoomId].status = 'waiting';
+            }
+
+            allChats[currentChatRoomId].messages.push({
+                sender: senderName,
+                text: msg,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                isStaff: (role === 'admin' || role === 'ctv')
+            });
+
+            await saveFirebaseChats();
+            txtInput.value = '';
+            taiNoiDungChatHienTai();
+        }
+
+        function checkEnterChat(e) {
+            if(e.key === 'Enter') guiTinNhanChat();
+        }
+
+        async function saveFirebaseChats() {
+            try {
+                await fetch(FIREBASE_DB_URL + "sinek_chats.json", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(allChats)
+                });
+            } catch(e) {}
+        }
+
+        function batDauLangNgheChat() {
+            if(chatInterval) clearInterval(chatInterval);
+            chatInterval = setInterval(async () => {
+                await taiNoiDungChatHienTai();
+                let role = localStorage.getItem('sinek_role');
+                if(role === 'admin' || role === 'ctv') {
+                    loadDanhSachChatChoAdmin();
+                }
+            }, 3000);
+            taiNoiDungChatHienTai();
+        }
+
+        async function taiNoiDungChatHienTai() {
+            try {
+                let res = await fetch(FIREBASE_DB_URL + "sinek_chats.json");
+                if(res.ok) {
+                    let data = await res.json();
+                    if(data) allChats = data;
+                }
+            } catch(e) {}
+
+            let room = allChats[currentChatRoomId];
+            let msgListEl = document.getElementById('chatMessagesList');
+            let waitingArea = document.getElementById('waitingArea');
+            if(!msgListEl) return;
+
+            let html = '';
+            if(room && room.messages) {
+                room.messages.forEach(m => {
+                    let cssClass = m.isStaff ? 'chat-msg staff' : 'chat-msg user';
+                    html += `<div class="${cssClass}"><b>${m.sender}:</b> ${m.text} <span style="font-size:9px; opacity:0.7; float:right; margin-left:6px;">${m.time}</span></div>`;
+                });
+            } else {
+                html = `<div class="chat-msg system">Chào mừng bạn đến với Sinek Store! Hãy nhắn nội dung cần hỗ trợ.</div>`;
+            }
+            msgListEl.innerHTML = html;
+            msgListEl.scrollTop = msgListEl.scrollHeight;
+
+            if(room && room.status === 'waiting') {
+                if(waitingArea) waitingArea.style.display = 'block';
+            } else {
+                if(waitingArea) waitingArea.style.display = 'none';
+            }
+        }
+
+        async function staffJoinChat() {
+            await fetchFirebaseData();
+            let staffName = localStorage.getItem('sinek_username') || 'Nhân viên';
+            if(!allChats[currentChatRoomId]) allChats[currentChatRoomId] = { messages: [], status: 'waiting' };
+            
+            allChats[currentChatRoomId].status = 'active';
+            allChats[currentChatRoomId].handler = staffName;
+            allChats[currentChatRoomId].messages.push({
+                sender: 'Hệ Thống',
+                text: `✨ ${staffName} đã tham gia vào cuộc hội thoại để hỗ trợ bạn!`,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                isStaff: true
+            });
+
+            await saveFirebaseChats();
+            alert('Bạn đã tham gia tư vấn phiên chat này thành công!');
+            taiNoiDungChatHienTai();
+        }
+
+        async function staffOutChat() {
+            if(confirm('Bạn có chắc chắn muốn kết thúc và rời khỏi cuộc hội thoại này không?')) {
+                await fetchFirebaseData();
+                let staffName = localStorage.getItem('sinek_username') || 'Nhân viên';
+                if(allChats[currentChatRoomId]) {
+                    allChats[currentChatRoomId].status = 'closed';
+                    allChats[currentChatRoomId].messages.push({
+                        sender: 'Hệ Thống',
+                        text: `🔒 ${staffName} đã kết thúc phiên tư vấn này. Cảm ơn bạn đã sử dụng dịch vụ tại Sinek Store!`,
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        isStaff: true
+                    });
+                    await saveFirebaseChats();
+                }
+                alert('Đã out khỏi cuộc hội thoại!');
+                taiNoiDungChatHienTai();
+            }
+        }
+
+        // CTV chỉ thấy đơn chờ duyệt, Admin thấy tất cả
+        async function loadDanhSachChatChoAdmin() {
+            let container = document.getElementById('adminChatRoomsList');
+            if(!container) return;
+            let html = '';
+            if(!allChats || Object.keys(allChats).length === 0) {
+                container.innerHTML = 'Chưa có đoạn chat nào đang hoạt động.';
+                return;
+            }
+
+            let role = localStorage.getItem('sinek_role');
+            let countValidRooms = 0;
+
+            for(let roomId in allChats) {
+                let room = allChats[roomId];
+                
+                if(role === 'ctv' && room.status !== 'waiting') {
+                    continue; 
+                }
+
+                countValidRooms++;
+                let statusText = room.status === 'waiting' ? '⏳ Đang chờ tư vấn' : (room.status === 'active' ? '🟢 Đang tư vấn (' + room.handler + ')' : '🔒 Đã đóng');
+                let lastMsg = room.messages.length > 0 ? room.messages[room.messages.length - 1].text : 'Trống';
+                
+                html += `<div style="background:#1e293b; border:1px solid #334155; padding:8px; border-radius:6px; margin-bottom:6px; cursor:pointer;" onclick="chonPhongChatAdmin('${roomId}')">
+                    <b style="color:#38bdf8;">Phòng chat: ${roomId}</b> | Trạng thái: <b style="color:#fbbf24;">${statusText}</b><br>
+                    <span style="font-size:11px; color:#94a3b8;">Tin nhắn cuối: ${lastMsg}</span>
+                </div>`;
+            }
+
+            if(countValidRooms === 0 && role === 'ctv') {
+                container.innerHTML = 'Hiện không có đoạn chat nào đang chờ tư vấn.';
+            } else if(countValidRooms === 0) {
+                container.innerHTML = 'Chưa có đoạn chat nào đang hoạt động.';
+            } else {
+                container.innerHTML = html;
+            }
+        }
+
+        function chonPhongChatAdmin(roomId) {
+            currentChatRoomId = roomId;
+            let box = document.getElementById('chatBoxContainer');
+            box.style.display = 'flex';
+            document.getElementById('chatHeaderTitle').innerText = 'Đang xem chat của: ' + roomId;
+            document.getElementById('chatActionButtons').style.display = 'flex';
+            taiNoiDungChatHienTai();
         }
     </script>
 </body>
