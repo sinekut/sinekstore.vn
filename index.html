@@ -1,4 +1,4 @@
-6<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -167,10 +167,11 @@
         </div>
     </div>
 
-    <!-- Thanh Góc Nhạc Chill cho mọi người nghe -->
-    <div id="globalMusicPlayerBar" style="position: fixed; bottom: 20px; left: 20px; background: rgba(15, 23, 42, 0.9); border: 1px solid #38bdf8; border-radius: 30px; padding: 6px 12px; display: flex; align-items: center; gap: 8px; z-index: 1000; backdrop-filter: blur(6px); box-shadow: 0 4px 15px rgba(56,189,248,0.3);">
+    <!-- Thanh Góc Nhạc Chill có nút Play thủ công để lách chặn âm thanh của trình duyệt -->
+    <div id="globalMusicPlayerBar" style="position: fixed; bottom: 20px; left: 20px; background: rgba(15, 23, 42, 0.95); border: 1px solid #38bdf8; border-radius: 30px; padding: 6px 14px; display: flex; align-items: center; gap: 8px; z-index: 1000; backdrop-filter: blur(6px); box-shadow: 0 4px 15px rgba(56,189,248,0.3);">
         <span style="font-size: 14px;">🎵</span>
-        <div style="font-size: 11px; color: #38bdf8; font-weight: bold;" id="musicStatusText">Góc Nhạc Chill: Đang tắt</div>
+        <div style="font-size: 11px; color: #38bdf8; font-weight: bold;" id="musicStatusText">Nhạc Chill: Đang tắt</div>
+        <button id="playMusicManualBtn" onclick="kichHoatPhatNhacThuCong()" style="background: #10b981; color: #fff; border: none; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer; display: none;">▶ Bật Tiếng</button>
         <audio id="bgMusicAudio" loop style="display: none;"></audio>
     </div>
 
@@ -284,12 +285,12 @@
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">💬 Giám Sát & Trả Lời Chat Khách Hàng</h3>
                     <div id="adminChatRoomsList" style="font-size:12px; color:#94a3b8;">Chưa có đoạn chat nào đang hoạt động.</div>
                 </div>
-                <!-- Bảng điều khiển nhạc độc quyền chỉ Admin Tổng mới thấy -->
+                <!-- Bảng điều khiển nhạc độc quyền chỉ Admin Tổng mới thấy và chỉnh sửa -->
                 <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px; display:none;" id="khuVucDieuKhienNhac">
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">🎧 Bảng Điều Khiển Nhạc Nền Shop (Chỉ Admin)</h3>
                     <div class="form-group">
-                        <label>Link Nhạc MP3 trực tuyến:</label>
-                        <input type="text" id="adminMusicUrl" class="form-control" placeholder="Dán link file .mp3 vào đây">
+                        <label>Link Nhạc MP3 trực tiếp (.mp3):</label>
+                        <input type="text" id="adminMusicUrl" class="form-control" placeholder="Dán link file mp3 trực tiếp vào đây">
                     </div>
                     <div style="display: flex; gap: 8px; margin-top: 10px;">
                         <button class="action-btn" style="background: #10b981; flex: 1;" onclick="adminPhatNhac()">▶ Bật Nhạc Cho Mọi Người</button>
@@ -1572,7 +1573,7 @@
         // --- HỆ THỐNG ĐIỀU KHIỂN NHẠC NỀN CHILL REALTIME (CHỈ ADMIN TỔNG) ---
         async function adminPhatNhac() {
             let mUrl = document.getElementById('adminMusicUrl').value.trim();
-            if(!mUrl) { alert('Vui lòng nhập link nhạc MP3 trực tuyến hợp lệ!'); return; }
+            if(!mUrl) { alert('Vui lòng nhập link nhạc MP3 trực tiếp hợp lệ!'); return; }
             
             await fetch(FIREBASE_DB_URL + "sinek_music.json", {
                 method: "PUT",
@@ -1593,6 +1594,18 @@
             kiemTraVaPhatNhacRealtime();
         }
 
+        function kichHoatPhatNhacThuCong() {
+            let audioEl = document.getElementById('bgMusicAudio');
+            if(audioEl) {
+                audioEl.play().then(() => {
+                    document.getElementById('playMusicManualBtn').style.display = 'none';
+                    document.getElementById('musicStatusText').innerText = "Đang phát nhạc nền Chill 🎶";
+                }).catch(e => {
+                    alert('Trình duyệt vẫn đang chặn, vui lòng thử lại!');
+                });
+            }
+        }
+
         async function kiemTraVaPhatNhacRealtime() {
             try {
                 let res = await fetch(FIREBASE_DB_URL + "sinek_music.json");
@@ -1600,18 +1613,24 @@
                     let musicData = await res.json();
                     let audioEl = document.getElementById('bgMusicAudio');
                     let statusText = document.getElementById('musicStatusText');
+                    let playBtn = document.getElementById('playMusicManualBtn');
                     if(!audioEl) return;
 
                     if(musicData && musicData.playing && musicData.url) {
                         if(audioEl.src !== musicData.url) {
                             audioEl.src = musicData.url;
-                            audioEl.play().catch(e => {});
-                        } else if(audioEl.paused) {
-                            audioEl.play().catch(e => {});
                         }
-                        if(statusText) statusText.innerText = "Đang phát nhạc nền Chill 🎶";
+                        
+                        audioEl.play().then(() => {
+                            if(playBtn) playBtn.style.display = 'none';
+                            if(statusText) statusText.innerText = "Đang phát nhạc nền Chill 🎶";
+                        }).catch(e => {
+                            if(playBtn) playBtn.style.display = 'inline-block';
+                            if(statusText) statusText.innerText = "Nhạc đang bật, bấm để nghe 👇";
+                        });
                     } else {
                         audioEl.pause();
+                        if(playBtn) playBtn.style.display = 'none';
                         if(statusText) statusText.innerText = "Góc Nhạc Chill: Đang tắt";
                     }
                 }
