@@ -412,6 +412,9 @@
                 selectAmount.appendChild(opt);
             });
         }
+        // Kết nối chính thức Firebase Realtime Database của Sinek Store
+        const FIREBASE_DB_URL = "https://sinek-store-default-rtdb.asia-southeast1.firebasedatabase.app/";
+        
         const defaultDatabaseSanPham = {
             muaacc: [
                 { id: 101, name: "Acc King Legacy Max Level + Godhuman", price: 150000, stock: 1, soldOut: false }
@@ -425,48 +428,38 @@
             ]
         };
 
-        let databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
-        let adminStatus = localStorage.getItem('sinek_real_admin_status') === 'false' ? false : true;
+        let databaseSanPham = defaultDatabaseSanPham;
+        let adminStatus = true;
+        let allOrders = [];
 
-        async function fetchCloudData() {
+        async function fetchFirebaseData() {
             try {
-                let res = await fetch("https://api.npoint.io/e3b0c44298fc1c149afbf", { method: "GET" });
+                let res = await fetch(FIREBASE_DB_URL + "sinek_data.json");
                 if(res.ok) {
-                    let cloudData = await res.json();
-                    if(cloudData && cloudData.products) {
-                        databaseSanPham = cloudData.products;
-                        localStorage.setItem('sinek_real_cloud_db', JSON.stringify(databaseSanPham));
+                    let data = await res.json();
+                    if(data) {
+                        if(data.products) databaseSanPham = data.products;
+                        if(typeof data.adminStatus !== 'undefined') adminStatus = data.adminStatus;
+                        if(data.orders) allOrders = data.orders;
                     }
-                    if(cloudData && typeof cloudData.adminStatus !== 'undefined') {
-                        adminStatus = cloudData.adminStatus;
-                        localStorage.setItem('sinek_real_admin_status', adminStatus);
-                    }
-                    capNhatGiaoDienTrangThaiAdmin();
                 }
             } catch(e) {}
+            capNhatGiaoDienTrangThaiAdmin();
         }
 
-        async function saveDatabaseToCloud() {
-            localStorage.setItem('sinek_real_cloud_db', JSON.stringify(databaseSanPham));
-            localStorage.setItem('sinek_real_admin_status', adminStatus);
+        async function saveFirebaseData() {
             try {
-                await fetch("https://api.npoint.io/e3b0c44298fc1c149afbf", {
-                    method: "POST",
+                await fetch(FIREBASE_DB_URL + "sinek_data.json", {
+                    method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ products: databaseSanPham, adminStatus: adminStatus })
+                    body: JSON.stringify({
+                        products: databaseSanPham,
+                        adminStatus: adminStatus,
+                        orders: allOrders
+                    })
                 });
             } catch(e) {}
-            window.dispatchEvent(new Event('storage'));
         }
-
-        window.addEventListener('storage', () => {
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
-            adminStatus = localStorage.getItem('sinek_real_admin_status') === 'false' ? false : true;
-            capNhatGiaoDienTrangThaiAdmin();
-            if(document.getElementById('pageProducts').style.display === 'block') {
-                renderCategoryGrid();
-            }
-        });
 
         const fixedImage = "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg";
         let currentUser = localStorage.getItem('sinek_logged_user') || null;
@@ -483,14 +476,14 @@
             }
         }
 
-        function toggleAdminStatus() {
+        async function toggleAdminStatus() {
             adminStatus = !adminStatus;
-            saveDatabaseToCloud();
+            await saveFirebaseData();
             capNhatGiaoDienTrangThaiAdmin();
         }
 
         window.onload = async function() {
-            await fetchCloudData();
+            await fetchFirebaseData();
             capNhatGiaoDienUser();
             capNhatDanhSachMenhGia();
             capNhatGiaoDienTrangThaiAdmin();
@@ -526,7 +519,7 @@
 
         async function chuyenTab(tabName) {
             document.querySelectorAll('.page-view').forEach(el => el.style.display = 'none');
-            await fetchCloudData();
+            await fetchFirebaseData();
             
             if(tabName === 'home') {
                 document.getElementById('pageHome').style.display = 'block';
@@ -547,7 +540,7 @@
         async function moDanhMuc(keyDM) {
             document.getElementById('pageHome').style.display = 'none';
             document.getElementById('pageProducts').style.display = 'block';
-            await fetchCloudData();
+            await fetchFirebaseData();
             
             let listHTML = '';
             let danhSach = databaseSanPham[keyDM] || [];
@@ -586,26 +579,34 @@
         function moModalAuth() { document.getElementById('modalAuth').style.display = 'flex'; }
         function dongModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        function thucHienDangKy() {
+        async function thucHienDangKy() {
             let u = document.getElementById('authUsername').value.trim();
             let p = document.getElementById('authPassword').value.trim();
             if(!u || !p) { alert('Vui lòng điền đầy đủ tài khoản và mật khẩu!'); return; }
-            let storageKey = 'sinek_user_' + u;
-            if(localStorage.getItem(storageKey) !== null) {
+            
+            let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + u + ".json");
+            let existingUser = await res.json();
+            if(existingUser !== null) {
                 alert('Tên tài khoản này đã tồn tại trên hệ thống!');
                 return;
             }
-            localStorage.setItem(storageKey, p);
-            localStorage.setItem('sinek_bal_' + u, '0');
-            localStorage.setItem('sinek_history_' + u, JSON.stringify([]));
+
+            await fetch(FIREBASE_DB_URL + "sinek_users/" + u + ".json", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: p, balance: 0 })
+            });
             alert('Đăng ký thành công! Bạn có thể bấm đăng nhập ngay.');
         }
 
-        function thucHienDangNhap() {
+        async function thucHienDangNhap() {
             let u = document.getElementById('authUsername').value.trim();
             let p = document.getElementById('authPassword').value.trim();
-            let savedPass = localStorage.getItem('sinek_user_' + u);
-            if(savedPass && savedPass === p) {
+            
+            let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + u + ".json");
+            let userData = await res.json();
+
+            if(userData && userData.password === p) {
                 currentUser = u;
                 localStorage.setItem('sinek_logged_user', u);
                 alert('Đăng nhập thành công!');
@@ -616,10 +617,13 @@
             }
         }
 
-        function capNhatGiaoDienUser() {
+        async function capNhatGiaoDienUser() {
             if(currentUser) {
-                let bal = localStorage.getItem('sinek_bal_' + currentUser) || '0';
-                document.getElementById('displayBalance').innerText = parseInt(bal).toLocaleString() + ' đ';
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json");
+                let bal = await res.json();
+                let displayBal = (bal !== null) ? bal : 0;
+                document.getElementById('displayBalance').innerText = parseInt(displayBal).toLocaleString() + ' đ';
+                
                 let btn = document.getElementById('authBtn');
                 btn.innerText = currentUser + ' (Đăng xuất)';
                 btn.onclick = function() {
@@ -683,26 +687,30 @@
             document.getElementById('itTotalMoney').value = total.toLocaleString() + ' đ';
         }
 
-        function luuVaTaoDonHang(chiTietDon) {
-            let allOrders = JSON.parse(localStorage.getItem('sinek_all_orders') || '[]');
+        async function luuVaTaoDonHang(chiTietDon) {
+            await fetchFirebaseData();
             allOrders.unshift(chiTietDon);
-            localStorage.setItem('sinek_all_orders', JSON.stringify(allOrders));
+            await saveFirebaseData();
         }
 
-        function xacNhanThanhToanMuaAcc() {
+        async function xacNhanThanhToanMuaAcc() {
             let accCode = document.getElementById('accCodeInput').value.trim();
             let phone = document.getElementById('accPhone').value.trim();
             if(!accCode || !phone) { alert('Vui lòng điền đầy đủ Mã Acc và Số Điện Thoại!'); return; }
 
             if(currentUser) {
-                let balKey = 'sinek_bal_' + currentUser;
-                let currentBal = parseInt(localStorage.getItem(balKey) || '0');
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json");
+                let currentBal = await res.json() || 0;
                 if(currentBal < sanphamDangChon.price) {
                     alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
                     return;
                 }
                 let newBal = currentBal - sanphamDangChon.price;
-                localStorage.setItem(balKey, newBal);
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newBal)
+                });
                 capNhatGiaoDienUser();
             }
 
@@ -710,7 +718,7 @@
             let timeNow = new Date().toLocaleString('vi-VN');
             let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Mã Acc cần mua: ${accCode}\n- SĐT: ${phone}`;
             
-            luuVaTaoDonHang({
+            await luuVaTaoDonHang({
                 code: randomCode,
                 webUser: currentUser || 'Khách vãng lai',
                 item: sanphamDangChon.name,
@@ -729,7 +737,7 @@
             dongModal('modalMuaAcc');
         }
 
-        function xacNhanThanhToanCayThue() {
+        async function xacNhanThanhToanCayThue() {
             let qty = document.getElementById('ctQuantity').value;
             let gUser = document.getElementById('ctGameUser').value.trim();
             let gPass = document.getElementById('ctGamePass').value.trim();
@@ -738,14 +746,18 @@
             if(!gUser || !gPass || !phone) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
 
             if(currentUser) {
-                let balKey = 'sinek_bal_' + currentUser;
-                let currentBal = parseInt(localStorage.getItem(balKey) || '0');
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json");
+                let currentBal = await res.json() || 0;
                 if(currentBal < sanphamDangChon.price) {
                     alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
                     return;
                 }
                 let newBal = currentBal - sanphamDangChon.price;
-                localStorage.setItem(balKey, newBal);
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newBal)
+                });
                 capNhatGiaoDienUser();
             }
 
@@ -753,7 +765,7 @@
             let timeNow = new Date().toLocaleString('vi-VN');
             let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Số lượng: ${qty}\n- Tên Acc game: ${gUser}\n- Mật khẩu: ${gPass}\n- Ghi chú: ${note}\n- SĐT: ${phone}`;
             
-            luuVaTaoDonHang({
+            await luuVaTaoDonHang({
                 code: randomCode,
                 webUser: currentUser || 'Khách vãng lai',
                 item: sanphamDangChon.name + ` (Số lượng: ${qty})`,
@@ -772,21 +784,25 @@
             dongModal('modalCayThue');
         }
 
-        function xacNhanThanhToanItem() {
+        async function xacNhanThanhToanItem() {
             let qty = document.getElementById('itQuantity').value;
             let gUser = document.getElementById('itGameUser').value.trim();
             let phone = document.getElementById('itPhone').value.trim();
             if(!gUser || !phone) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
 
             if(currentUser) {
-                let balKey = 'sinek_bal_' + currentUser;
-                let currentBal = parseInt(localStorage.getItem(balKey) || '0');
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json");
+                let currentBal = await res.json() || 0;
                 if(currentBal < sanphamDangChon.price) {
                     alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
                     return;
                 }
                 let newBal = currentBal - sanphamDangChon.price;
-                localStorage.setItem(balKey, newBal);
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newBal)
+                });
                 capNhatGiaoDienUser();
             }
 
@@ -794,7 +810,7 @@
             let timeNow = new Date().toLocaleString('vi-VN');
             let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Số lượng: ${qty}\n- Tên Roblox: ${gUser}\n- SĐT: ${phone}`;
             
-            luuVaTaoDonHang({
+            await luuVaTaoDonHang({
                 code: randomCode,
                 webUser: currentUser || 'Khách vãng lai',
                 item: sanphamDangChon.name + ` (Số lượng: ${qty})`,
@@ -813,9 +829,9 @@
             dongModal('modalItem');
         }
 
-        function hienThiLichSu() {
+        async function hienThiLichSu() {
             if(!currentUser) { document.getElementById('historyList').innerHTML = 'Vui lòng đăng nhập để xem lịch sử.'; return; }
-            let allOrders = JSON.parse(localStorage.getItem('sinek_all_orders') || '[]');
+            await fetchFirebaseData();
             let userOrders = allOrders.filter(o => o.webUser === currentUser);
             if(userOrders.length === 0) { document.getElementById('historyList').innerHTML = 'Chưa có đơn hàng nào.'; return; }
             let html = '';
@@ -883,8 +899,8 @@
             loadQuanLyDonHangAdmin();
         }
 
-        function loadQuanLyDonHangAdmin() {
-            let allOrders = JSON.parse(localStorage.getItem('sinek_all_orders') || '[]');
+        async function loadQuanLyDonHangAdmin() {
+            await fetchFirebaseData();
             let listEl = document.getElementById('adminOrderList');
             if(allOrders.length === 0) { listEl.innerHTML = 'Chưa có đơn hàng nào chờ duyệt.'; return; }
             let html = '';
@@ -903,19 +919,19 @@
             listEl.innerHTML = html;
         }
 
-        function adminDoiTrangThaiDon(index, trangThaiMoi) {
-            let allOrders = JSON.parse(localStorage.getItem('sinek_all_orders') || '[]');
+        async function adminDoiTrangThaiDon(index, trangThaiMoi) {
+            await fetchFirebaseData();
             allOrders[index].status = trangThaiMoi;
-            localStorage.setItem('sinek_all_orders', JSON.stringify(allOrders));
+            await saveFirebaseData();
             loadQuanLyDonHangAdmin();
             alert('Đã cập nhật trạng thái đơn hàng thành: ' + trangThaiMoi);
         }
 
-        function adminXoaDonHang(index) {
+        async function adminXoaDonHang(index) {
             if(confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
-                let allOrders = JSON.parse(localStorage.getItem('sinek_all_orders') || '[]');
+                await fetchFirebaseData();
                 allOrders.splice(index, 1);
-                localStorage.setItem('sinek_all_orders', JSON.stringify(allOrders));
+                await saveFirebaseData();
                 loadQuanLyDonHangAdmin();
             }
         }
@@ -934,26 +950,34 @@
             }
         }
 
-        function adminXuLyTien() {
+        async function adminXuLyTien() {
             let targetUser = document.getElementById('adUserTarget').value.trim();
             let amount = parseInt(document.getElementById('adAmountTarget').value);
             if(!targetUser || isNaN(amount)) { alert('Vui lòng nhập đúng tên tài khoản và số tiền!'); return; }
             
-            let balKey = 'sinek_bal_' + targetUser;
-            let currentBal = parseInt(localStorage.getItem(balKey) || '0');
+            let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + targetUser + ".json");
+            let userData = await res.json() || { password: "123456", balance: 0 };
+            let currentBal = userData.balance || 0;
             let newBal = 0;
 
             if(adminMoneyMode === '+') {
                 newBal = currentBal + amount;
-                localStorage.setItem(balKey, newBal);
-                if(!localStorage.getItem('sinek_user_' + targetUser)) {
-                    localStorage.setItem('sinek_user_' + targetUser, '123456');
-                }
+                userData.balance = newBal;
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + targetUser + ".json", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(userData)
+                });
                 alert(`Đã cộng thành công ${amount.toLocaleString()}đ cho tài khoản: ${targetUser}\nSố dư mới: ${newBal.toLocaleString()}đ`);
             } else {
                 newBal = currentBal - amount;
                 if(newBal < 0) newBal = 0;
-                localStorage.setItem(balKey, newBal);
+                userData.balance = newBal;
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + targetUser + ".json", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(userData)
+                });
                 alert(`Đã trừ thành công ${amount.toLocaleString()}đ của tài khoản: ${targetUser}\nSố dư còn lại: ${newBal.toLocaleString()}đ`);
             }
 
@@ -973,14 +997,14 @@
                 return;
             }
 
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
+            await fetchFirebaseData();
             if(!databaseSanPham[cat]) {
                 databaseSanPham[cat] = [];
             }
 
             let newId = Date.now();
             databaseSanPham[cat].push({ id: newId, name: name, price: price, stock: stock, soldOut: false });
-            await saveDatabaseToCloud();
+            await saveFirebaseData();
             loadDanhSachSanPhamAdmin();
             alert(`Thêm sản phẩm "${name}" thành công! Đã đồng bộ mượt mà.`);
             document.getElementById('newProName').value = '';
@@ -988,8 +1012,7 @@
         }
 
         async function loadDanhSachSanPhamAdmin() {
-            await fetchCloudData();
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
+            await fetchFirebaseData();
             let selectEl = document.getElementById('adSelectProduct');
             selectEl.innerHTML = '';
             for(let keyDM in databaseSanPham) {
@@ -1009,7 +1032,6 @@
             let parts = val.split('_');
             let dm = parts[0];
             let id = parseInt(parts[1]);
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
             let spObj = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
             return { dm, id, spObj };
         }
@@ -1043,13 +1065,13 @@
                 return;
             }
 
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
+            await fetchFirebaseData();
             let targetSp = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
             if(targetSp) {
                 targetSp.name = newName;
                 targetSp.price = newPrice;
                 targetSp.stock = newStock;
-                await saveDatabaseToCloud();
+                await saveFirebaseData();
                 loadDanhSachSanPhamAdmin();
                 alert(`Cập nhật thành công sản phẩm "${newName}"!`);
             }
@@ -1058,11 +1080,11 @@
         async function adminToggleHetHang() {
             let { dm, id, spObj } = timSanPhamHienTai();
             if(!spObj) return;
-            databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
+            await fetchFirebaseData();
             let targetSp = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
             if(targetSp) {
                 targetSp.soldOut = !targetSp.soldOut;
-                await saveDatabaseToCloud();
+                await saveFirebaseData();
                 loadThongTinSanPhamAdmin();
                 alert(`Đã đổi trạng thái sản phẩm thành: ${targetSp.soldOut ? 'HẾT HÀNG' : 'ĐANG MỞ BÁN'}`);
             }
@@ -1072,9 +1094,9 @@
             let { dm, id, spObj } = timSanPhamHienTai();
             if(!spObj) return;
             if(confirm(`Bạn có chắc chắn muốn XÓA sản phẩm "${spObj.name}" không?`)) {
-                databaseSanPham = JSON.parse(localStorage.getItem('sinek_real_cloud_db')) || defaultDatabaseSanPham;
+                await fetchFirebaseData();
                 databaseSanPham[dm] = databaseSanPham[dm].filter(item => item.id !== id);
-                await saveDatabaseToCloud();
+                await saveFirebaseData();
                 loadDanhSachSanPhamAdmin();
                 alert('Đã xóa sản phẩm thành công!');
             }
