@@ -228,7 +228,7 @@
                     <div id="adminOrderList" style="font-size:12px; color:#94a3b8;">Chưa có đơn hàng nào chờ duyệt.</div>
                 </div>
                 <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
-                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">1. Thêm Sản Phẩm Mới (Đồng bộ siêu tốc)</h3>
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">1. Thêm Sản Phẩm Mới (Chọn ảnh từ thư viện)</h3>
                     <div class="form-group">
                         <label>Chọn danh mục:</label>
                         <select id="newProCategory" class="form-control">
@@ -249,7 +249,11 @@
                         <label>Số lượng kho:</label>
                         <input type="number" id="newProStock" class="form-control" placeholder="Nhập số lượng kho" value="1">
                     </div>
-                    <button class="action-btn" style="background:#0284c7;" onclick="adminThemSanPhamMoi()">Thêm Sản Phẩm</button>
+                    <div class="form-group">
+                        <label>Chọn ảnh từ thư viện:</label>
+                        <input type="file" id="newProImageFile" class="form-control" accept="image/*" style="padding: 6px;">
+                    </div>
+                    <button class="action-btn" style="background:#0284c7;" onclick="adminThemSanPhamMoi()">Thêm Sản Phẩm & Tải Ảnh</button>
                 </div>
                 <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">2. Biến Động Số Dư Khách Hàng</h3>
@@ -412,19 +416,18 @@
                 selectAmount.appendChild(opt);
             });
         }
-        // Kết nối chính thức Firebase Realtime Database của Sinek Store
         const FIREBASE_DB_URL = "https://sinek-store-default-rtdb.asia-southeast1.firebasedatabase.app/";
         
         const defaultDatabaseSanPham = {
             muaacc: [
-                { id: 101, name: "Acc King Legacy Max Level + Godhuman", price: 150000, stock: 1, soldOut: false }
+                { id: 101, name: "Acc King Legacy Max Level + Godhuman", price: 150000, stock: 1, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ],
             caythue: [
-                { id: 1, name: "Cày Level Max King Legacy", price: 50000, stock: 99, soldOut: false },
-                { id: 2, name: "Săn Sea King Fin", price: 16000, stock: 99, soldOut: false }
+                { id: 1, name: "Cày Level Max King Legacy", price: 50000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
+                { id: 2, name: "Săn Sea King Fin", price: 16000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ],
             itemnguyenlieu: [
-                { id: 4, name: "Donate ĐTP King Legacy", price: 1000, stock: 50, soldOut: false }
+                { id: 4, name: "Donate ĐTP King Legacy", price: 1000, stock: 50, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ]
         };
 
@@ -552,7 +555,8 @@
                 let btnStyle = isSoldOut ? 'background: #64748b; cursor: not-allowed;' : '';
                 let onclickAttr = isSoldOut ? '' : `onclick="${keyDM === 'muaacc' ? `moModalMuaAcc('${sp.name}', ${sp.price})` : (keyDM === 'caythue' ? `moModalCayThue('${sp.name}', ${sp.price})` : `moModalItem('${sp.name}', ${sp.price})`)}"`;
                 
-                let mediaHTML = `<img src="${fixedImage}" class="card-img">`;
+                let productImg = sp.image || fixedImage;
+                let mediaHTML = `<img src="${productImg}" class="card-img">`;
                 let stockHTML = `<div style="font-size: 11px; color: #fbbf24; margin-bottom: 4px;">Kho còn: <b>${sp.stock}</b></div>`;
                 let noteAccHTML = (keyDM === 'muaacc') ? `<div style="font-size: 10px; color: #38bdf8; margin-bottom: 8px; font-style: italic; line-height: 1.3;">💡 Nếu muốn xem ảnh của acc trọn vẹn, vui lòng liên hệ qua Zalo hoặc FB của admin!</div>` : '';
 
@@ -991,24 +995,42 @@
             let name = document.getElementById('newProName').value.trim();
             let price = parseInt(document.getElementById('newProPrice').value);
             let stock = parseInt(document.getElementById('newProStock').value) || 1;
+            let imageInput = document.getElementById('newProImageFile');
 
             if(!name || isNaN(price)) {
                 alert('Vui lòng điền đầy đủ tên và giá sản phẩm!');
                 return;
             }
 
+            let defaultImg = "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg";
+
+            if (imageInput.files && imageInput.files[0]) {
+                let file = imageInput.files[0];
+                let reader = new FileReader();
+                reader.onload = async function(e) {
+                    let base64Image = e.target.result;
+                    await luuSanPhamVaoFirebase(cat, name, price, stock, base64Image);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                await luuSanPhamVaoFirebase(cat, name, price, stock, defaultImg);
+            }
+        }
+
+        async function luuSanPhamVaoFirebase(cat, name, price, stock, imageUrl) {
             await fetchFirebaseData();
             if(!databaseSanPham[cat]) {
                 databaseSanPham[cat] = [];
             }
 
             let newId = Date.now();
-            databaseSanPham[cat].push({ id: newId, name: name, price: price, stock: stock, soldOut: false });
+            databaseSanPham[cat].push({ id: newId, name: name, price: price, stock: stock, image: imageUrl, soldOut: false });
             await saveFirebaseData();
             loadDanhSachSanPhamAdmin();
             alert(`Thêm sản phẩm "${name}" thành công! Đã đồng bộ mượt mà.`);
             document.getElementById('newProName').value = '';
             document.getElementById('newProPrice').value = '';
+            document.getElementById('newProImageFile').value = '';
         }
 
         async function loadDanhSachSanPhamAdmin() {
