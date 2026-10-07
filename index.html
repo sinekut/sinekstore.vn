@@ -563,7 +563,6 @@
             capNhatGiaoDienTrangThaiAdmin();
             renderCategoryGrid();
             kiemTraQuyenQTVDaLuu();
-            // Tự động kích hoạt nghe ngóng chat ngầm ngay khi vào web
             batDauLangNgheChat();
         };
 
@@ -1363,7 +1362,6 @@
 
             let senderName = localStorage.getItem('sinek_username') || (currentUser ? currentUser : 'Khách vãng lai');
 
-            // Lấy dữ liệu mới nhất từ Firebase trước khi push tin nhắn
             await taiDuLieuChatTuFirebase();
             if(!allChats) allChats = {};
             
@@ -1473,16 +1471,17 @@
         }
 
         async function staffOutChat() {
+            if(!currentChatRoomId) { alert('Chưa chọn phòng chat nào để kết thúc!'); return; }
             if(confirm('Bạn có chắc chắn muốn kết thúc và xóa phiên tư vấn này không?')) {
                 await taiDuLieuChatTuFirebase();
-                if(currentChatRoomId && allChats[currentChatRoomId]) {
+                if(allChats[currentChatRoomId]) {
                     delete allChats[currentChatRoomId];
                     await saveFirebaseChats();
                 }
                 alert('Đã kết thúc và dọn sạch phòng chat thành công!');
                 document.getElementById('chatBoxContainer').style.display = 'none';
                 currentChatRoomId = null;
-                location.reload();
+                loadDanhSachChatChoAdmin();
             }
         }
 
@@ -1509,7 +1508,7 @@
                     currentWaitingRooms++;
                 }
 
-                if(role === 'ctv' && room.status !== 'waiting') {
+                if(role === 'ctv' && room.status !== 'waiting' && room.handler !== localStorage.getItem('sinek_username')) {
                     continue; 
                 }
 
@@ -1517,7 +1516,9 @@
                 let statusText = room.status === 'waiting' ? '⏳ Đang chờ tư vấn' : (room.status === 'active' ? '🟢 Đang tư vấn (' + (room.handler || 'Nhân viên') + ')' : '🔒 Đã đóng');
                 let lastMsg = (room.messages && room.messages.length > 0) ? room.messages[room.messages.length - 1].text : 'Trống';
                 
-                html += `<div style="background:#1e293b; border:1px solid #334155; padding:8px; border-radius:6px; margin-bottom:6px; cursor:pointer;" onclick="chonPhongChatAdmin('${roomId}')">
+                let borderStyle = (currentChatRoomId === roomId) ? 'border: 2px solid #38bdf8;' : 'border: 1px solid #334155;';
+
+                html += `<div style="background:#1e293b; ${borderStyle} padding:8px; border-radius:6px; margin-bottom:6px; cursor:pointer;" onclick="chonPhongChatAdmin('${roomId}')">
                     <b style="color:#38bdf8;">Phòng chat: ${roomId}</b> | Trạng thái: <b style="color:#fbbf24;">${statusText}</b><br>
                     <span style="font-size:11px; color:#94a3b8;">Tin nhắn cuối: ${lastMsg}</span>
                 </div>`;
