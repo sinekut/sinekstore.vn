@@ -7,116 +7,145 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { 
-            background: linear-gradient(135deg, #020617 0%, #0c1438 50%, #0f172a 100%);
-            color: #f8fafc; padding-bottom: 20px; min-height: 100vh; position: relative; overflow-x: hidden;
+            background: #020617; color: #f8fafc; padding-bottom: 20px; min-height: 100vh; position: relative; overflow-x: hidden;
         }
-        body::before {
-            content: ""; position: fixed; top: -60%; left: -60%; width: 220%; height: 220%;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, transparent 50%),
-                        linear-gradient(45deg, rgba(16, 185, 129, 0.12), rgba(139, 92, 246, 0.18), rgba(56, 189, 248, 0.15), rgba(236, 72, 153, 0.1));
-            mix-blend-mode: screen; opacity: 0.95; z-index: 0; pointer-events: none;
-            animation: auroraWaving 12s ease infinite alternate;
+        .aurora-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+            background: radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 85% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%), #020617;
+            overflow: hidden;
         }
-        @keyframes auroraWaving {
-            0% { transform: translateY(-10%) translateX(-5%) rotate(0deg) scale(1); }
-            50% { transform: translateY(10%) translateX(5%) rotate(6deg) scale(1.12); }
-            100% { transform: translateY(-5%) translateX(-2%) rotate(-4deg) scale(1.06); }
-        }
-        .star-field {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;
-            background-image: radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
-                              radial-gradient(2px 2px at 40px 70px, #38bdf8, rgba(0,0,0,0)),
-                              radial-gradient(1px 1px at 90px 40px, #ffffff, rgba(0,0,0,0)),
-                              radial-gradient(2px 2px at 160px 120px, #bae6fd, rgba(0,0,0,0));
-            background-repeat: repeat; background-size: 350px 350px; opacity: 0.8;
-            animation: twinkleStars 4s infinite alternate;
-        }
-        @keyframes twinkleStars { 0% { opacity: 0.5; } 100% { opacity: 0.95; } }
         .shooting-star {
-            position: fixed; height: 2px;
-            background: linear-gradient(90deg, rgba(255,255,255,1), rgba(56,189,248,0.8), transparent);
-            border-radius: 999px; filter: drop-shadow(0 0 8px #38bdf8); z-index: 1; pointer-events: none; opacity: 0;
-            animation: shootingStarAnim linear infinite;
+            position: absolute; width: 100px; height: 2px;
+            background: linear-gradient(90deg, rgba(255,255,255,1), transparent);
+            transform: rotate(-45deg); opacity: 0; animation: shoot 4s infinite ease-in-out;
         }
-        @keyframes shootingStarAnim {
-            0% { transform: rotate(315deg) translateX(0); opacity: 1; }
-            100% { transform: rotate(315deg) translateX(-1000px); opacity: 0; }
+        .shooting-star:nth-child(1) { top: 10%; left: 80%; animation-delay: 0s; }
+        .shooting-star:nth-child(2) { top: 30%; left: 90%; animation-delay: 1.5s; }
+        .shooting-star:nth-child(3) { top: 5%; left: 40%; animation-delay: 3s; }
+        @keyframes shoot {
+            0% { transform: translateX(0) translateY(0) rotate(-45deg); opacity: 1; }
+            100% { transform: translateX(-400px) translateY(400px) rotate(-45deg); opacity: 0; }
         }
+
         @keyframes glowingBorder {
-            0% { border-color: #0284c7; box-shadow: 0 0 5px rgba(2, 132, 199, 0.5); }
-            50% { border-color: #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.8); }
-            100% { border-color: #0284c7; box-shadow: 0 0 5px rgba(2, 132, 199, 0.5); }
+            0% { border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
+            50% { border-color: rgba(236, 72, 153, 0.8); box-shadow: 0 4px 25px rgba(236, 72, 153, 0.3); }
+            100% { border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
         }
         @keyframes goldFlameAura {
-            0% { border-color: #fbbf24; box-shadow: 0 0 8px #fbbf24, inset 0 0 5px #fbbf24; }
-            50% { border-color: #f59e0b; box-shadow: 0 0 22px #f59e0b, 0 0 35px rgba(251, 191, 36, 0.6), inset 0 0 10px #fbbf24; }
-            100% { border-color: #fbbf24; box-shadow: 0 0 8px #fbbf24, inset 0 0 5px #fbbf24; }
+            0% { border-color: #fbbf24; box-shadow: 0 0 10px rgba(251,191,36,0.5); }
+            50% { border-color: #f59e0b; box-shadow: 0 0 25px rgba(245,158,11,0.8); }
+            100% { border-color: #fbbf24; box-shadow: 0 0 10px rgba(251,191,36,0.5); }
         }
         @keyframes shineText {
             0% { color: #38bdf8; text-shadow: 0 0 5px rgba(56,189,248,0.5); }
             50% { color: #fbbf24; text-shadow: 0 0 12px rgba(251,191,36,0.8); }
             100% { color: #38bdf8; text-shadow: 0 0 5px rgba(56,189,248,0.5); }
         }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); border-bottom: 2px solid #0284c7; position: sticky; top: 0; z-index: 100; animation: glowingBorder 4s infinite; }
-        
-        .chat-float-btn { position: fixed; bottom: 20px; right: 20px; background: #0284c7; color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 4px 15px rgba(56,189,248,0.4); z-index: 1500; border: 2px solid #38bdf8; transition: 0.3s; }
-        .chat-float-btn:hover { transform: scale(1.1); background: #38bdf8; color: #0f172a; }
-        .chat-box-container { display: none; position: fixed; bottom: 80px; right: 20px; width: 340px; height: 450px; background: #0f172a; border: 2px solid #0284c7; border-radius: 14px; z-index: 2000; flex-direction: column; box-shadow: 0 8px 30px rgba(2,132,199,0.5); overflow: hidden; }
-        .chat-header { background: #1e293b; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; font-weight: bold; color: #38bdf8; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.15); position: sticky; top: 0; z-index: 100; animation: glowingBorder 4s infinite; }
+        .chat-float-btn { position: fixed; bottom: 20px; right: 20px; background: rgba(2, 132, 199, 0.85); backdrop-filter: blur(10px); color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 8px 25px rgba(56,189,248,0.4); z-index: 1500; border: 1px solid rgba(255,255,255,0.25); transition: 0.3s; }
+        .chat-float-btn:hover { transform: scale(1.1); background: rgba(56, 189, 248, 0.9); color: #0f172a; }
+        .chat-box-container { display: none; position: fixed; bottom: 80px; right: 20px; width: 340px; height: 450px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 18px; z-index: 2000; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,0.5); overflow: hidden; }
+        .chat-header { background: rgba(30, 41, 59, 0.5); padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.15); font-weight: bold; color: #38bdf8; }
         .chat-messages { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px; }
-        .chat-input-area { padding: 10px; background: #1e293b; display: flex; gap: 6px; border-top: 1px solid #334155; }
-        .chat-msg { max-width: 80%; padding: 8px 10px; border-radius: 8px; line-height: 1.4; word-break: break-word; }
-        .chat-msg.user { background: #0284c7; color: #fff; align-self: flex-end; }
-        .chat-msg.staff { background: #334155; color: #f8fafc; align-self: flex-start; }
-        .chat-msg.system { background: rgba(251,191,36,0.15); color: #fbbf24; align-self: center; text-align: center; width: 100%; font-size: 11px; border: 1px dashed #fbbf24; }
-        .waiting-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; color: #fbbf24; font-size: 11px; text-align: center; gap: 6px; background: rgba(30,41,59,0.7); border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
+        .chat-input-area { padding: 10px; background: rgba(30, 41, 59, 0.5); display: flex; gap: 6px; border-top: 1px solid rgba(255, 255, 255, 0.15); }
+        .chat-msg { max-width: 80%; padding: 8px 10px; border-radius: 12px; line-height: 1.4; word-break: break-word; }
+        .chat-msg.user { background: rgba(2, 132, 199, 0.85); backdrop-filter: blur(8px); color: #fff; align-self: flex-end; border: 1px solid rgba(255,255,255,0.2); }
+        .chat-msg.staff { background: rgba(51, 65, 85, 0.75); backdrop-filter: blur(8px); color: #f8fafc; align-self: flex-start; border: 1px solid rgba(255,255,255,0.15); }
+        .chat-msg.system { background: rgba(251,191,36,0.15); color: #fbbf24; align-self: center; text-align: center; width: 100%; font-size: 11px; border: 1px dashed rgba(251,191,36,0.4); border-radius: 8px; }
+        .waiting-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; color: #fbbf24; font-size: 11px; text-align: center; gap: 6px; background: rgba(30,41,59,0.6); border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.15); }
         .spinner { width: 20px; height: 20px; border: 3px solid rgba(251,191,36,0.3); border-top-color: #fbbf24; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .vip-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 1px 4px; font-size: 7px; font-weight: bold; border-radius: 3px;
+            text-transform: uppercase; letter-spacing: 0.3px; margin-left: 3px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3); vertical-align: middle;
+        }
+        .vip-1 { background: linear-gradient(135deg, #64748b, #475569); color: #f8fafc; border: 1px solid #94a3b8; }
+        .vip-2 { background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: 1px solid #38bdf8; }
+        .vip-3 { background: linear-gradient(135deg, #10b981, #047857); color: #fff; border: 1px solid #34d399; }
+        .vip-4 { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; border: 1px solid #a78bfa; }
+        .vip-5 { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: 1px solid #fbbf24; }
+        .vip-6 { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; border: 1px solid #f87171; }
+        .vip-7 { background: linear-gradient(135deg, #ec4899, #be185d); color: #fff; border: 1px solid #f472b6; }
+        .vip-8 { background: linear-gradient(135deg, #ffd700, #ff8c00, #ff0000); color: #fff; border: 1px solid #fff; animation: goldFlameAura 1.5s infinite alternate; }
         .header-left { display: flex; align-items: center; gap: 8px; position: relative; }
-        .menu-hamburger-btn { background: rgba(30, 41, 59, 0.9); border: 2px solid #38bdf8; color: #38bdf8; width: 36px; height: 36px; border-radius: 8px; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; z-index: 10; }
+        .menu-hamburger-btn { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; width: 36px; height: 36px; border-radius: 10px; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; z-index: 10; }
         .menu-hamburger-btn:hover { background: #38bdf8; color: #0f172a; }
-        .dropdown-menu-left { display: none; position: absolute; top: 45px; left: 0; background: #0f172a; border: 1px solid #0284c7; border-radius: 10px; width: 180px; box-shadow: 0 8px 25px rgba(2, 132, 199, 0.4); z-index: 3000; overflow: hidden; }
-        .dropdown-item { padding: 12px 15px; font-size: 13px; color: #f8fafc; border-bottom: 1px solid #1e293b; cursor: pointer; text-decoration: none; display: block; transition: 0.2s; font-weight: bold; }
-        .dropdown-item:hover { background: #1e293b; color: #38bdf8; }
-        .admin-contact-box { display: flex; align-items: center; gap: 6px; background: rgba(30, 41, 59, 0.9); padding: 3px 8px 3px 3px; border-radius: 30px; border: 2px solid #fbbf24; cursor: pointer; text-decoration: none; transition: 0.3s; animation: goldFlameAura 2s infinite ease-in-out; z-index: 10; position: relative; }
+        .dropdown-menu-left { display: none; position: absolute; top: 45px; left: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 14px; width: 210px; box-shadow: 0 12px 35px rgba(0,0,0,0.5); z-index: 3000; overflow: hidden; }
+        .dropdown-item { padding: 12px 15px; font-size: 13px; color: #f8fafc; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; text-decoration: none; display: block; transition: 0.2s; font-weight: bold; }
+        .dropdown-item:hover { background: rgba(56, 189, 248, 0.25); color: #38bdf8; }
+        .admin-contact-box { display: flex; align-items: center; gap: 6px; background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); padding: 3px 8px 3px 3px; border-radius: 30px; border: 1px solid rgba(251,191,36,0.7); cursor: pointer; text-decoration: none; transition: 0.3s; animation: goldFlameAura 2s infinite ease-in-out; z-index: 10; position: relative; }
         .admin-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid #fbbf24; display: block; }
         .admin-info { display: flex; flex-direction: column; }
         .admin-label { font-size: 8px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
         .admin-name { font-size: 10px; font-weight: bold; animation: shineText 3s infinite; }
-        .user-panel { display: flex; align-items: center; gap: 4px; z-index: 10; position: relative; }
-        .balance-badge { background: rgba(30, 41, 59, 0.9); color: #38bdf8; padding: 4px 8px; border-radius: 20px; font-size: 11px; border: 1px solid #334155; font-weight: bold; }
-        .auth-btn { background: #0284c7; color: #fff; border: none; padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        
+        .user-panel { display: flex; align-items: center; gap: 6px; z-index: 10; position: relative; }
+        .balance-badge-header { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(10px); color: #38bdf8; padding: 5px 10px; border-radius: 20px; font-size: 11px; border: 1px solid rgba(56,189,248,0.4); font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+        .user-profile-bar { display: flex; align-items: center; gap: 6px; background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(10px); border: 1px solid rgba(56, 189, 248, 0.5); padding: 3px 10px 3px 3px; border-radius: 30px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .user-profile-bar:hover { border-color: #38bdf8; background: rgba(30, 41, 59, 0.95); }
+        .header-user-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #38bdf8; display: block; }
+        .header-user-info { display: flex; flex-direction: column; line-height: 1.2; }
+        .header-username-text { font-size: 12px; font-weight: bold; color: #f8fafc; max-width: 85px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .auth-btn { background: rgba(2, 132, 199, 0.85); backdrop-filter: blur(8px); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .auth-btn:hover { background: #38bdf8; color: #0f172a; }
         .container { max-width: 800px; margin: 0 auto; padding: 15px; position: relative; z-index: 10; }
         .section-title { font-size: 16px; margin: 15px 0; color: #f1f5f9; text-transform: uppercase; border-left: 4px solid #38bdf8; padding-left: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 14px; text-align: center; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; }
-        .card:hover { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56,189,248,0.3); transform: translateY(-2px); }
-        .card-img { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid #334155; }
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        
+        .card { 
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(30, 41, 59, 0.45)) !important; 
+            backdrop-filter: blur(20px) saturate(200%) !important; 
+            -webkit-backdrop-filter: blur(20px) saturate(200%) !important; 
+            border: 1px solid rgba(56, 189, 248, 0.35) !important; 
+            border-radius: 18px; padding: 14px; text-align: center; transition: 0.3s; 
+            box-shadow: 0 10px 35px rgba(0,0,0,0.4); position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            transition: 0.5s;
+        }
+        .card:hover::before { left: 100%; }
+        .card:hover { border-color: #38bdf8; box-shadow: 0 0 25px rgba(56,189,248,0.4); transform: translateY(-3px); }
+        .card-img { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.2); }
         .card-title { font-size: 14px; font-weight: bold; margin-bottom: 6px; color: #f8fafc; }
         .card-desc { font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
-        .action-btn { width: 100%; background: #0284c7; color: #fff; border: none; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .action-btn:hover { background: #38bdf8; color: #0f172a; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(5px); align-items: center; justify-content: center; z-index: 2000; padding: 15px; }
-        .modal-content { background: #0f172a; border: 1px solid #0284c7; border-radius: 14px; width: 100%; max-width: 380px; padding: 20px; box-shadow: 0 0 25px rgba(2, 132, 199, 0.4); max-height: 90vh; overflow-y: auto; }
+        .action-btn { width: 100%; background: linear-gradient(135deg, #0284c7, #0369a1); backdrop-filter: blur(8px); color: #fff; border: 1px solid rgba(255,255,255,0.25); padding: 9px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4); }
+        .action-btn:hover { background: linear-gradient(135deg, #38bdf8, #0284c7); color: #0f172a; transform: scale(1.02); }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 2000; padding: 15px; }
+        .modal-content { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 22px; width: 100%; max-width: 380px; padding: 20px; box-shadow: 0 15px 45px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
         .modal-title-custom { font-size: 18px; font-weight: bold; color: #38bdf8; margin-bottom: 15px; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
-        .form-control { width: 100%; background: #1e293b; border: 1px solid #334155; padding: 10px; border-radius: 6px; color: #fff; font-size: 13px; outline: none; }
-        .form-control:focus { border-color: #38bdf8; box-shadow: 0 0 8px rgba(56,189,248,0.3); }
+        .form-control { width: 100%; background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.18); padding: 10px; border-radius: 10px; color: #fff; font-size: 13px; outline: none; }
+        .form-control:focus { border-color: #38bdf8; box-shadow: 0 0 12px rgba(56,189,248,0.3); }
         .modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-close { background: #334151; color: #94a3b8; flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-submit { background: #0284c7; color: #fff; flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .popup-box { background: #0f172a; border: 2px solid #0284c7; border-radius: 14px; width: 90%; max-width: 380px; padding: 22px; text-align: center; box-shadow: 0 0 30px rgba(2, 132, 199, 0.5); position: relative; }
+        .btn-close { background: rgba(51, 65, 81, 0.7); color: #94a3b8; flex: 1; padding: 10px; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-submit { background: #0284c7; color: #fff; flex: 1; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .popup-box { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 22px; width: 90%; max-width: 380px; padding: 22px; text-align: center; box-shadow: 0 15px 45px rgba(0,0,0,0.5); position: relative; }
         .popup-header { font-size: 18px; font-weight: bold; color: #38bdf8; margin-bottom: 18px; letter-spacing: 1px; text-transform: uppercase; }
         .popup-body { font-size: 13px; color: #e2e8f0; line-height: 1.6; margin-bottom: 20px; text-align: left; }
-        .popup-btn { width: 100%; background: linear-gradient(to right, #0284c7, #38bdf8); color: #0f172a; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4); }
-        .qr-img { width: 190px; height: 190px; display: block; margin: 10px auto; border-radius: 8px; border: 2px solid #38bdf8; }
-        .note-box { background: #1e293b; padding: 10px; border-radius: 6px; font-size: 13px; color: #fbbf24; text-align: center; margin-bottom: 10px; font-weight: bold; border: 1px solid #334155; }
+        .popup-btn { width: 100%; background: linear-gradient(to right, #0284c7, #38bdf8); color: #0f172a; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; box-shadow: 0 8px 25px rgba(2, 132, 199, 0.4); }
+        .qr-img { width: 190px; height: 190px; display: block; margin: 10px auto; border-radius: 12px; border: 2px solid rgba(56,189,248,0.6); }
+        .note-box { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); padding: 10px; border-radius: 10px; font-size: 13px; color: #fbbf24; text-align: center; margin-bottom: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.15); }
     </style>
 </head>
 <body>
-    <div class="star-field"></div>
+    <div class="aurora-bg">
+        <div class="shooting-star"></div>
+        <div class="shooting-star"></div>
+        <div class="shooting-star"></div>
+    </div>
+
     <div class="modal" id="popupNotice" style="display: flex;">
         <div class="popup-box">
             <div class="popup-header">THÔNG BÁO</div>
@@ -145,8 +174,10 @@
                 <div class="dropdown-item" onclick="chonMenuLeft('home')">🏠 Trang Chủ</div>
                 <div class="dropdown-item" onclick="chonMenuLeft('deposit')">💳 Nạp Tiền</div>
                 <div class="dropdown-item" onclick="chonMenuLeft('history')">📜 Lịch Sử</div>
-                <div class="dropdown-item" onclick="chonMenuLeft('admin')" style="color: #f87171;">🛡 Khu Vực QTV</div>
+                <div class="dropdown-item" onclick="moModalTopNap()" style="color: #fbbf24;">🏆 Top Nạp Tháng</div>
+                <div class="dropdown-item" onclick="chonMenuLeft('admin')" style="color: #f87171; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px; padding-top: 10px;">🛡 Khu Vực QTV</div>
                 <a href="https://sinekut.github.io/ctv-sinekstore/" class="dropdown-item" style="color: #fbbf24;">🤝 Trang CTV</a>
+                <div class="dropdown-item" id="menuLogoutItem" onclick="thucHienDangXuat()" style="color: #ef4444; display: none; border-top: 1px solid rgba(255,255,255,0.15);">🚪 Đăng Xuất</div>
             </div>
             <div class="admin-contact-box" onclick="moMenuLienHe()">
                 <div class="admin-avatar-wrapper" style="position:relative; width:30px; height:30px;">
@@ -159,18 +190,19 @@
             </div>
         </div>
         <div class="user-panel">
-            <div id="userGroupContainer" style="display: flex; align-items: center; gap: 4px; background: rgba(30, 41, 59, 0.9); border: 1px solid #334155; border-radius: 20px; padding: 2px 6px;">
-                <span class="balance-badge" id="displayBalance" style="background: none; border: none; padding: 0; font-size: 10px;">0 đ</span>
-                <button class="auth-btn" id="changePassBtn" style="background: #f59e0b; display: none; padding: 2px 5px; font-size: 9px; border-radius: 4px;" onclick="moModalDoiMk()">Đổi MK</button>
+            <div class="balance-badge-header" id="displayBalance" onclick="moModalDiemVip()" title="Bấm để xem điểm và hạn mức lên VIP" style="display:none; cursor:pointer;">0 đ</div>
+            <button class="auth-btn" id="changePassBtn" style="background: #f59e0b; display: none; padding: 6px 8px; font-size: 10px;" onclick="moModalDoiMk()">Đổi MK</button>
+            <div id="userProfileBar" class="user-profile-bar" onclick="moModalDoiAvatar()" title="Bấm để chọn Avatar từ thư viện" style="display:none;">
+                <img id="headerUserAvatar" src="https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" class="header-user-avatar">
+                <div class="header-user-info">
+                    <span class="header-username-text" id="headerUsernameText">User</span>
+                    <span id="headerVipBadgeContainer"></span>
+                </div>
             </div>
             <button class="auth-btn" id="authBtn" onclick="moModalAuth()">Đăng Nhập</button>
         </div>
     </div>
-
-    <!-- Nút Live Chat nổi -->
     <div class="chat-float-btn" onclick="toggleChatBox()">💬</div>
-
-    <!-- Hộp Chat Trực Tuyến -->
     <div class="chat-box-container" id="chatBoxContainer">
         <div class="chat-header">
             <span id="chatHeaderTitle">Sinek Store - Hỗ Trợ 24/7</span>
@@ -189,7 +221,7 @@
             <input type="text" id="chatInputText" class="form-control" placeholder="Nhập tin nhắn..." style="flex:1;" onkeypress="checkEnterChat(event)">
             <button class="action-btn" style="width: 60px;" onclick="guiTinNhanChat()">Gửi</button>
         </div>
-        <div id="chatActionButtons" style="padding: 8px; background: #1e293b; display: none; gap: 6px;">
+        <div id="chatActionButtons" style="padding: 8px; background: rgba(30, 41, 59, 0.6); display: none; gap: 6px;">
             <button class="action-btn" id="btnJoinChat" style="background: #10b981; font-size: 11px;" onclick="staffJoinChat()">🤝 Nhận Tư Vấn</button>
             <button class="action-btn" id="btnOutChat" style="background: #ef4444; font-size: 11px;" onclick="staffOutChat()">🚪 Kết Thúc / Out</button>
         </div>
@@ -200,21 +232,21 @@
             <div class="grid-container" id="categoryGrid"></div>
         </div>
         <div id="pageProducts" class="page-view" style="display: none;">
-            <button onclick="veTrangChu()" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:15px; font-weight:bold;">← Quay lại danh mục</button>
+            <button onclick="veTrangChu()" style="background:rgba(30, 41, 59, 0.6); backdrop-filter: blur(8px); color:#38bdf8; border:1px solid rgba(255,255,255,0.15); padding:6px 12px; border-radius:10px; cursor:pointer; margin-bottom:15px; font-weight:bold;">← Quay lại danh mục</button>
             <div class="section-title" id="categoryTitle">Sản Phẩm</div>
             <div class="grid-container" id="productList"></div>
         </div>
         <div id="pageDeposit" class="page-view" style="display: none;">
             <div class="section-title">Nạp Tiền Vào Tài Khoản</div>
-            <div style="background:rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px; text-align:center;">
+            <div class="card" style="margin-bottom:15px; text-align:center;">
                 <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align:left;">1. Nạp qua ZaloPay</h3>
                 <p style="font-size:12px; color:#94a3b8; margin-bottom:10px; text-align:left;">Quét mã QR ZaloPay bên dưới và <b>nhập đúng nội dung chuyển khoản</b>:</p>
                 <div class="note-box" id="bankSyntaxContent">Nội dung chuyển khoản: NAP_sinekut</div>
                 <img src="https://i.ibb.co/tPsgyfKT/IMG-20261004-214345.jpg" alt="QR ZaloPay" class="qr-img">
                 <div style="font-size:11px; color:#38bdf8; margin-top:10px; line-height: 1.4;">ℹ️ Lưu ý: Tiền được cộng sau 1-12h. Nếu quá hạn chưa thấy, liên hệ Admin!</div>
             </div>
-            <div style="background:rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); border:1px solid #334155; padding:15px; border-radius:10px;">
-                <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">2. Nạp qua Thẻ Cào</h3>
+            <div class="card">
+                <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">2. Nạp qua Thẻ Cào</h3>
                 <div class="form-group">
                     <label>Chọn nhà mạng:</label>
                     <select id="cardType" class="form-control" onchange="capNhatDanhSachMenhGia()">
@@ -240,7 +272,7 @@
                     <label>Mã Thẻ (Mã nạp):</label>
                     <input type="text" id="cardPin" class="form-control" placeholder="Nhập mã thẻ cào">
                 </div>
-                <div style="font-size:11px; color:#f87171; margin-bottom:12px;">⚠ Cảnh báo: Nhập sai mất giá trị thẻ shop không chịu trách nhiệm!</div>
+                <div style="font-size:11px; color:#f87171; margin-bottom:12px; text-align: left;">⚠ Cảnh báo: Nhập sai mất giá trị thẻ shop không chịu trách nhiệm!</div>
                 <div style="display: flex; gap: 8px;">
                     <button class="action-btn" style="background:#0284c7;" onclick="guiTheCaoZalo()">Gửi Thẻ Qua Zalo</button>
                     <button class="action-btn" style="background:#2563eb;" onclick="guiTheCaoFB()">Gửi Thẻ Qua FB</button>
@@ -249,11 +281,11 @@
         </div>
         <div id="pageHistory" class="page-view" style="display: none;">
             <div class="section-title">Lịch Sử Đặt Đơn</div>
-            <div id="historyList" style="font-size:12px; color:#94a3b8; text-align:center; padding:20px;">Chưa có đơn hàng nào.</div>
+            <div id="historyList" class="card" style="font-size:12px; color:#94a3b8; text-align:center; padding:20px;">Chưa có đơn hàng nào.</div>
         </div>
         <div id="pageAdmin" class="page-view" style="display: none;">
             <div class="section-title" style="border-color:#f87171;">Khu Vực Quản Trị Viên (Admin Pro)</div>
-            <div id="adminLoginBox" style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px;">
+            <div id="adminLoginBox" class="card">
                 <div class="form-group">
                     <label>Mật khẩu QTV / CTV:</label>
                     <input type="password" id="adminPassInput" class="form-control" placeholder="Nhập mật khẩu quản trị hoặc CTV">
@@ -261,24 +293,23 @@
                 <button class="action-btn" style="background:#f87171;" onclick="kiemTraAdmin()">Đăng Nhập Hệ Thống</button>
             </div>
             <div id="adminPanelBox" style="display:none;">
-                <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                <div class="card" style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <h3 style="font-size:14px; color:#38bdf8; margin-bottom:3px;">Trạng thái Admin Shop</h3>
-                        <p style="font-size:11px; color:#94a3b8;">Bật Online, tắt Offline tức thì cho mọi thiết bị</p>
+                        <h3 style="font-size:14px; color:#38bdf8; margin-bottom:3px; text-align: left;">Trạng thái Admin Shop</h3>
+                        <p style="font-size:11px; color:#94a3b8; text-align: left;">Bật Online, tắt Offline tức thì cho mọi thiết bị</p>
                     </div>
                     <button class="action-btn" id="btnToggleAdminStatus" style="width: 100px; background: #10b981;" onclick="toggleAdminStatus()">Online</button>
                 </div>
-                <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
-                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">📦 Quản Lý Đơn Hàng Khách Đặt</h3>
-                    <div id="adminOrderList" style="font-size:12px; color:#94a3b8;">Chưa có đơn hàng nào chờ duyệt.</div>
+                <div class="card" style="margin-bottom:15px;">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">📦 Quản Lý Đơn Hàng Khách Đặt</h3>
+                    <div id="adminOrderList" style="font-size:12px; color:#94a3b8; text-align: left;">Chưa có đơn hàng nào chờ duyệt.</div>
                 </div>
-                <!-- Giám sát tin nhắn Live Chat -->
-                <div style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
-                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">💬 Giám Sát & Trả Lời Chat Khách Hàng</h3>
-                    <div id="adminChatRoomsList" style="font-size:12px; color:#94a3b8;">Chưa có đoạn chat nào đang hoạt động.</div>
+                <div class="card" style="margin-bottom:15px;">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">💬 Giám Sát & Trả Lời Chat Khách Hàng</h3>
+                    <div id="adminChatRoomsList" style="font-size:12px; color:#94a3b8; text-align: left;">Chưa có đoạn chat nào đang hoạt động.</div>
                 </div>
-                <div id="khuVucThemSanPham" style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
-                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">1. Thêm Sản Phẩm Mới (Chọn ảnh từ thư viện)</h3>
+                <div id="khuVucThemSanPham" class="card" style="margin-bottom:15px;">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">1. Thêm Sản Phẩm Mới (Chọn ảnh từ thư viện)</h3>
                     <div class="form-group">
                         <label>Chọn danh mục:</label>
                         <select id="newProCategory" class="form-control">
@@ -305,8 +336,8 @@
                     </div>
                     <button class="action-btn" style="background:#0284c7;" onclick="adminThemSanPhamMoi()">Thêm Sản Phẩm & Tải Ảnh</button>
                 </div>
-                <div id="khuVucBienDongTien" style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px; margin-bottom:15px;">
-                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">2. Biến Động Số Dư Khách Hàng</h3>
+                <div id="khuVucBienDongTien" class="card" style="margin-bottom:15px;">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">2. Biến Động Số Dư Khách Hàng</h3>
                     <div class="form-group">
                         <label>Tên tài khoản khách:</label>
                         <input type="text" id="adUserTarget" class="form-control" placeholder="Nhập username khách">
@@ -320,8 +351,8 @@
                     </div>
                     <button class="action-btn" style="background: #0284c7; margin-top: 5px;" onclick="adminXuLyTien()">Xác Nhận Thay Đổi Số Dư</button>
                 </div>
-                <div id="khuVucQuanLySanPham" style="background:rgba(15, 23, 42, 0.85); border:1px solid #334155; padding:15px; border-radius:10px;">
-                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px;">3. Quản Lý, Sửa & Xóa Sản Phẩm</h3>
+                <div id="khuVucQuanLySanPham" class="card" style="margin-bottom:15px;">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">3. Quản Lý, Sửa & Xóa Sản Phẩm</h3>
                     <div class="form-group">
                         <label>Chọn sản phẩm:</label>
                         <select id="adSelectProduct" class="form-control" onchange="loadThongTinSanPhamAdmin()"></select>
@@ -344,6 +375,34 @@
                         <button class="action-btn" style="background: #ef4444; flex: 1;" onclick="adminXoaSanPham()">Xóa SP</button>
                     </div>
                 </div>
+                <div id="khuVucQuanLyVoucher" class="card">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">4. Quản Lý & Tạo Mã Voucher Giảm Giá</h3>
+                    <div class="form-group">
+                        <label>Mã Voucher (Viết hoa, liền nhau):</label>
+                        <input type="text" id="adVoucherCode" class="form-control" placeholder="VD: SINEK2026">
+                    </div>
+                    <div class="form-group">
+                        <label>Loại giảm giá:</label>
+                        <select id="adVoucherType" class="form-control">
+                            <option value="amount">Giảm tiền trực tiếp (VNĐ)</option>
+                            <option value="percent">Giảm theo phần trăm (%)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Giá trị giảm (Nhập số tiền hoặc %):</label>
+                        <input type="number" id="adVoucherValue" class="form-control" placeholder="VD: 20000 hoặc 10">
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng lượt dùng:</label>
+                        <input type="number" id="adVoucherStock" class="form-control" placeholder="Số lượt dùng" value="1">
+                    </div>
+                    <button class="action-btn" style="background:#10b981; margin-bottom: 12px;" onclick="adminTaoVoucherMoi()">Tạo & Lưu Voucher</button>
+                    
+                    <h4 style="font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-align: left;">Danh sách Voucher đang hoạt động:</h4>
+                    <div id="adminVoucherListContainer" style="font-size: 11px; color: #cbd5e1; text-align: left; background: rgba(15,23,42,0.6); padding: 8px; border-radius: 8px;">
+                        Chưa có voucher nào được tạo.
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -351,8 +410,16 @@
         <div class="modal-content">
             <div class="modal-title-custom">Mua Acc King Legacy</div>
             <div class="form-group"><label>Sản phẩm:</label><input type="text" id="accProductName" class="form-control" readonly></div>
-            <div class="form-group"><label>Giá tiền:</label><input type="text" id="accProductPrice" class="form-control" readonly></div>
-            <div class="form-group"><label>Mã acc cần mua:</label><input type="text" id="accCodeInput" class="form-control" placeholder="Nhập mã acc (VD: ACC-123 hoặc tên acc)"></div>
+            <div class="form-group"><label>Giá gốc:</label><input type="text" id="accProductPrice" class="form-control" readonly></div>
+            <div class="form-group">
+                <label>Mã Voucher Giảm Giá (Nếu có):</label>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="accVoucherInput" class="form-control" placeholder="Nhập mã voucher...">
+                    <button type="button" class="action-btn" style="width: 90px; font-size: 11px;" onclick="apDungVoucherChoDonHang('acc')">Áp Dụng</button>
+                </div>
+            </div>
+            <div class="form-group"><label>Tổng tiền sau giảm:</label><input type="text" id="accTotalMoney" class="form-control" style="color: #38bdf8; font-weight: bold;" readonly></div>
+            <div class="form-group"><label>Mã acc cần mua:</label><input type="text" id="accCodeInput" class="form-control" placeholder="Nhập mã acc (VD: ACC-123)"></div>
             <div class="form-group"><label>Số điện thoại liên hệ:</label><input type="text" id="accPhone" class="form-control" placeholder="Số điện thoại của bạn"></div>
             <div class="modal-buttons">
                 <button class="btn-close" onclick="dongModal('modalMuaAcc')">Hủy</button>
@@ -366,6 +433,13 @@
             <div class="form-group"><label>Sản phẩm:</label><input type="text" id="ctProductName" class="form-control" readonly></div>
             <div class="form-group"><label>Đơn giá:</label><input type="text" id="ctProductPrice" class="form-control" readonly></div>
             <div class="form-group"><label>Số lượng (Gói / Lần / Số level):</label><input type="number" id="ctQuantity" class="form-control" value="1" min="1" oninput="tinhTienCayThue()"></div>
+            <div class="form-group">
+                <label>Mã Voucher Giảm Giá (Nếu có):</label>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="ctVoucherInput" class="form-control" placeholder="Nhập mã voucher...">
+                    <button type="button" class="action-btn" style="width: 90px; font-size: 11px;" onclick="apDungVoucherChoDonHang('ct')">Áp Dụng</button>
+                </div>
+            </div>
             <div class="form-group"><label>Tổng tiền thanh toán:</label><input type="text" id="ctTotalMoney" class="form-control" style="color: #38bdf8; font-weight: bold;" readonly></div>
             <div class="form-group"><label>Tài khoản game (Tên acc):</label><input type="text" id="ctGameUser" class="form-control" placeholder="Tên đăng nhập game"></div>
             <div class="form-group"><label>Mật khẩu game (Mk acc):</label><input type="password" id="ctGamePass" class="form-control" placeholder="Mật khẩu game"></div>
@@ -383,6 +457,13 @@
             <div class="form-group"><label>Sản phẩm:</label><input type="text" id="itProductName" class="form-control" readonly></div>
             <div class="form-group"><label>Đơn giá:</label><input type="text" id="itProductPrice" class="form-control" readonly></div>
             <div class="form-group"><label>Số lượng cần mua:</label><input type="number" id="itQuantity" class="form-control" value="1" min="1" oninput="tinhTienItem()"></div>
+            <div class="form-group">
+                <label>Mã Voucher Giảm Giá (Nếu có):</label>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="itVoucherInput" class="form-control" placeholder="Nhập mã voucher...">
+                    <button type="button" class="action-btn" style="width: 90px; font-size: 11px;" onclick="apDungVoucherChoDonHang('it')">Áp Dụng</button>
+                </div>
+            </div>
             <div class="form-group"><label>Tổng tiền thanh toán:</label><input type="text" id="itTotalMoney" class="form-control" style="color: #38bdf8; font-weight: bold;" readonly></div>
             <div class="form-group"><label>Tên đăng nhập Roblox:</label><input type="text" id="itGameUser" class="form-control" placeholder="Tên đăng nhập Roblox"></div>
             <div class="form-group"><label>Số điện thoại:</label><input type="text" id="itPhone" class="form-control" placeholder="Số điện thoại"></div>
@@ -400,7 +481,7 @@
                 <label>Mật khẩu:</label>
                 <div style="display: flex; gap: 5px;">
                     <input type="password" id="authPassword" class="form-control" placeholder="Nhập mật khẩu">
-                    <button type="button" onclick="hienThiMatKhau()" style="background: #1e293b; border: 1px solid #334155; color: #38bdf8; padding: 0 10px; border-radius: 6px; cursor: pointer; font-size: 12px;">👁</button>
+                    <button type="button" onclick="hienThiMatKhau()" style="background: rgba(30,41,59,0.6); border: 1px solid rgba(255,255,255,0.15); color: #38bdf8; padding: 0 10px; border-radius: 8px; cursor: pointer; font-size: 12px;">👁</button>
                 </div>
             </div>
             <div class="form-group"><label>Số điện thoại hoặc Email liên hệ (Bắt buộc):</label><input type="text" id="authContact" class="form-control" placeholder="Nhập SĐT hoặc Email của bạn"></div>
@@ -408,7 +489,12 @@
                 <button class="btn-submit" onclick="thucHienDangKy()">Đăng Ký</button>
                 <button class="btn-submit" style="background:#10b981;" onclick="thucHienDangNhap()">Đăng Nhập</button>
             </div>
-            <button class="btn-close" style="width:100%; margin-top:10px;" onclick="dongModal('modalAuth')">Đóng</button>
+            <div style="margin: 12px 0 8px 0; text-align: center; font-size: 11px; color: #94a3b8;">Hoặc đăng nhập/đăng ký siêu tốc bằng:</div>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <button class="action-btn" style="background: #ea4335; font-size: 11px;" onclick="dangNhapNhanhSocial('Google')">🔴 Google</button>
+                <button class="action-btn" style="background: #1877f2; font-size: 11px;" onclick="dangNhapNhanhSocial('Facebook')">🔵 Facebook</button>
+            </div>
+            <button class="btn-close" style="width:100%; margin-top:5px;" onclick="dongModal('modalAuth')">Đóng</button>
         </div>
     </div>
     <div class="modal" id="modalDoiMk">
@@ -422,62 +508,34 @@
             </div>
         </div>
     </div>
+    <div class="modal" id="modalDoiAvatar">
+        <div class="modal-content">
+            <div class="modal-title-custom">Chọn Ảnh Đại Diện</div>
+            <div class="form-group">
+                <label>Chọn ảnh từ thư viện máy của bạn:</label>
+                <input type="file" id="newAvatarFile" class="form-control" accept="image/*" style="padding: 6px;">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-close" onclick="dongModal('modalDoiAvatar')">Hủy</button>
+                <button class="btn-submit" style="background:#10b981;" onclick="luuAvatarTuThuVien()">Tải Lên & Lưu</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="modalDiemVip">
+        <div class="modal-content">
+            <div class="modal-title-custom">Thông Tin Hạng VIP</div>
+            <div id="vipInfoContent" style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 15px;">Đang tải thông tin...</div>
+            <button class="btn-close" style="width: 100%;" onclick="dongModal('modalDiemVip')">Đóng</button>
+        </div>
+    </div>
+    <div class="modal" id="modalTopNap">
+        <div class="modal-content">
+            <div class="modal-title-custom">🏆 Top Nạp Tiền Tháng Này</div>
+            <div id="topNapContentList" style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 15px; max-height: 250px; overflow-y: auto;">Đang tải dữ liệu xếp hạng...</div>
+            <button class="btn-close" style="width: 100%;" onclick="dongModal('modalTopNap')">Đóng</button>
+        </div>
+    </div>
     <script>
-        function createShootingStar() {
-            const star = document.createElement('div');
-            star.classList.add('shooting-star');
-            star.style.top = Math.random() * 50 + 'vh';
-            star.style.left = Math.random() * 100 + 'vw';
-            let length = Math.floor(Math.random() * 70) + 80;
-            star.style.width = length + 'px';
-            let duration = Math.random() * 1.3 + 1.2;
-            star.style.animationDuration = duration + 's';
-            document.body.appendChild(star);
-            setTimeout(() => { star.remove(); }, duration * 1000);
-        }
-        setInterval(createShootingStar, 1800);
-
-        function dongPopupNotice() { 
-            let popup = document.getElementById('popupNotice');
-            if(popup) { popup.style.display = 'none'; }
-        }
-
-        function toggleMenuLeft(event) {
-            event.stopPropagation();
-            let menu = document.getElementById('dropdownMenuLeft');
-            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-        }
-        function chonMenuLeft(tabName) {
-            document.getElementById('dropdownMenuLeft').style.display = 'none';
-            chuyenTab(tabName);
-        }
-        function dongMenuBenNgoai(event) {
-            let menu = document.getElementById('dropdownMenuLeft');
-            if (menu.style.display === 'block') { menu.style.display = 'none'; }
-        }
-        function moMenuLienHe() { document.getElementById('modalContactAdmin').style.display = 'flex'; }
-        function lienHeZalo() { window.location.href = "https://zalo.me/0794221549"; }
-        function lienHeFB() { window.location.href = "https://www.facebook.com/share/1Dy3Rqke3P/"; }
-        function hienThiMatKhau() {
-            let pwdInput = document.getElementById('authPassword');
-            pwdInput.type = (pwdInput.type === 'password') ? 'text' : 'password';
-        }
-
-        function capNhatDanhSachMenhGia() {
-            let selectType = document.getElementById('cardType');
-            let selOpt = selectType.options[selectType.selectedIndex];
-            let discountPercent = parseFloat(selOpt.getAttribute('data-discount')) || 0;
-            let menhGiaArr = [10000, 20000, 30000, 50000, 100000, 200000, 300000, 500000, 1000000];
-            let selectAmount = document.getElementById('cardAmount');
-            selectAmount.innerHTML = '';
-            menhGiaArr.forEach(mg => {
-                let thucNhan = mg - (mg * discountPercent / 100);
-                let opt = document.createElement('option');
-                opt.value = mg;
-                opt.innerText = `${mg.toLocaleString('vi-VN')}đ - Thực nhận ${thucNhan.toLocaleString('vi-VN')}đ`;
-                selectAmount.appendChild(opt);
-            });
-        }
         const FIREBASE_DB_URL = "https://sinek-store-default-rtdb.asia-southeast1.firebasedatabase.app/";
         
         const defaultDatabaseSanPham = {
@@ -501,9 +559,176 @@
 
         let databaseSanPham = defaultDatabaseSanPham;
         let danhSachCTV = defaultDanhSachCTV;
+        let databaseVouchers = {};
         let adminStatus = true;
         let allOrders = [];
+        let appliedVoucherCode = null;
+        let discountAmountGlobal = 0;
 
+        function layHuyHieuVip(tongTienNap) {
+            let total = parseInt(tongTienNap) || 0;
+            if(total >= 10000000) return `<span class="vip-badge vip-8">👑 VIP 8</span>`;
+            if(total >= 5000000) return `<span class="vip-badge vip-7">💎 VIP 7</span>`;
+            if(total >= 3000000) return `<span class="vip-badge vip-6">🔥 VIP 6</span>`;
+            if(total >= 1500000) return `<span class="vip-badge vip-5">⚡ VIP 5</span>`;
+            if(total >= 800000) return `<span class="vip-badge vip-4">⭐ VIP 4</span>`;
+            if(total >= 400000) return `<span class="vip-badge vip-3">🛡️ VIP 3</span>`;
+            if(total >= 150000) return `<span class="vip-badge vip-2">🔷 VIP 2</span>`;
+            if(total > 0) return `<span class="vip-badge vip-1">🟢 VIP 1</span>`;
+            return `<span class="vip-badge vip-1">Mới</span>`;
+        }
+
+        function dongPopupNotice() { 
+            let popup = document.getElementById('popupNotice');
+            if(popup) { popup.style.display = 'none'; }
+        }
+
+        function toggleMenuLeft(event) {
+            event.stopPropagation();
+            let menu = document.getElementById('dropdownMenuLeft');
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+        function chonMenuLeft(tabName) {
+            document.getElementById('dropdownMenuLeft').style.display = 'none';
+            chuyenTab(tabName);
+        }
+        function dongMenuBenNgoai(event) {
+            let menu = document.getElementById('dropdownMenuLeft');
+            if (menu && menu.style.display === 'block') { menu.style.display = 'none'; }
+        }
+        function moMenuLienHe() { document.getElementById('modalContactAdmin').style.display = 'flex'; }
+        function lienHeZalo() { window.location.href = "https://zalo.me/0794221549"; }
+        function lienHeFB() { window.location.href = "https://www.facebook.com/share/1Dy3Rqke3P/"; }
+        function hienThiMatKhau() {
+            let pwdInput = document.getElementById('authPassword');
+            pwdInput.type = (pwdInput.type === 'password') ? 'text' : 'password';
+        }
+
+        async function apDungVoucherChoDonHang(modalType) {
+            let inputId = modalType === 'acc' ? 'accVoucherInput' : (modalType === 'ct' ? 'ctVoucherInput' : 'itVoucherInput');
+            let totalId = modalType === 'acc' ? 'accTotalMoney' : (modalType === 'ct' ? 'ctTotalMoney' : 'itTotalMoney');
+            let vCode = document.getElementById(inputId).value.trim().toUpperCase();
+
+            if(!vCode) { alert('Vui lòng nhập mã voucher!'); return; }
+
+            await fetchFirebaseData();
+            let vData = databaseVouchers[vCode];
+
+            if(!vData) { alert('Mã voucher này không tồn tại!'); return; }
+            if(vData.stock <= 0) { alert('Mã voucher này đã hết lượt sử dụng!'); return; }
+
+            let basePrice = sanphamDangChon.basePrice !== undefined ? sanphamDangChon.basePrice : sanphamDangChon.price;
+            let qty = 1;
+            if(modalType === 'ct') { qty = parseInt(document.getElementById('ctQuantity').value) || 1; }
+            else if(modalType === 'it') { qty = parseInt(document.getElementById('itQuantity').value) || 1; }
+
+            let subTotal = basePrice * qty;
+            let discount = 0;
+
+            if(vData.type === 'amount') {
+                discount = vData.value;
+            } else {
+                discount = subTotal * (vData.value / 100);
+            }
+
+            let finalPrice = subTotal - discount;
+            if(finalPrice < 0) finalPrice = 0;
+
+            sanphamDangChon.price = finalPrice;
+            appliedVoucherCode = vCode;
+            discountAmountGlobal = discount;
+
+            document.getElementById(totalId).value = finalPrice.toLocaleString() + ' đ (Đã giảm ' + discount.toLocaleString() + 'đ)';
+            alert(`Áp dụng thành công mã [${vCode}]! Đã trừ trực tiếp vào tổng tiền.`);
+        }
+
+        async function moModalTopNap() {
+            document.getElementById('dropdownMenuLeft').style.display = 'none';
+            
+            try {
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users.json");
+                let usersData = await res.json() || {};
+                
+                let rankList = [];
+                for(let username in usersData) {
+                    let uInfo = usersData[username];
+                    let totalDep = uInfo.totalDeposit || uInfo.balance || 0;
+                    if(totalDep > 0) {
+                        rankList.push({ name: username, total: totalDep });
+                    }
+                }
+
+                rankList.sort((a, b) => b.total - a.total);
+
+                let htmlContent = '';
+                if(rankList.length === 0) {
+                    htmlContent = '<div style="text-align: center; color: #94a3b8; padding: 10px;">Chưa có khách hàng nào phát sinh nạp tiền tháng này.</div>';
+                } else {
+                    rankList.forEach((item, index) => {
+                        let topStt = index + 1;
+                        let medalIcon = topStt === 1 ? '👑' : (topStt === 2 ? '🥈' : (topStt === 3 ? '🥉' : '⭐'));
+                        let vipBadge = layHuyHieuVip(item.total);
+                        htmlContent += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                            <span><b>${topStt}. ${item.name}</b> ${medalIcon}</span>
+                            <span><b style="color:#fbbf24;">${item.total.toLocaleString()} đ</b> ${vipBadge}</span>
+                        </div>`;
+                    });
+                }
+                document.getElementById('topNapContentList').innerHTML = htmlContent;
+            } catch(e) {
+                document.getElementById('topNapContentList').innerHTML = '<div style="text-align: center; color: #f87171;">Không thể tải dữ liệu xếp hạng.</div>';
+            }
+            document.getElementById('modalTopNap').style.display = 'flex';
+        }
+
+        async function moModalDiemVip() {
+            if(!currentUser) { alert('Vui lòng đăng nhập để xem thông tin VIP!'); return; }
+            try {
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
+                let userData = await res.json() || { totalDeposit: 0 };
+                let total = userData.totalDeposit || 0;
+
+                let nextTarget = 150000;
+                let currentVip = "Thành viên Mới";
+                if(total >= 10000000) { currentVip = "👑 VIP 8 (Cấp độ tối đa)"; nextTarget = 10000000; }
+                else if(total >= 5000000) { currentVip = "💎 VIP 7"; nextTarget = 10000000; }
+                else if(total >= 3000000) { currentVip = "🔥 VIP 6"; nextTarget = 5000000; }
+                else if(total >= 1500000) { currentVip = "⚡ VIP 5"; nextTarget = 3000000; }
+                else if(total >= 800000) { currentVip = "⭐ VIP 4"; nextTarget = 1500000; }
+                else if(total >= 400000) { currentVip = "🛡️ VIP 3"; nextTarget = 800000; }
+                else if(total >= 150000) { currentVip = "🔷 VIP 2"; nextTarget = 400000; }
+                else if(total > 0) { currentVip = "🟢 VIP 1"; nextTarget = 150000; }
+
+                let thieuNha = nextTarget > total ? (nextTarget - total).toLocaleString() + ' đ' : 'Đã đạt cấp tối đa!';
+                let html = `
+                    • Tài khoản: <b>${currentUser}</b><br>
+                    • Tổng tiền đã nạp tích lũy: <b style="color:#38bdf8;">${total.toLocaleString()} đ</b><br>
+                    • Hạng VIP hiện tại: <b style="color:#fbbf24;">${currentVip}</b><br>
+                    • Cần nạp thêm: <b style="color:#f87171;">${thieuNha}</b> để lên hạng tiếp theo!<br><br>
+                    <i>💡 Mẹo: Nạp nhiều để nhận ưu đãi chiết khấu cao và quà tặng độc quyền từ Sinek Store!</i>
+                `;
+                document.getElementById('vipInfoContent').innerHTML = html;
+            } catch(e) {}
+            document.getElementById('modalDiemVip').style.display = 'flex';
+        }
+
+        function capNhatDanhSachMenhGia() {
+            let selectType = document.getElementById('cardType');
+            if(!selectType) return;
+            let selOpt = selectType.options[selectType.selectedIndex];
+            let discountPercent = parseFloat(selOpt.getAttribute('data-discount')) || 0;
+            let menhGiaArr = [10000, 20000, 30000, 50000, 100000, 200000, 300000, 500000, 1000000];
+            let selectAmount = document.getElementById('cardAmount');
+            if(!selectAmount) return;
+            selectAmount.innerHTML = '';
+            menhGiaArr.forEach(mg => {
+                let thucNhan = mg - (mg * discountPercent / 100);
+                let opt = document.createElement('option');
+                opt.value = mg;
+                opt.innerText = `${mg.toLocaleString('vi-VN')}đ - Thực nhận ${thucNhan.toLocaleString('vi-VN')}đ`;
+                selectAmount.appendChild(opt);
+            });
+        }
         async function fetchFirebaseData() {
             try {
                 let res = await fetch(FIREBASE_DB_URL + "sinek_data.json");
@@ -514,10 +739,14 @@
                         if(data.ctvList) danhSachCTV = data.ctvList;
                         if(typeof data.adminStatus !== 'undefined') adminStatus = data.adminStatus;
                         if(data.orders) allOrders = data.orders;
+                        if(data.vouchers) databaseVouchers = data.vouchers;
+                    } else {
+                        await saveFirebaseData();
                     }
                 }
             } catch(e) {}
             capNhatGiaoDienTrangThaiAdmin();
+            loadDanhSachVoucherAdmin();
         }
 
         async function saveFirebaseData() {
@@ -529,7 +758,8 @@
                         products: databaseSanPham,
                         ctvList: danhSachCTV,
                         adminStatus: adminStatus,
-                        orders: allOrders
+                        orders: allOrders,
+                        vouchers: databaseVouchers
                     })
                 });
             } catch(e) {}
@@ -557,13 +787,16 @@
         }
 
         window.onload = async function() {
-            await fetchFirebaseData();
-            capNhatGiaoDienUser();
-            capNhatDanhSachMenhGia();
-            capNhatGiaoDienTrangThaiAdmin();
-            renderCategoryGrid();
-            kiemTraQuyenQTVDaLuu();
-            batDauLangNgheChat();
+            try {
+                renderCategoryGrid();
+                await fetchFirebaseData();
+                capNhatGiaoDienUser();
+                capNhatDanhSachMenhGia();
+                capNhatGiaoDienTrangThaiAdmin();
+                renderCategoryGrid();
+                kiemTraQuyenQTVDaLuu();
+                batDauLangNgheChat();
+            } catch(e) {}
         };
 
         function renderCategoryGrid() {
@@ -659,32 +892,25 @@
             document.getElementById('newPassword').value = '';
             document.getElementById('modalDoiMk').style.display = 'flex';
         }
+        function moModalDoiAvatar() { document.getElementById('modalDoiAvatar').style.display = 'flex'; }
 
         async function thucHienDangKy() {
             let u = document.getElementById('authUsername').value.trim();
             let p = document.getElementById('authPassword').value.trim();
             let contact = document.getElementById('authContact').value.trim();
 
-            if(!u || !p) { 
-                alert('Vui lòng điền đầy đủ Tên tài khoản và Mật khẩu!'); 
-                return; 
-            }
-            if(!contact) {
-                alert('Vui lòng nhập Số điện thoại hoặc Email để liên hệ khi cần!');
-                return;
-            }
+            if(!u || !p) { alert('Vui lòng điền đầy đủ Tên tài khoản và Mật khẩu!'); return; }
+            if(!contact) { alert('Vui lòng nhập Số điện thoại hoặc Email để liên hệ khi cần!'); return; }
             
             let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + u + ".json");
             let existingUser = await res.json();
-            if(existingUser !== null) {
-                alert('Tên tài khoản này đã tồn tại trên hệ thống!');
-                return;
-            }
+            if(existingUser !== null) { alert('Tên tài khoản này đã tồn tại trên hệ thống!'); return; }
 
+            let defaultAvatar = fixedImage;
             await fetch(FIREBASE_DB_URL + "sinek_users/" + u + ".json", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password: p, contact: contact, balance: 0 })
+                body: JSON.stringify({ password: p, contact: contact, balance: 0, avatar: defaultAvatar, totalDeposit: 0 })
             });
             alert('Đăng ký tài khoản thành công! Bạn có thể bấm đăng nhập ngay.');
             document.getElementById('authContact').value = '';
@@ -708,15 +934,41 @@
             }
         }
 
+        async function dangNhapNhanhSocial(provider) {
+            let socialName = prompt(`Nhập tên hiển thị tài khoản ${provider} của bạn:`, provider + "_" + Math.floor(1000 + Math.random() * 9000));
+            if(!socialName) return;
+            socialName = socialName.trim();
+
+            let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + socialName + ".json");
+            let userData = await res.json();
+
+            if(!userData) {
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + socialName + ".json", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password: "social_login", contact: provider + " User", balance: 0, avatar: fixedImage, totalDeposit: 0 })
+                });
+            }
+
+            currentUser = socialName;
+            localStorage.setItem('sinek_logged_user', socialName);
+            alert(`Đăng nhập thành công qua tài khoản ${provider}! Chào mừng ${socialName}`);
+            dongModal('modalAuth');
+            capNhatGiaoDienUser();
+        }
+
+        function thucHienDangXuat() {
+            localStorage.removeItem('sinek_logged_user');
+            currentUser = null;
+            location.reload();
+        }
+
         async function thucHienDoiMatKhau() {
             if(!currentUser) { alert('Vui lòng đăng nhập trước!'); return; }
             let oldPass = document.getElementById('oldPassword').value.trim();
             let newPass = document.getElementById('newPassword').value.trim();
 
-            if(!oldPass || !newPass) {
-                alert('Vui lòng điền đầy đủ mật khẩu cũ và mới!');
-                return;
-            }
+            if(!oldPass || !newPass) { alert('Vui lòng điền đầy đủ mật khẩu cũ và mới!'); return; }
 
             await fetchFirebaseData();
             let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
@@ -736,36 +988,85 @@
             }
         }
 
+        async function luuAvatarTuThuVien() {
+            if(!currentUser) { alert('Vui lòng đăng nhập trước!'); return; }
+            let fileInput = document.getElementById('newAvatarFile');
+            
+            if(fileInput.files && fileInput.files[0]) {
+                let file = fileInput.files[0];
+                let reader = new FileReader();
+                reader.onload = async function(e) {
+                    let base64Img = e.target.result;
+                    let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
+                    let userData = await res.json();
+                    if(userData) {
+                        userData.avatar = base64Img;
+                        await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(userData)
+                        });
+                        alert('Cập nhật Avatar thành công!');
+                        dongModal('modalDoiAvatar');
+                        fileInput.value = '';
+                        capNhatGiaoDienUser();
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Vui lòng chọn một hình ảnh từ thư viện!');
+            }
+        }
+
         async function capNhatGiaoDienUser() {
             let changeBtn = document.getElementById('changePassBtn');
-            if(currentUser) {
-                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json");
-                let bal = await res.json();
-                let displayBal = (bal !== null) ? bal : 0;
-                document.getElementById('displayBalance').innerText = parseInt(displayBal).toLocaleString() + ' đ';
-                
-                if(changeBtn) changeBtn.style.display = 'inline-block';
+            let profileBar = document.getElementById('userProfileBar');
+            let balanceBadge = document.getElementById('displayBalance');
+            let logoutMenu = document.getElementById('menuLogoutItem');
+            let authBtn = document.getElementById('authBtn');
 
-                let btn = document.getElementById('authBtn');
-                btn.innerText = currentUser + ' (Đăng xuất)';
-                btn.onclick = function() {
-                    localStorage.removeItem('sinek_logged_user');
-                    currentUser = null;
-                    if(changeBtn) changeBtn.style.display = 'none';
-                    location.reload();
-                };
+            if(currentUser) {
+                try {
+                    let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
+                    let userData = await res.json() || { balance: 0, avatar: fixedImage, totalDeposit: 0 };
+                    let displayBal = userData.balance !== undefined ? userData.balance : 0;
+                    let userAvatar = userData.avatar || fixedImage;
+                    let totalNap = userData.totalDeposit || displayBal;
+
+                    if(balanceBadge) {
+                        balanceBadge.style.display = 'inline-block';
+                        balanceBadge.innerText = parseInt(displayBal).toLocaleString() + ' đ';
+                    }
+                    
+                    if(profileBar) profileBar.style.display = 'flex';
+                    let avatarEl = document.getElementById('headerUserAvatar');
+                    if(avatarEl) avatarEl.src = userAvatar;
+                    let nameEl = document.getElementById('headerUsernameText');
+                    if(nameEl) nameEl.innerText = currentUser;
+                    let badgeContainer = document.getElementById('headerVipBadgeContainer');
+                    if(badgeContainer) badgeContainer.innerHTML = layHuyHieuVip(totalNap);
+
+                    if(changeBtn) changeBtn.style.display = 'inline-block';
+                    if(logoutMenu) logoutMenu.style.display = 'block';
+                    if(authBtn) authBtn.style.display = 'none';
+                } catch(e) {}
             } else {
-                document.getElementById('displayBalance').innerText = '0 đ';
+                if(balanceBadge) balanceBadge.style.display = 'none';
+                if(profileBar) profileBar.style.display = 'none';
                 if(changeBtn) changeBtn.style.display = 'none';
-                document.getElementById('authBtn').innerText = 'Đăng Nhập';
-                document.getElementById('authBtn').onclick = moModalAuth;
+                if(logoutMenu) logoutMenu.style.display = 'none';
+                if(authBtn) { authBtn.style.display = 'inline-block'; authBtn.innerText = 'Đăng Nhập'; authBtn.onclick = moModalAuth; }
             }
         }
         let sanphamDangChon = {};
         function moModalMuaAcc(ten, gia) {
-            sanphamDangChon = { name: ten, price: gia };
+            sanphamDangChon = { name: ten, price: gia, basePrice: gia };
+            appliedVoucherCode = null;
+            discountAmountGlobal = 0;
             document.getElementById('accProductName').value = ten;
             document.getElementById('accProductPrice').value = gia.toLocaleString() + ' đ';
+            document.getElementById('accVoucherInput').value = '';
+            document.getElementById('accTotalMoney').value = gia.toLocaleString() + ' đ';
             document.getElementById('accCodeInput').value = '';
             document.getElementById('accPhone').value = '';
             document.getElementById('modalMuaAcc').style.display = 'flex';
@@ -773,9 +1074,12 @@
 
         function moModalCayThue(ten, gia) {
             sanphamDangChon = { name: ten, price: gia, basePrice: gia };
+            appliedVoucherCode = null;
+            discountAmountGlobal = 0;
             document.getElementById('ctProductName').value = ten;
             document.getElementById('ctProductPrice').value = gia.toLocaleString() + ' đ';
             document.getElementById('ctQuantity').value = 1;
+            document.getElementById('ctVoucherInput').value = '';
             document.getElementById('ctTotalMoney').value = gia.toLocaleString() + ' đ';
             document.getElementById('ctGameUser').value = '';
             document.getElementById('ctGamePass').value = '';
@@ -787,16 +1091,21 @@
         function tinhTienCayThue() {
             let qty = parseInt(document.getElementById('ctQuantity').value) || 1;
             if(qty < 1) qty = 1;
-            let total = sanphamDangChon.basePrice * qty;
+            let total = sanphamDangChon.basePrice * qty - discountAmountGlobal;
+            if(total < 0) total = 0;
             sanphamDangChon.price = total;
-            document.getElementById('ctTotalMoney').value = total.toLocaleString() + ' đ';
+            let disText = discountAmountGlobal > 0 ? ' (Đã giảm ' + discountAmountGlobal.toLocaleString() + 'đ)' : '';
+            document.getElementById('ctTotalMoney').value = total.toLocaleString() + ' đ' + disText;
         }
 
         function moModalItem(ten, gia) {
             sanphamDangChon = { name: ten, price: gia, basePrice: gia };
+            appliedVoucherCode = null;
+            discountAmountGlobal = 0;
             document.getElementById('itProductName').value = ten;
             document.getElementById('itProductPrice').value = gia.toLocaleString() + ' đ';
             document.getElementById('itQuantity').value = 1;
+            document.getElementById('itVoucherInput').value = '';
             document.getElementById('itTotalMoney').value = gia.toLocaleString() + ' đ';
             document.getElementById('itGameUser').value = '';
             document.getElementById('itPhone').value = '';
@@ -806,13 +1115,19 @@
         function tinhTienItem() {
             let qty = parseInt(document.getElementById('itQuantity').value) || 1;
             if(qty < 1) qty = 1;
-            let total = sanphamDangChon.basePrice * qty;
+            let total = sanphamDangChon.basePrice * qty - discountAmountGlobal;
+            if(total < 0) total = 0;
             sanphamDangChon.price = total;
-            document.getElementById('itTotalMoney').value = total.toLocaleString() + ' đ';
+            let disText = discountAmountGlobal > 0 ? ' (Đã giảm ' + discountAmountGlobal.toLocaleString() + 'đ)' : '';
+            document.getElementById('itTotalMoney').value = total.toLocaleString() + ' đ' + disText;
         }
 
         async function luuVaTaoDonHang(chiTietDon) {
             await fetchFirebaseData();
+            if(appliedVoucherCode && databaseVouchers[appliedVoucherCode]) {
+                databaseVouchers[appliedVoucherCode].stock -= 1;
+                if(databaseVouchers[appliedVoucherCode].stock < 0) databaseVouchers[appliedVoucherCode].stock = 0;
+            }
             allOrders.unshift(chiTietDon);
             await saveFirebaseData();
         }
@@ -823,24 +1138,25 @@
             if(!accCode || !phone) { alert('Vui lòng điền đầy đủ Mã Acc và Số Điện Thoại!'); return; }
 
             if(currentUser) {
-                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json");
-                let currentBal = await res.json() || 0;
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
+                let userData = await res.json() || { balance: 0 };
+                let currentBal = userData.balance || 0;
                 if(currentBal < sanphamDangChon.price) {
                     alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
                     return;
                 }
-                let newBal = currentBal - sanphamDangChon.price;
-                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json", {
+                userData.balance = currentBal - sanphamDangChon.price;
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(newBal)
+                    body: JSON.stringify(userData)
                 });
                 capNhatGiaoDienUser();
             }
 
             let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
             let timeNow = new Date().toLocaleString('vi-VN');
-            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Mã Acc cần mua: ${accCode}\n- SĐT: ${phone}`;
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Mã Acc cần mua: ${accCode}\n- SĐT: ${phone}` + (appliedVoucherCode ? `\n- Dùng Voucher: ${appliedVoucherCode}` : '');
             
             await luuVaTaoDonHang({
                 code: randomCode,
@@ -871,24 +1187,25 @@
             if(!gUser || !gPass || !phone) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
 
             if(currentUser) {
-                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json");
-                let currentBal = await res.json() || 0;
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
+                let userData = await res.json() || { balance: 0 };
+                let currentBal = userData.balance || 0;
                 if(currentBal < sanphamDangChon.price) {
                     alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
                     return;
                 }
-                let newBal = currentBal - sanphamDangChon.price;
-                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json", {
+                userData.balance = currentBal - sanphamDangChon.price;
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(newBal)
+                    body: JSON.stringify(userData)
                 });
                 capNhatGiaoDienUser();
             }
 
             let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
             let timeNow = new Date().toLocaleString('vi-VN');
-            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Số lượng: ${qty}\n- Tên Acc game: ${gUser}\n- Mật khẩu: ${gPass}\n- Ghi chú: ${note}\n- SĐT: ${phone}`;
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Số lượng: ${qty}\n- Tên Acc game: ${gUser}\n- Mật khẩu: ${gPass}\n- Ghi chú: ${note}\n- SĐT: ${phone}` + (appliedVoucherCode ? `\n- Dùng Voucher: ${appliedVoucherCode}` : '');
             
             await luuVaTaoDonHang({
                 code: randomCode,
@@ -917,24 +1234,25 @@
             if(!gUser || !phone) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
 
             if(currentUser) {
-                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json");
-                let currentBal = await res.json() || 0;
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
+                let userData = await res.json() || { balance: 0 };
+                let currentBal = userData.balance || 0;
                 if(currentBal < sanphamDangChon.price) {
                     alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
                     return;
                 }
-                let newBal = currentBal - sanphamDangChon.price;
-                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + "/balance.json", {
+                userData.balance = currentBal - sanphamDangChon.price;
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(newBal)
+                    body: JSON.stringify(userData)
                 });
                 capNhatGiaoDienUser();
             }
 
             let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
             let timeNow = new Date().toLocaleString('vi-VN');
-            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Số lượng: ${qty}\n- Tên Roblox: ${gUser}\n- SĐT: ${phone}`;
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Số lượng: ${qty}\n- Tên Roblox: ${gUser}\n- SĐT: ${phone}` + (appliedVoucherCode ? `\n- Dùng Voucher: ${appliedVoucherCode}` : '');
             
             await luuVaTaoDonHang({
                 code: randomCode,
@@ -964,7 +1282,7 @@
             let html = '';
             userOrders.forEach(h => {
                 let badgeColor = h.status === '⏳ Chờ Duyệt' ? '#fbbf24' : (h.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
-                html += `<div style="background:#0f172a; border:1px solid #334155; padding:10px; border-radius:8px; margin-bottom:8px; text-align:left;">
+                html += `<div style="background:rgba(15,23,42,0.5); border:1px solid rgba(255,255,255,0.15); padding:10px; border-radius:12px; margin-bottom:8px; text-align:left;">
                     <b style="color:#38bdf8;">Mã đơn: ${h.code}</b> | Trạng thái: <b style="color:${badgeColor};">${h.status}</b><br>
                     <span>Sản phẩm: ${h.item}</span><br><span>Tổng giá: ${h.price.toLocaleString()}đ</span><br>
                     <pre style="font-size:11px; color:#94a3b8; font-family:inherit; white-space:pre-wrap; margin-top:4px;">${h.details}</pre>
@@ -1048,34 +1366,91 @@
             let khuVucThemSP = document.getElementById('khuVucThemSanPham');
             let khuVucSuaTien = document.getElementById('khuVucBienDongTien');
             let khuVucSuaSP = document.getElementById('khuVucQuanLySanPham');
+            let khuVucVoucher = document.getElementById('khuVucQuanLyVoucher');
 
             if(role === 'ctv') {
                 if(khuVucThemSP) khuVucThemSP.style.display = 'none';
                 if(khuVucSuaTien) khuVucSuaTien.style.display = 'none';
                 if(khuVucSuaSP) khuVucSuaSP.style.display = 'none';
+                if(khuVucVoucher) khuVucVoucher.style.display = 'none';
             } else {
                 if(khuVucThemSP) khuVucThemSP.style.display = 'block';
                 if(khuVucSuaTien) khuVucSuaTien.style.display = 'block';
                 if(khuVucSuaSP) khuVucSuaSP.style.display = 'block';
+                if(khuVucVoucher) khuVucVoucher.style.display = 'block';
                 loadDanhSachSanPhamAdmin();
+                loadDanhSachVoucherAdmin();
             }
             loadQuanLyDonHangAdmin();
+        }
+
+        async function adminTaoVoucherMoi() {
+            let vCode = document.getElementById('adVoucherCode').value.trim().toUpperCase();
+            let vType = document.getElementById('adVoucherType').value;
+            let vVal = parseFloat(document.getElementById('adVoucherValue').value);
+            let vStock = parseInt(document.getElementById('adVoucherStock').value) || 1;
+
+            if(!vCode || isNaN(vVal)) {
+                alert('Vui lòng nhập đầy đủ Mã Voucher và Giá trị giảm hợp lệ!');
+                return;
+            }
+
+            await fetchFirebaseData();
+            databaseVouchers[vCode] = { type: vType, value: vVal, stock: vStock };
+
+            await saveFirebaseData();
+            alert(`Tạo thành công mã voucher: [${vCode}]!`);
+            document.getElementById('adVoucherCode').value = '';
+            document.getElementById('adVoucherValue').value = '';
+            loadDanhSachVoucherAdmin();
+        }
+
+        function loadDanhSachVoucherAdmin() {
+            let container = document.getElementById('adminVoucherListContainer');
+            if(!container) return;
+
+            if(!databaseVouchers || Object.keys(databaseVouchers).length === 0) {
+                container.innerHTML = 'Chưa có voucher nào được tạo.';
+                return;
+            }
+
+            let html = '';
+            for(let code in databaseVouchers) {
+                let v = databaseVouchers[code];
+                let valStr = v.type === 'amount' ? v.value.toLocaleString() + ' đ' : v.value + '%';
+                html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                    <span><b>${code}</b> (Giảm: <b style="color:#fbbf24;">${valStr}</b> - Còn: ${v.stock} lượt)</span>
+                    <button onclick="adminXoaVoucher('${code}')" style="background:#ef4444; color:#fff; border:none; padding:2px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Xóa</button>
+                </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        async function adminXoaVoucher(code) {
+            if(confirm(`Bạn có chắc muốn xóa mã voucher [${code}] không?`)) {
+                await fetchFirebaseData();
+                delete databaseVouchers[code];
+                await saveFirebaseData();
+                loadDanhSachVoucherAdmin();
+                alert('Đã xóa voucher thành công!');
+            }
         }
 
         async function loadQuanLyDonHangAdmin() {
             await fetchFirebaseData();
             let listEl = document.getElementById('adminOrderList');
+            if(!listEl) return;
             if(allOrders.length === 0) { listEl.innerHTML = 'Chưa có đơn hàng nào chờ duyệt.'; return; }
             let html = '';
             allOrders.forEach((o, index) => {
                 let badgeColor = o.status === '⏳ Chờ Duyệt' ? '#fbbf24' : (o.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
                 let nguoiDuyetHTML = o.handledBy ? `<br><span style="color: #10b981; font-weight: bold;">👤 Người duyệt/xử lý: ${o.handledBy}</span>` : `<br><span style="color: #94a3b8; font-style: italic;">👤 Người duyệt: Chưa có ai nhận đơn</span>`;
                 
-                html += `<div style="background:#1e293b; border:1px solid #334155; padding:10px; border-radius:8px; margin-bottom:8px; text-align:left;">
+                html += `<div style="background:rgba(30,41,59,0.6); border:1px solid rgba(255,255,255,0.15); padding:10px; border-radius:12px; margin-bottom:8px; text-align:left;">
                     <b style="color:#38bdf8;">Mã đơn: ${o.code}</b> | Trạng thái: <b style="color:${badgeColor};">${o.status}</b>
                     ${nguoiDuyetHTML}<br>
                     <span>Khách đặt: <b>${o.webUser}</b></span><br><span>Sản phẩm: ${o.item} (${o.price.toLocaleString()}đ)</span><br>
-                    <pre style="font-size:11px; color:#cbd5e1; font-family:inherit; white-space:pre-wrap; margin-top:4px; background:#0f172a; padding:6px; border-radius:4px;">${o.details}</pre>
+                    <pre style="font-size:11px; color:#cbd5e1; font-family:inherit; white-space:pre-wrap; margin-top:4px; background:rgba(15,23,42,0.7); padding:6px; border-radius:8px;">${o.details}</pre>
                     <div style="display:flex; gap:6px; margin-top:8px;">
                         <button class="action-btn" style="background:#38bdf8; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '🔄 Đang Xử Lý')">Nhận Đơn / Xác Nhận</button>
                         <button class="action-btn" style="background:#10b981; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '✅ Thành Công')">Hoàn Thành</button>
@@ -1088,10 +1463,8 @@
         async function adminDoiTrangThaiDon(index, trangThaiMoi) {
             await fetchFirebaseData();
             let currentHandler = localStorage.getItem('sinek_username') || 'Nhân viên';
-            
             allOrders[index].status = trangThaiMoi;
             allOrders[index].handledBy = currentHandler;
-            
             await saveFirebaseData();
             loadQuanLyDonHangAdmin();
             alert('Đã cập nhật trạng thái đơn hàng thành: ' + trangThaiMoi);
@@ -1126,13 +1499,15 @@
             if(!targetUser || isNaN(amount)) { alert('Vui lòng nhập đúng tên tài khoản và số tiền!'); return; }
             
             let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + targetUser + ".json");
-            let userData = await res.json() || { password: "123456", balance: 0 };
+            let userData = await res.json() || { password: "123456", balance: 0, totalDeposit: 0 };
             let currentBal = userData.balance || 0;
+            let currentTotalNap = userData.totalDeposit || 0;
             let newBal = 0;
 
             if(adminMoneyMode === '+') {
                 newBal = currentBal + amount;
                 userData.balance = newBal;
+                userData.totalDeposit = currentTotalNap + amount;
                 await fetch(FIREBASE_DB_URL + "sinek_users/" + targetUser + ".json", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -1155,7 +1530,6 @@
             document.getElementById('adUserTarget').value = '';
             document.getElementById('adAmountTarget').value = '';
         }
-
         async function adminThemSanPhamMoi() {
             let cat = document.getElementById('newProCategory').value;
             let name = document.getElementById('newProName').value.trim();
@@ -1163,13 +1537,9 @@
             let stock = parseInt(document.getElementById('newProStock').value) || 1;
             let imageInput = document.getElementById('newProImageFile');
 
-            if(!name || isNaN(price)) {
-                alert('Vui lòng điền đầy đủ tên và giá sản phẩm!');
-                return;
-            }
+            if(!name || isNaN(price)) { alert('Vui lòng điền đầy đủ tên và giá sản phẩm!'); return; }
 
-            let defaultImg = "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg";
-
+            let defaultImg = fixedImage;
             if (imageInput.files && imageInput.files[0]) {
                 let file = imageInput.files[0];
                 let reader = new FileReader();
@@ -1185,15 +1555,13 @@
 
         async function luuSanPhamVaoFirebase(cat, name, price, stock, imageUrl) {
             await fetchFirebaseData();
-            if(!databaseSanPham[cat]) {
-                databaseSanPham[cat] = [];
-            }
+            if(!databaseSanPham[cat]) { databaseSanPham[cat] = []; }
 
             let newId = Date.now();
             databaseSanPham[cat].push({ id: newId, name: name, price: price, stock: stock, image: imageUrl, soldOut: false });
             await saveFirebaseData();
             loadDanhSachSanPhamAdmin();
-            alert(`Thêm sản phẩm "${name}" thành công! Đã đồng bộ mượt mà.`);
+            alert(`Thêm sản phẩm "${name}" thành công!`);
             document.getElementById('newProName').value = '';
             document.getElementById('newProPrice').value = '';
             document.getElementById('newProImageFile').value = '';
@@ -1249,10 +1617,7 @@
             let newPrice = parseInt(document.getElementById('adProductPriceEdit').value);
             let newStock = parseInt(document.getElementById('adProductStock').value);
 
-            if(!newName || isNaN(newPrice) || isNaN(newStock)) {
-                alert('Vui lòng điền đầy đủ thông tin hợp lệ!');
-                return;
-            }
+            if(!newName || isNaN(newPrice) || isNaN(newStock)) { alert('Vui lòng điền đầy đủ thông tin hợp lệ!'); return; }
 
             await fetchFirebaseData();
             let targetSp = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
@@ -1290,6 +1655,7 @@
                 alert('Đã xóa sản phẩm thành công!');
             }
         }
+
         let currentChatRoomId = null;
         let chatInterval = null;
         let allChats = {};
@@ -1322,7 +1688,6 @@
 
         async function khoiTaoHoacTaiPhienChat() {
             let role = localStorage.getItem('sinek_role');
-            
             if(role === 'admin' || role === 'ctv') {
                 if(!currentChatRoomId) {
                     document.getElementById('chatMessagesList').innerHTML = `<div class="chat-msg system">Vui lòng bấm vào một phòng chat trong mục "Giám Sát & Trả Lời Chat Khách Hàng" ở trang Quản Trị để bắt đầu tư vấn.</div>`;
@@ -1341,9 +1706,7 @@
                     currentChatRoomId = guestId;
                 }
             }
-
-            let roleCheck = localStorage.getItem('sinek_role');
-            if(roleCheck === 'admin' || roleCheck === 'ctv') {
+            if(role === 'admin' || role === 'ctv') {
                 document.getElementById('chatActionButtons').style.display = 'flex';
             }
         }
@@ -1354,7 +1717,6 @@
             let role = localStorage.getItem('sinek_role');
 
             if(!msg) return;
-
             if((role === 'admin' || role === 'ctv') && !currentChatRoomId) {
                 alert('Vui lòng chọn phòng chat cần trả lời trước!');
                 return;
@@ -1366,11 +1728,7 @@
             if(!allChats) allChats = {};
             
             if(!allChats[currentChatRoomId]) {
-                allChats[currentChatRoomId] = {
-                    messages: [],
-                    status: 'waiting',
-                    handler: null
-                };
+                allChats[currentChatRoomId] = { messages: [], status: 'waiting', handler: null };
             }
 
             allChats[currentChatRoomId].messages.push({
@@ -1504,10 +1862,7 @@
                 let room = allChats[roomId];
                 if(!room) continue;
                 
-                if(room.status === 'waiting') {
-                    currentWaitingRooms++;
-                }
-
+                if(room.status === 'waiting') { currentWaitingRooms++; }
                 if(role === 'ctv' && room.status !== 'waiting' && room.handler !== localStorage.getItem('sinek_username')) {
                     continue; 
                 }
@@ -1515,18 +1870,15 @@
                 countValidRooms++;
                 let statusText = room.status === 'waiting' ? '⏳ Đang chờ tư vấn' : (room.status === 'active' ? '🟢 Đang tư vấn (' + (room.handler || 'Nhân viên') + ')' : '🔒 Đã đóng');
                 let lastMsg = (room.messages && room.messages.length > 0) ? room.messages[room.messages.length - 1].text : 'Trống';
-                
-                let borderStyle = (currentChatRoomId === roomId) ? 'border: 2px solid #38bdf8;' : 'border: 1px solid #334155;';
+                let borderStyle = (currentChatRoomId === roomId) ? 'border: 2px solid #38bdf8;' : 'border: 1px solid rgba(255,255,255,0.15);';
 
-                html += `<div style="background:#1e293b; ${borderStyle} padding:8px; border-radius:6px; margin-bottom:6px; cursor:pointer;" onclick="chonPhongChatAdmin('${roomId}')">
+                html += `<div style="background:rgba(30,41,59,0.6); ${borderStyle} padding:8px; border-radius:10px; margin-bottom:6px; cursor:pointer;" onclick="chonPhongChatAdmin('${roomId}')">
                     <b style="color:#38bdf8;">Phòng chat: ${roomId}</b> | Trạng thái: <b style="color:#fbbf24;">${statusText}</b><br>
                     <span style="font-size:11px; color:#94a3b8;">Tin nhắn cuối: ${lastMsg}</span>
                 </div>`;
             }
 
-            if(currentWaitingRooms > lastWaitingCount) {
-                playNotificationSound();
-            }
+            if(currentWaitingRooms > lastWaitingCount) { playNotificationSound(); }
             lastWaitingCount = currentWaitingRooms;
 
             if(countValidRooms === 0 && role === 'ctv') {
