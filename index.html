@@ -173,8 +173,9 @@
             <div class="dropdown-menu-left" id="dropdownMenuLeft">
                 <div class="dropdown-item" onclick="chonMenuLeft('home')">🏠 Trang Chủ</div>
                 <div class="dropdown-item" onclick="chonMenuLeft('deposit')">💳 Nạp Tiền</div>
-                <div class="dropdown-item" onclick="chonMenuLeft('history')">📜 Lịch Sử</div>
+                <div class="dropdown-item" onclick="chonMenuLeft('history')">📜 Lịch Sử Đơn</div>
                 <div class="dropdown-item" onclick="moModalTopNap()" style="color: #fbbf24;">🏆 Top Nạp Tháng</div>
+                <div class="dropdown-item" id="menuChangePassItem" onclick="moModalDoiMkMenu()" style="color: #f59e0b; display: none;">🔑 Đổi Mật Khẩu</div>
                 <div class="dropdown-item" onclick="chonMenuLeft('admin')" style="color: #f87171; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px; padding-top: 10px;">🛡 Khu Vực QTV</div>
                 <a href="https://sinekut.github.io/ctv-sinekstore/" class="dropdown-item" style="color: #fbbf24;">🤝 Trang CTV</a>
                 <div class="dropdown-item" id="menuLogoutItem" onclick="thucHienDangXuat()" style="color: #ef4444; display: none; border-top: 1px solid rgba(255,255,255,0.15);">🚪 Đăng Xuất</div>
@@ -191,7 +192,6 @@
         </div>
         <div class="user-panel">
             <div class="balance-badge-header" id="displayBalance" onclick="moModalDiemVip()" title="Bấm để xem điểm và hạn mức lên VIP" style="display:none; cursor:pointer;">0 đ</div>
-            <button class="auth-btn" id="changePassBtn" style="background: #f59e0b; display: none; padding: 6px 8px; font-size: 10px;" onclick="moModalDoiMk()">Đổi MK</button>
             <div id="userProfileBar" class="user-profile-bar" onclick="moModalDoiAvatar()" title="Bấm để chọn Avatar từ thư viện" style="display:none;">
                 <img id="headerUserAvatar" src="https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" class="header-user-avatar">
                 <div class="header-user-info">
@@ -458,7 +458,7 @@
             <div class="form-group"><label>Đơn giá:</label><input type="text" id="itProductPrice" class="form-control" readonly></div>
             <div class="form-group"><label>Số lượng cần mua:</label><input type="number" id="itQuantity" class="form-control" value="1" min="1" oninput="tinhTienItem()"></div>
             <div class="form-group">
-                <label>Mã Voucher Giảm Giá (Nếu có):</label>
+                <label>Mã Voucher Giảm Giá (Если có / Nếu có):</label>
                 <div style="display: flex; gap: 6px;">
                     <input type="text" id="itVoucherInput" class="form-control" placeholder="Nhập mã voucher...">
                     <button type="button" class="action-btn" style="width: 90px; font-size: 11px;" onclick="apDungVoucherChoDonHang('it')">Áp Dụng</button>
@@ -602,6 +602,11 @@
         function hienThiMatKhau() {
             let pwdInput = document.getElementById('authPassword');
             pwdInput.type = (pwdInput.type === 'password') ? 'text' : 'password';
+        }
+
+        function moModalDoiMkMenu() {
+            document.getElementById('dropdownMenuLeft').style.display = 'none';
+            moModalDoiMk();
         }
 
         async function apDungVoucherChoDonHang(modalType) {
@@ -1019,9 +1024,9 @@
         }
 
         async function capNhatGiaoDienUser() {
-            let changeBtn = document.getElementById('changePassBtn');
             let profileBar = document.getElementById('userProfileBar');
             let balanceBadge = document.getElementById('displayBalance');
+            let changePassMenu = document.getElementById('menuChangePassItem');
             let logoutMenu = document.getElementById('menuLogoutItem');
             let authBtn = document.getElementById('authBtn');
 
@@ -1046,14 +1051,14 @@
                     let badgeContainer = document.getElementById('headerVipBadgeContainer');
                     if(badgeContainer) badgeContainer.innerHTML = layHuyHieuVip(totalNap);
 
-                    if(changeBtn) changeBtn.style.display = 'inline-block';
+                    if(changePassMenu) changePassMenu.style.display = 'block';
                     if(logoutMenu) logoutMenu.style.display = 'block';
                     if(authBtn) authBtn.style.display = 'none';
                 } catch(e) {}
             } else {
                 if(balanceBadge) balanceBadge.style.display = 'none';
                 if(profileBar) profileBar.style.display = 'none';
-                if(changeBtn) changeBtn.style.display = 'none';
+                if(changePassMenu) changePassMenu.style.display = 'none';
                 if(logoutMenu) logoutMenu.style.display = 'none';
                 if(authBtn) { authBtn.style.display = 'inline-block'; authBtn.innerText = 'Đăng Nhập'; authBtn.onclick = moModalAuth; }
             }
