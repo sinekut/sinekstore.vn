@@ -174,7 +174,7 @@
                 <div class="dropdown-item" onclick="chonMenuLeft('home')">🏠 Trang Chủ</div>
                 <div class="dropdown-item" onclick="chonMenuLeft('deposit')">💳 Nạp Tiền</div>
                 <div class="dropdown-item" onclick="chonMenuLeft('history')">📜 Lịch Sử Đơn</div>
-                <div class="dropdown-item" onclick="moModalTopNap()" style="color: #fbbf24;">🏆 Top Nạp Tháng</div>
+                <div class="dropdown-item" onclick="moModalTopNap()" style="color: #fbbf24;">🏆 Top Nạp</div>
                 <div class="dropdown-item" id="menuChangePassItem" onclick="moModalDoiMkMenu()" style="color: #f59e0b; display: none;">🔑 Đổi Mật Khẩu</div>
                 <div class="dropdown-item" onclick="chonMenuLeft('admin')" style="color: #f87171; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px; padding-top: 10px;">🛡 Khu Vực QTV</div>
                 <a href="https://sinekut.github.io/ctv-sinekstore/" class="dropdown-item" style="color: #fbbf24;">🤝 Trang CTV</a>
@@ -316,11 +316,12 @@
                             <option value="muaacc">Acc King Legacy VIP</option>
                             <option value="caythue">Cày Thuê King Legacy</option>
                             <option value="itemnguyenlieu">Item & Nguyên Liệu</option>
+                            <option value="giftgamepass">Gift Gamepass King Legacy</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Tên sản phẩm / Mã Acc:</label>
-                        <input type="text" id="newProName" class="form-control" placeholder="Nhập tên sản phẩm hoặc mã acc">
+                        <label>Tên sản phẩm / Gói Gamepass:</label>
+                        <input type="text" id="newProName" class="form-control" placeholder="Nhập tên gói gamepass">
                     </div>
                     <div class="form-group">
                         <label>Giá tiền (VNĐ):</label>
@@ -328,7 +329,7 @@
                     </div>
                     <div class="form-group">
                         <label>Số lượng kho:</label>
-                        <input type="number" id="newProStock" class="form-control" placeholder="Nhập số lượng kho" value="1">
+                        <input type="number" id="newProStock" class="form-control" placeholder="Nhập số lượng kho" value="99">
                     </div>
                     <div class="form-group">
                         <label>Chọn ảnh từ thư viện:</label>
@@ -458,7 +459,7 @@
             <div class="form-group"><label>Đơn giá:</label><input type="text" id="itProductPrice" class="form-control" readonly></div>
             <div class="form-group"><label>Số lượng cần mua:</label><input type="number" id="itQuantity" class="form-control" value="1" min="1" oninput="tinhTienItem()"></div>
             <div class="form-group">
-                <label>Mã Voucher Giảm Giá (Если có / Nếu có):</label>
+                <label>Mã Voucher Giảm Giá (Nếu có):</label>
                 <div style="display: flex; gap: 6px;">
                     <input type="text" id="itVoucherInput" class="form-control" placeholder="Nhập mã voucher...">
                     <button type="button" class="action-btn" style="width: 90px; font-size: 11px;" onclick="apDungVoucherChoDonHang('it')">Áp Dụng</button>
@@ -470,6 +471,36 @@
             <div class="modal-buttons">
                 <button class="btn-close" onclick="dongModal('modalItem')">Hủy</button>
                 <button class="btn-submit" onclick="xacNhanThanhToanItem()">Xác Nhận & Gửi Zalo</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="modalGiftGamepass">
+        <div class="modal-content">
+            <div class="modal-title-custom">Đặt Trước Gift Gamepass</div>
+            <div class="note-box" style="font-size: 11px; text-align: left; margin-bottom: 12px; line-height: 1.4;">
+                ⚠ <b>LƯU Ý QUAN TRỌNG:</b> Quý khách vui lòng <b>đặt trước từ 1-3 tuần</b> và <b>thanh toán trước luôn</b> thì shop mới tiến hành xử lý đơn hàng nhé!
+            </div>
+            <div class="form-group"><label>Sản phẩm:</label><input type="text" id="gpProductName" class="form-control" readonly></div>
+            <div class="form-group"><label>Đơn giá:</label><input type="text" id="gpProductPrice" class="form-control" readonly></div>
+            <div class="form-group"><label>Số lượng:</label><input type="number" id="gpQuantity" class="form-control" value="1" min="1" oninput="tinhTienGiftGamepass()"></div>
+            <div class="form-group">
+                <label>Mã Voucher Giảm Giá (Nếu có):</label>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="gpVoucherInput" class="form-control" placeholder="Nhập mã voucher...">
+                    <button type="button" class="action-btn" style="width: 90px; font-size: 11px;" onclick="apDungVoucherChoDonHang('gp')">Áp Dụng</button>
+                </div>
+            </div>
+            <div class="form-group"><label>Tổng tiền thanh toán:</label><input type="text" id="gpTotalMoney" class="form-control" style="color: #38bdf8; font-weight: bold;" readonly></div>
+            <div class="form-group">
+                <label>Tên đăng nhập Roblox:</label>
+                <input type="text" id="gpGameUser" class="form-control" placeholder="Nhập chính xác tên đăng nhập Roblox">
+                <div style="font-size: 10px; color: #f87171; margin-top: 3px;">⚠ Nhập sai tên Roblox shop không chịu trách nhiệm!</div>
+            </div>
+            <div class="form-group"><label>Ghi chú cho shop:</label><input type="text" id="gpNote" class="form-control" placeholder="Bạn muốn dặn dò shop gì cứ ghi vào đây..."></div>
+            <div class="form-group"><label>Số điện thoại / Zalo liên hệ:</label><input type="text" id="gpPhone" class="form-control" placeholder="Số điện thoại của bạn"></div>
+            <div class="modal-buttons">
+                <button class="btn-close" onclick="dongModal('modalGiftGamepass')">Hủy</button>
+                <button class="btn-submit" style="background:#10b981;" onclick="xacNhanDatTruocGiftGamepass()">Xác Nhận Đặt Trước</button>
             </div>
         </div>
     </div>
@@ -530,7 +561,7 @@
     </div>
     <div class="modal" id="modalTopNap">
         <div class="modal-content">
-            <div class="modal-title-custom">🏆 Top Nạp Tiền Tháng Này</div>
+            <div class="modal-title-custom">🏆 Bảng Xếp Hạng Top Nạp</div>
             <div id="topNapContentList" style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 15px; max-height: 250px; overflow-y: auto;">Đang tải dữ liệu xếp hạng...</div>
             <button class="btn-close" style="width: 100%;" onclick="dongModal('modalTopNap')">Đóng</button>
         </div>
@@ -547,6 +578,9 @@
             ],
             itemnguyenlieu: [
                 { id: 4, name: "Donate ĐTP King Legacy", price: 1000, stock: 50, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
+            ],
+            giftgamepass: [
+                { id: 7, name: "Gamepass X2 Drop / X2 Money", price: 120000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ]
         };
 
@@ -610,8 +644,8 @@
         }
 
         async function apDungVoucherChoDonHang(modalType) {
-            let inputId = modalType === 'acc' ? 'accVoucherInput' : (modalType === 'ct' ? 'ctVoucherInput' : 'itVoucherInput');
-            let totalId = modalType === 'acc' ? 'accTotalMoney' : (modalType === 'ct' ? 'ctTotalMoney' : 'itTotalMoney');
+            let inputId = modalType === 'acc' ? 'accVoucherInput' : (modalType === 'ct' ? 'ctVoucherInput' : (modalType === 'it' ? 'itVoucherInput' : 'gpVoucherInput'));
+            let totalId = modalType === 'acc' ? 'accTotalMoney' : (modalType === 'ct' ? 'ctTotalMoney' : (modalType === 'it' ? 'itTotalMoney' : 'gpTotalMoney'));
             let vCode = document.getElementById(inputId).value.trim().toUpperCase();
 
             if(!vCode) { alert('Vui lòng nhập mã voucher!'); return; }
@@ -626,6 +660,7 @@
             let qty = 1;
             if(modalType === 'ct') { qty = parseInt(document.getElementById('ctQuantity').value) || 1; }
             else if(modalType === 'it') { qty = parseInt(document.getElementById('itQuantity').value) || 1; }
+            else if(modalType === 'gp') { qty = parseInt(document.getElementById('gpQuantity').value) || 1; }
 
             let subTotal = basePrice * qty;
             let discount = 0;
@@ -667,7 +702,7 @@
 
                 let htmlContent = '';
                 if(rankList.length === 0) {
-                    htmlContent = '<div style="text-align: center; color: #94a3b8; padding: 10px;">Chưa có khách hàng nào phát sinh nạp tiền tháng này.</div>';
+                    htmlContent = '<div style="text-align: center; color: #94a3b8; padding: 10px;">Chưa có khách hàng nào phát sinh nạp tiền.</div>';
                 } else {
                     rankList.forEach((item, index) => {
                         let topStt = index + 1;
@@ -827,6 +862,12 @@
                     <div class="card-desc">Kiếm, phụ kiện, nguyên liệu hiếm</div>
                     <button class="action-btn">Xem Sản Phẩm</button>
                 </div>
+                <div class="card" onclick="moDanhMuc('giftgamepass')">
+                    <img src="${fixedImage}" class="card-img">
+                    <div class="card-title">Gift Gamepass</div>
+                    <div class="card-desc">Đặt trước gamepass giá rẻ, uy tín</div>
+                    <button class="action-btn">Xem Sản Phẩm</button>
+                </div>
             `;
         }
 
@@ -857,13 +898,20 @@
             
             let listHTML = '';
             let danhSach = databaseSanPham[keyDM] || [];
-            document.getElementById('categoryTitle').innerText = keyDM === 'muaacc' ? 'Acc King Legacy VIP' : (keyDM === 'caythue' ? 'Cày Thuê King Legacy' : 'Item & Nguyên Liệu King Legacy');
+            document.getElementById('categoryTitle').innerText = keyDM === 'muaacc' ? 'Acc King Legacy VIP' : (keyDM === 'caythue' ? 'Cày Thuê King Legacy' : (keyDM === 'itemnguyenlieu' ? 'Item & Nguyên Liệu King Legacy' : 'Gift Gamepass King Legacy'));
             
             danhSach.forEach(sp => {
                 let isSoldOut = sp.soldOut;
-                let btnText = isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn';
+                let btnText = (keyDM === 'giftgamepass') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Xác Nhận Đặt Trước') : (isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn');
                 let btnStyle = isSoldOut ? 'background: #64748b; cursor: not-allowed;' : '';
-                let onclickAttr = isSoldOut ? '' : `onclick="${keyDM === 'muaacc' ? `moModalMuaAcc('${sp.name}', ${sp.price})` : (keyDM === 'caythue' ? `moModalCayThue('${sp.name}', ${sp.price})` : `moModalItem('${sp.name}', ${sp.price})`)}"`;
+                
+                let onclickAttr = '';
+                if(!isSoldOut) {
+                    if(keyDM === 'muaacc') onclickAttr = `onclick="moModalMuaAcc('${sp.name}', ${sp.price})"`;
+                    else if(keyDM === 'caythue') onclickAttr = `onclick="moModalCayThue('${sp.name}', ${sp.price})"`;
+                    else if(keyDM === 'itemnguyenlieu') onclickAttr = `onclick="moModalItem('${sp.name}', ${sp.price})"`;
+                    else if(keyDM === 'giftgamepass') onclickAttr = `onclick="moModalGiftGamepass('${sp.name}', ${sp.price})"`;
+                }
                 
                 let productImg = sp.image || fixedImage;
                 let mediaHTML = `<img src="${productImg}" class="card-img">`;
@@ -1127,6 +1175,31 @@
             document.getElementById('itTotalMoney').value = total.toLocaleString() + ' đ' + disText;
         }
 
+        function moModalGiftGamepass(ten, gia) {
+            sanphamDangChon = { name: ten, price: gia, basePrice: gia };
+            appliedVoucherCode = null;
+            discountAmountGlobal = 0;
+            document.getElementById('gpProductName').value = ten;
+            document.getElementById('gpProductPrice').value = gia.toLocaleString() + ' đ';
+            document.getElementById('gpQuantity').value = 1;
+            document.getElementById('gpVoucherInput').value = '';
+            document.getElementById('gpTotalMoney').value = gia.toLocaleString() + ' đ';
+            document.getElementById('gpGameUser').value = '';
+            document.getElementById('gpNote').value = '';
+            document.getElementById('gpPhone').value = '';
+            document.getElementById('modalGiftGamepass').style.display = 'flex';
+        }
+
+        function tinhTienGiftGamepass() {
+            let qty = parseInt(document.getElementById('gpQuantity').value) || 1;
+            if(qty < 1) qty = 1;
+            let total = sanphamDangChon.basePrice * qty - discountAmountGlobal;
+            if(total < 0) total = 0;
+            sanphamDangChon.price = total;
+            let disText = discountAmountGlobal > 0 ? ' (Đã giảm ' + discountAmountGlobal.toLocaleString() + 'đ)' : '';
+            document.getElementById('gpTotalMoney').value = total.toLocaleString() + ' đ' + disText;
+        }
+
         async function luuVaTaoDonHang(chiTietDon) {
             await fetchFirebaseData();
             if(appliedVoucherCode && databaseVouchers[appliedVoucherCode]) {
@@ -1279,6 +1352,54 @@
             dongModal('modalItem');
         }
 
+        async function xacNhanDatTruocGiftGamepass() {
+            let qty = document.getElementById('gpQuantity').value;
+            let gUser = document.getElementById('gpGameUser').value.trim();
+            let note = document.getElementById('gpNote').value.trim() || 'Không có';
+            let phone = document.getElementById('gpPhone').value.trim();
+            if(!gUser || !phone) { alert('Vui lòng điền đầy đủ Tên Roblox và Số Điện Thoại!'); return; }
+
+            if(currentUser) {
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
+                let userData = await res.json() || { balance: 0 };
+                let currentBal = userData.balance || 0;
+                if(currentBal < sanphamDangChon.price) {
+                    alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
+                    return;
+                }
+                userData.balance = currentBal - sanphamDangChon.price;
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(userData)
+                });
+                capNhatGiaoDienUser();
+            }
+
+            let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
+            let timeNow = new Date().toLocaleString('vi-VN');
+            let chiTiet = `[ĐẶT TRƯỚC GIFT GAMEPASS - Cần 1-3 tuần và đã thanh toán]\n- Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Số lượng: ${qty}\n- Tên Roblox: ${gUser}\n- Ghi chú: ${note}\n- SĐT: ${phone}` + (appliedVoucherCode ? `\n- Dùng Voucher: ${appliedVoucherCode}` : '');
+            
+            await luuVaTaoDonHang({
+                code: randomCode,
+                webUser: currentUser || 'Khách vãng lai',
+                item: '[Đặt Trước] ' + sanphamDangChon.name + ` (SL: ${qty})`,
+                price: sanphamDangChon.price,
+                details: chiTiet,
+                status: '⏳ Chờ Duyệt (Đặt Trước 1-3 tuần)',
+                handledBy: null,
+                time: timeNow
+            });
+
+            let noiDungGui = `[ĐƠN ĐẶT TRƯỚC GIFT GAMEPASS - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name} (SL: ${qty})\n- Tổng tiền: ${sanphamDangChon.price.toLocaleString()}đ (Đã thanh toán)\n- Tên Roblox: ${gUser}\n- Ghi chú: ${note}\n- SĐT: ${phone}\n(Lưu ý: Khách đặt trước 1-3 tuần)`;
+            
+            navigator.clipboard.writeText(noiDungGui).then(() => {
+                alert(`Đặt trước thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung đơn hàng! Hệ thống sẽ chuyển sang Zalo.`);
+                window.location.href = "https://zalo.me/0794221549";
+            });
+            dongModal('modalGiftGamepass');
+        }
+
         async function hienThiLichSu() {
             if(!currentUser) { document.getElementById('historyList').innerHTML = 'Vui lòng đăng nhập để xem lịch sử.'; return; }
             await fetchFirebaseData();
@@ -1286,7 +1407,7 @@
             if(userOrders.length === 0) { document.getElementById('historyList').innerHTML = 'Chưa có đơn hàng nào.'; return; }
             let html = '';
             userOrders.forEach(h => {
-                let badgeColor = h.status === '⏳ Chờ Duyệt' ? '#fbbf24' : (h.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
+                let badgeColor = h.status.includes('Chờ Duyệt') ? '#fbbf24' : (h.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
                 html += `<div style="background:rgba(15,23,42,0.5); border:1px solid rgba(255,255,255,0.15); padding:10px; border-radius:12px; margin-bottom:8px; text-align:left;">
                     <b style="color:#38bdf8;">Mã đơn: ${h.code}</b> | Trạng thái: <b style="color:${badgeColor};">${h.status}</b><br>
                     <span>Sản phẩm: ${h.item}</span><br><span>Tổng giá: ${h.price.toLocaleString()}đ</span><br>
@@ -1448,7 +1569,7 @@
             if(allOrders.length === 0) { listEl.innerHTML = 'Chưa có đơn hàng nào chờ duyệt.'; return; }
             let html = '';
             allOrders.forEach((o, index) => {
-                let badgeColor = o.status === '⏳ Chờ Duyệt' ? '#fbbf24' : (o.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
+                let badgeColor = o.status.includes('Chờ Duyệt') ? '#fbbf24' : (o.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
                 let nguoiDuyetHTML = o.handledBy ? `<br><span style="color: #10b981; font-weight: bold;">👤 Người duyệt/xử lý: ${o.handledBy}</span>` : `<br><span style="color: #94a3b8; font-style: italic;">👤 Người duyệt: Chưa có ai nhận đơn</span>`;
                 
                 html += `<div style="background:rgba(30,41,59,0.6); border:1px solid rgba(255,255,255,0.15); padding:10px; border-radius:12px; margin-bottom:8px; text-align:left;">
