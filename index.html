@@ -240,10 +240,7 @@
             <div class="section-title">Nạp Tiền Vào Tài Khoản</div>
             <div class="card" style="margin-bottom:15px; text-align:center;">
                 <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align:left;">1. Nạp qua ZaloPay</h3>
-                <p style="font-size:12px; color:#94a3b8; margin-bottom:10px; text-align:left;">Quét mã QR ZaloPay bên dưới và <b>nhập đúng nội dung chuyển khoản</b>:</p>
-                <div class="note-box" id="bankSyntaxContent">Nội dung chuyển khoản: NAP_sinekut</div>
-                <img src="https://i.ibb.co/tPsgyfKT/IMG-20261004-214345.jpg" alt="QR ZaloPay" class="qr-img">
-                <div style="font-size:11px; color:#38bdf8; margin-top:10px; line-height: 1.4;">ℹ️ Lưu ý: Tiền được cộng sau 1-12h. Nếu quá hạn chưa thấy, liên hệ Admin!</div>
+                <div id="depositQrContainer"></div>
             </div>
             <div class="card">
                 <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">2. Nạp qua Thẻ Cào</h3>
@@ -293,7 +290,7 @@
                 <button class="action-btn" style="background:#f87171;" onclick="kiemTraAdmin()">Đăng Nhập Hệ Thống</button>
             </div>
             <div id="adminPanelBox" style="display:none;">
-                <div class="card" style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                <div class="card" id="khuVucTrangThaiShop" style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <h3 style="font-size:14px; color:#38bdf8; margin-bottom:3px; text-align: left;">Trạng thái Admin Shop</h3>
                         <p style="font-size:11px; color:#94a3b8; text-align: left;">Bật Online, tắt Offline tức thì cho mọi thiết bị</p>
@@ -308,6 +305,15 @@
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">💬 Giám Sát & Trả Lời Chat Khách Hàng</h3>
                     <div id="adminChatRoomsList" style="font-size:12px; color:#94a3b8; text-align: left;">Chưa có đoạn chat nào đang hoạt động.</div>
                 </div>
+                <div id="khuVucQuanLyCTV" class="card" style="margin-bottom:15px;">
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">🛡 Quản Lý Tài Khoản CTV (Chỉ Admin Chính)</h3>
+                    <div class="form-group"><label>Mã tài khoản CTV (ví dụ: ctvmoi):</label><input type="text" id="newCtvUser" class="form-control" placeholder="Username CTV"></div>
+                    <div class="form-group"><label>Tên hiển thị CTV:</label><input type="text" id="newCtvName" class="form-control" placeholder="Tên CTV"></div>
+                    <div class="form-group"><label>Mật khẩu đăng nhập CTV:</label><input type="text" id="newCtvPass" class="form-control" placeholder="Mật khẩu CTV"></div>
+                    <button class="action-btn" style="background:#10b981; margin-bottom:12px;" onclick="adminThemHoacDoiMkCTV()">Thêm Mới / Đổi MK CTV</button>
+                    <h4 style="font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-align: left;">Danh sách CTV hiện tại:</h4>
+                    <div id="adminCtvListContainer" style="font-size: 11px; color: #cbd5e1; text-align: left; background: rgba(15,23,42,0.6); padding: 8px; border-radius: 8px;">Đang tải...</div>
+                </div>
                 <div id="khuVucThemSanPham" class="card" style="margin-bottom:15px;">
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">1. Thêm Sản Phẩm Mới (Chọn ảnh từ thư viện)</h3>
                     <div class="form-group">
@@ -317,11 +323,13 @@
                             <option value="caythue">Cày Thuê King Legacy</option>
                             <option value="itemnguyenlieu">Item & Nguyên Liệu</option>
                             <option value="giftgamepass">Gift Gamepass King Legacy</option>
+                            <option value="robux120h">Robux 120h</option>
+                            <option value="robuxglobal">Robux Global</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Tên sản phẩm / Gói Gamepass:</label>
-                        <input type="text" id="newProName" class="form-control" placeholder="Nhập tên gói gamepass">
+                        <label>Tên sản phẩm / Gói:</label>
+                        <input type="text" id="newProName" class="form-control" placeholder="Nhập tên sản phẩm">
                     </div>
                     <div class="form-group">
                         <label>Giá tiền (VNĐ):</label>
@@ -504,6 +512,28 @@
             </div>
         </div>
     </div>
+    <div class="modal" id="modalRobux">
+        <div class="modal-content">
+            <div class="modal-title-custom" id="modalRobuxTitle">Mua Robux</div>
+            <div class="form-group"><label>Gói sản phẩm:</label><input type="text" id="rbxProductName" class="form-control" readonly></div>
+            <div class="form-group"><label>Đơn giá:</label><input type="text" id="rbxProductPrice" class="form-control" readonly></div>
+            <div class="form-group"><label>Số lượng gói:</label><input type="number" id="rbxQuantity" class="form-control" value="1" min="1" oninput="tinhTienRobux()"></div>
+            <div class="form-group">
+                <label>Mã Voucher Giảm Giá:</label>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="rbxVoucherInput" class="form-control" placeholder="Mã voucher...">
+                    <button type="button" class="action-btn" style="width: 90px; font-size: 11px;" onclick="apDungVoucherChoRobux()">Áp Dụng</button>
+                </div>
+            </div>
+            <div class="form-group"><label>Tổng tiền thanh toán:</label><input type="text" id="rbxTotalMoney" class="form-control" style="color: #38bdf8; font-weight: bold;" readonly></div>
+            <div class="form-group"><label>Tên đăng nhập Roblox:</label><input type="text" id="rbxGameUser" class="form-control" placeholder="Tên đăng nhập Roblox"></div>
+            <div class="form-group"><label>Số điện thoại / Zalo:</label><input type="text" id="rbxPhone" class="form-control" placeholder="Số điện thoại"></div>
+            <div class="modal-buttons">
+                <button class="btn-close" onclick="dongModal('modalRobux')">Hủy</button>
+                <button class="btn-submit" onclick="xacNhanThanhToanRobux()">Xác Nhận & Gửi Zalo</button>
+            </div>
+        </div>
+    </div>
     <div class="modal" id="modalAuth">
         <div class="modal-content">
             <div class="modal-title-custom">Tài Khoản Sinek Store</div>
@@ -520,12 +550,7 @@
                 <button class="btn-submit" onclick="thucHienDangKy()">Đăng Ký</button>
                 <button class="btn-submit" style="background:#10b981;" onclick="thucHienDangNhap()">Đăng Nhập</button>
             </div>
-            <div style="margin: 12px 0 8px 0; text-align: center; font-size: 11px; color: #94a3b8;">Hoặc đăng nhập/đăng ký siêu tốc bằng:</div>
-            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                <button class="action-btn" style="background: #ea4335; font-size: 11px;" onclick="dangNhapNhanhSocial('Google')">🔴 Google</button>
-                <button class="action-btn" style="background: #1877f2; font-size: 11px;" onclick="dangNhapNhanhSocial('Facebook')">🔵 Facebook</button>
-            </div>
-            <button class="btn-close" style="width:100%; margin-top:5px;" onclick="dongModal('modalAuth')">Đóng</button>
+            <button class="btn-close" style="width:100%; margin-top:10px;" onclick="dongModal('modalAuth')">Đóng</button>
         </div>
     </div>
     <div class="modal" id="modalDoiMk">
@@ -581,6 +606,12 @@
             ],
             giftgamepass: [
                 { id: 7, name: "Gamepass X2 Drop / X2 Money", price: 120000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
+            ],
+            robux120h: [
+                { id: 201, name: "Gói 1,000 Robux (120h)", price: 150000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
+            ],
+            robuxglobal: [
+                { id: 301, name: "Gói 800 Robux Global", price: 180000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ]
         };
 
@@ -624,6 +655,11 @@
         }
         function chonMenuLeft(tabName) {
             document.getElementById('dropdownMenuLeft').style.display = 'none';
+            if(tabName === 'deposit' && !currentUser) {
+                alert('Vui lòng đăng nhập tài khoản trước khi nạp tiền!');
+                moModalAuth();
+                return;
+            }
             chuyenTab(tabName);
         }
         function dongMenuBenNgoai(event) {
@@ -680,6 +716,26 @@
 
             document.getElementById(totalId).value = finalPrice.toLocaleString() + ' đ (Đã giảm ' + discount.toLocaleString() + 'đ)';
             alert(`Áp dụng thành công mã [${vCode}]! Đã trừ trực tiếp vào tổng tiền.`);
+        }
+
+        async function apDungVoucherChoRobux() {
+            let vCode = document.getElementById('rbxVoucherInput').value.trim().toUpperCase();
+            if(!vCode) { alert('Vui lòng nhập mã voucher!'); return; }
+            await fetchFirebaseData();
+            let vData = databaseVouchers[vCode];
+            if(!vData) { alert('Mã voucher này không tồn tại!'); return; }
+            if(vData.stock <= 0) { alert('Mã voucher đã hết lượt sử dụng!'); return; }
+            let basePrice = sanphamDangChon.basePrice !== undefined ? sanphamDangChon.basePrice : sanphamDangChon.price;
+            let qty = parseInt(document.getElementById('rbxQuantity').value) || 1;
+            let subTotal = basePrice * qty;
+            let discount = vData.type === 'amount' ? vData.value : subTotal * (vData.value / 100);
+            let finalPrice = subTotal - discount;
+            if(finalPrice < 0) finalPrice = 0;
+            sanphamDangChon.price = finalPrice;
+            appliedVoucherCode = vCode;
+            discountAmountGlobal = discount;
+            document.getElementById('rbxTotalMoney').value = finalPrice.toLocaleString() + ' đ (Đã giảm ' + discount.toLocaleString() + 'đ)';
+            alert(`Áp dụng thành công mã [${vCode}]!`);
         }
 
         async function moModalTopNap() {
@@ -787,6 +843,7 @@
             } catch(e) {}
             capNhatGiaoDienTrangThaiAdmin();
             loadDanhSachVoucherAdmin();
+            loadDanhSachCTVAdmin();
         }
 
         async function saveFirebaseData() {
@@ -838,7 +895,6 @@
                 batDauLangNgheChat();
             } catch(e) {}
         };
-
         function renderCategoryGrid() {
             let grid = document.getElementById('categoryGrid');
             if(!grid) return;
@@ -868,6 +924,18 @@
                     <div class="card-desc">Đặt trước gamepass giá rẻ, uy tín</div>
                     <button class="action-btn">Xem Sản Phẩm</button>
                 </div>
+                <div class="card" onclick="moDanhMuc('robux120h')">
+                    <img src="${fixedImage}" class="card-img">
+                    <div class="card-title">⏳ Robux 120h</div>
+                    <div class="card-desc">Giá siêu hời, tiết kiệm tối đa</div>
+                    <button class="action-btn">Xem Gói</button>
+                </div>
+                <div class="card" onclick="moDanhMuc('robuxglobal')">
+                    <img src="${fixedImage}" class="card-img">
+                    <div class="card-title">🌍 Robux Global</div>
+                    <div class="card-desc">Nạp nhanh chóng, an toàn</div>
+                    <button class="action-btn">Xem Gói</button>
+                </div>
             `;
         }
 
@@ -879,9 +947,29 @@
                 document.getElementById('pageHome').style.display = 'block';
                 renderCategoryGrid();
             } else if(tabName === 'deposit') {
+                if(!currentUser) {
+                    alert('Vui lòng đăng nhập tài khoản trước khi nạp tiền!');
+                    moModalAuth();
+                    return;
+                }
                 document.getElementById('pageDeposit').style.display = 'block';
-                let syntaxUser = currentUser ? currentUser : "vãng_lai";
-                document.getElementById('bankSyntaxContent').innerText = "Nội dung chuyển khoản: NAP_" + syntaxUser;
+                let qrContainer = document.getElementById('depositQrContainer');
+                if(currentUser) {
+                    qrContainer.innerHTML = `
+                        <p style="font-size:12px; color:#94a3b8; margin-bottom:10px; text-align:left;">Quét mã QR ZaloPay bên dưới và <b>nhập đúng nội dung chuyển khoản</b>:</p>
+                        <div class="note-box" id="bankSyntaxContent">Nội dung chuyển khoản: NAP_${currentUser}</div>
+                        <img src="https://i.ibb.co/tPsgyfKT/IMG-20261004-214345.jpg" alt="QR ZaloPay" class="qr-img">
+                        <div style="font-size:11px; color:#38bdf8; margin-top:10px; line-height: 1.4;">ℹ️ Lưu ý: Tiền được cộng sau 1-12h. Nếu quá hạn chưa thấy, liên hệ Admin!</div>
+                    `;
+                } else {
+                    qrContainer.innerHTML = `
+                        <div style="padding: 20px; text-align: center; color: #f87171; font-weight: bold; background: rgba(239, 68, 68, 0.1); border-radius: 12px; border: 1px dashed rgba(239, 68, 68, 0.4);">
+                            ⚠ Vui lòng Đăng Nhập hoặc Đăng Ký tài khoản để hiển thị mã QR nạp tiền chính xác!
+                            <br><br>
+                            <button class="action-btn" style="max-width: 180px; margin: 0 auto;" onclick="moModalAuth()">Đăng Nhập Ngay</button>
+                        </div>
+                    `;
+                }
             } else if(tabName === 'history') {
                 document.getElementById('pageHistory').style.display = 'block';
                 hienThiLichSu();
@@ -898,25 +986,39 @@
             
             let listHTML = '';
             let danhSach = databaseSanPham[keyDM] || [];
-            document.getElementById('categoryTitle').innerText = keyDM === 'muaacc' ? 'Acc King Legacy VIP' : (keyDM === 'caythue' ? 'Cày Thuê King Legacy' : (keyDM === 'itemnguyenlieu' ? 'Item & Nguyên Liệu King Legacy' : 'Gift Gamepass King Legacy'));
+            
+            if(keyDM === 'muaacc') document.getElementById('categoryTitle').innerText = 'Acc King Legacy VIP';
+            else if(keyDM === 'caythue') document.getElementById('categoryTitle').innerText = 'Cày Thuê King Legacy';
+            else if(keyDM === 'itemnguyenlieu') document.getElementById('categoryTitle').innerText = 'Item & Nguyên Liệu King Legacy';
+            else if(keyDM === 'giftgamepass') document.getElementById('categoryTitle').innerText = 'Gift Gamepass King Legacy';
+            else if(keyDM === 'robux120h') document.getElementById('categoryTitle').innerText = 'Danh Mục Robux 120h';
+            else if(keyDM === 'robuxglobal') document.getElementById('categoryTitle').innerText = 'Danh Mục Robux Global';
             
             danhSach.forEach(sp => {
                 let isSoldOut = sp.soldOut;
-                let btnText = (keyDM === 'giftgamepass') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Xác Nhận Đặt Trước') : (isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn');
+                let btnText = (keyDM === 'robux120h' || keyDM === 'robuxglobal') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Mua Ngay') : ((keyDM === 'giftgamepass') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Xác Nhận Đặt Trước') : (isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn'));
                 let btnStyle = isSoldOut ? 'background: #64748b; cursor: not-allowed;' : '';
                 
                 let onclickAttr = '';
                 if(!isSoldOut) {
-                    if(keyDM === 'muaacc') onclickAttr = `onclick="moModalMuaAcc('${sp.name}', ${sp.price})"`;
-                    else if(keyDM === 'caythue') onclickAttr = `onclick="moModalCayThue('${sp.name}', ${sp.price})"`;
-                    else if(keyDM === 'itemnguyenlieu') onclickAttr = `onclick="moModalItem('${sp.name}', ${sp.price})"`;
-                    else if(keyDM === 'giftgamepass') onclickAttr = `onclick="moModalGiftGamepass('${sp.name}', ${sp.price})"`;
+                    if(keyDM === 'muaacc') onclickAttr = `onclick="kiemTraTruocKhiMoModal('acc', '${sp.name}', ${sp.price})"`;
+                    else if(keyDM === 'caythue') onclickAttr = `onclick="kiemTraTruocKhiMoModal('ct', '${sp.name}', ${sp.price})"`;
+                    else if(keyDM === 'itemnguyenlieu') onclickAttr = `onclick="kiemTraTruocKhiMoModal('it', '${sp.name}', ${sp.price})"`;
+                    else if(keyDM === 'giftgamepass') onclickAttr = `onclick="kiemTraTruocKhiMoModal('gp', '${sp.name}', ${sp.price})"`;
+                    else if(keyDM === 'robux120h' || keyDM === 'robuxglobal') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbx', '${sp.name}', ${sp.price})"`;
                 }
                 
                 let productImg = sp.image || fixedImage;
                 let mediaHTML = `<img src="${productImg}" class="card-img">`;
                 let stockHTML = `<div style="font-size: 11px; color: #fbbf24; margin-bottom: 4px;">Kho còn: <b>${sp.stock}</b></div>`;
                 let noteAccHTML = (keyDM === 'muaacc') ? `<div style="font-size: 10px; color: #38bdf8; margin-bottom: 8px; font-style: italic; line-height: 1.3;">💡 Nếu muốn xem ảnh của acc trọn vẹn, vui lòng liên hệ qua Zalo hoặc FB của admin!</div>` : '';
+                
+                let customNoteHTML = '';
+                if(keyDM === 'robux120h') {
+                    customNoteHTML = `<div style="font-size: 10px; color: #f87171; margin-bottom: 6px; font-style: italic; line-height: 1.3;">⚠ Lưu ý: Rate càng thấp chờ càng lâu</div>`;
+                } else if(keyDM === 'robuxglobal') {
+                    customNoteHTML = `<div style="font-size: 10px; color: #38bdf8; margin-bottom: 6px; font-style: italic; line-height: 1.3;">ℹ️ Lưu ý: Robux sẽ tự động vào acc sau 12-24h có thể sớm hơn</div>`;
+                }
 
                 listHTML += `
                     <div class="card" ${isSoldOut ? 'style="opacity: 0.6;"' : ''}>
@@ -925,11 +1027,25 @@
                         <div class="card-desc" style="color: #38bdf8; font-weight: bold; margin-bottom: 4px;">${sp.price.toLocaleString()} đ</div>
                         ${stockHTML}
                         ${noteAccHTML}
+                        ${customNoteHTML}
                         <button class="action-btn" ${btnStyle} ${onclickAttr}>${btnText}</button>
                     </div>
                 `;
             });
             document.getElementById('productList').innerHTML = listHTML;
+        }
+
+        function kiemTraTruocKhiMoModal(loai, ten, gia) {
+            if(!currentUser) {
+                alert('Vui lòng Đăng Nhập hoặc Đăng Ký tài khoản trước khi mua hàng!');
+                moModalAuth();
+                return;
+            }
+            if(loai === 'acc') moModalMuaAcc(ten, gia);
+            else if(loai === 'ct') moModalCayThue(ten, gia);
+            else if(loai === 'it') moModalItem(ten, gia);
+            else if(loai === 'gp') moModalGiftGamepass(ten, gia);
+            else if(loai === 'rbx') moModalRobux(ten, gia);
         }
 
         function veTrangChu() {
@@ -985,29 +1101,6 @@
             } else {
                 alert('Sai tên đăng nhập hoặc mật khẩu!');
             }
-        }
-
-        async function dangNhapNhanhSocial(provider) {
-            let socialName = prompt(`Nhập tên hiển thị tài khoản ${provider} của bạn:`, provider + "_" + Math.floor(1000 + Math.random() * 9000));
-            if(!socialName) return;
-            socialName = socialName.trim();
-
-            let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + socialName + ".json");
-            let userData = await res.json();
-
-            if(!userData) {
-                await fetch(FIREBASE_DB_URL + "sinek_users/" + socialName + ".json", {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ password: "social_login", contact: provider + " User", balance: 0, avatar: fixedImage, totalDeposit: 0 })
-                });
-            }
-
-            currentUser = socialName;
-            localStorage.setItem('sinek_logged_user', socialName);
-            alert(`Đăng nhập thành công qua tài khoản ${provider}! Chào mừng ${socialName}`);
-            dongModal('modalAuth');
-            capNhatGiaoDienUser();
         }
 
         function thucHienDangXuat() {
@@ -1200,6 +1293,26 @@
             document.getElementById('gpTotalMoney').value = total.toLocaleString() + ' đ' + disText;
         }
 
+        function moModalRobux(ten, gia) {
+            sanphamDangChon = { name: ten, price: gia, basePrice: gia };
+            appliedVoucherCode = null;
+            discountAmountGlobal = 0;
+            document.getElementById('modalRobuxTitle').innerText = "Mua " + ten;
+            document.getElementById('rbxProductName').value = ten;
+            document.getElementById('rbxProductPrice').value = gia.toLocaleString() + ' đ';
+            document.getElementById('rbxQuantity').value = 1;
+            document.getElementById('rbxTotalMoney').value = gia.toLocaleString() + ' đ';
+            document.getElementById('modalRobux').style.display = 'flex';
+        }
+
+        function tinhTienRobux() {
+            let qty = parseInt(document.getElementById('rbxQuantity').value) || 1;
+            let total = sanphamDangChon.basePrice * qty - discountAmountGlobal;
+            if(total < 0) total = 0;
+            sanphamDangChon.price = total;
+            document.getElementById('rbxTotalMoney').value = total.toLocaleString() + ' đ';
+        }
+
         async function luuVaTaoDonHang(chiTietDon) {
             await fetchFirebaseData();
             if(appliedVoucherCode && databaseVouchers[appliedVoucherCode]) {
@@ -1255,7 +1368,6 @@
             });
             dongModal('modalMuaAcc');
         }
-
         async function xacNhanThanhToanCayThue() {
             let qty = document.getElementById('ctQuantity').value;
             let gUser = document.getElementById('ctGameUser').value.trim();
@@ -1400,6 +1512,42 @@
             dongModal('modalGiftGamepass');
         }
 
+        async function xacNhanThanhToanRobux() {
+            let gUser = document.getElementById('rbxGameUser').value.trim();
+            let phone = document.getElementById('rbxPhone').value.trim();
+            if(!gUser || !phone) { alert('Vui lòng điền đủ tên Roblox và SĐT!'); return; }
+            if(currentUser) {
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
+                let userData = await res.json() || { balance: 0 };
+                if((userData.balance || 0) < sanphamDangChon.price) { alert('Số dư không đủ!'); return; }
+                userData.balance -= sanphamDangChon.price;
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {
+                    method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(userData)
+                });
+                capNhatGiaoDienUser();
+            }
+            let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
+            let timeNow = new Date().toLocaleString('vi-VN');
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Tên Roblox: ${gUser}\n- SĐT: ${phone}`;
+            
+            await luuVaTaoDonHang({ 
+                code: randomCode, 
+                webUser: currentUser || 'Vãng lai', 
+                item: sanphamDangChon.name, 
+                price: sanphamDangChon.price, 
+                details: chiTiet, 
+                status: '⏳ Chờ Duyệt', 
+                handledBy: null,
+                time: timeNow 
+            });
+            
+            navigator.clipboard.writeText(`[ĐƠN ROBUX - ${randomCode}]\n- Sản phẩm: ${sanphamDangChon.name}\n- Roblox: ${gUser}\n- SĐT: ${phone}`).then(() => {
+                alert('Đặt đơn thành công! Đã sao chép nội dung, chuyển sang Zalo.');
+                window.location.href = "https://zalo.me/0794221549";
+            });
+            dongModal('modalRobux');
+        }
+
         async function hienThiLichSu() {
             if(!currentUser) { document.getElementById('historyList').innerHTML = 'Vui lòng đăng nhập để xem lịch sử.'; return; }
             await fetchFirebaseData();
@@ -1489,25 +1637,75 @@
             document.getElementById('adminLoginBox').style.display = 'none';
             document.getElementById('adminPanelBox').style.display = 'block';
 
+            let khuVucTrangThaiShop = document.getElementById('khuVucTrangThaiShop');
             let khuVucThemSP = document.getElementById('khuVucThemSanPham');
             let khuVucSuaTien = document.getElementById('khuVucBienDongTien');
             let khuVucSuaSP = document.getElementById('khuVucQuanLySanPham');
             let khuVucVoucher = document.getElementById('khuVucQuanLyVoucher');
+            let khuVucQuanLyCTV = document.getElementById('khuVucQuanLyCTV');
 
             if(role === 'ctv') {
+                if(khuVucTrangThaiShop) khuVucTrangThaiShop.style.display = 'none';
                 if(khuVucThemSP) khuVucThemSP.style.display = 'none';
                 if(khuVucSuaTien) khuVucSuaTien.style.display = 'none';
                 if(khuVucSuaSP) khuVucSuaSP.style.display = 'none';
                 if(khuVucVoucher) khuVucVoucher.style.display = 'none';
+                if(khuVucQuanLyCTV) khuVucQuanLyCTV.style.display = 'none';
             } else {
+                if(khuVucTrangThaiShop) khuVucTrangThaiShop.style.display = 'flex';
                 if(khuVucThemSP) khuVucThemSP.style.display = 'block';
                 if(khuVucSuaTien) khuVucSuaTien.style.display = 'block';
                 if(khuVucSuaSP) khuVucSuaSP.style.display = 'block';
                 if(khuVucVoucher) khuVucVoucher.style.display = 'block';
+                if(khuVucQuanLyCTV) khuVucQuanLyCTV.style.display = 'block';
                 loadDanhSachSanPhamAdmin();
                 loadDanhSachVoucherAdmin();
+                loadDanhSachCTVAdmin();
             }
             loadQuanLyDonHangAdmin();
+        }
+
+        async function adminThemHoacDoiMkCTV() {
+            let u = document.getElementById('newCtvUser').value.trim().toLowerCase();
+            let name = document.getElementById('newCtvName').value.trim();
+            let pass = document.getElementById('newCtvPass').value.trim();
+            if(!u || !name || !pass) { alert('Vui lòng điền đầy đủ thông tin tài khoản, tên và mật khẩu CTV!'); return; }
+            await fetchFirebaseData();
+            danhSachCTV[u] = { pass: pass, name: name };
+            await saveFirebaseData();
+            alert(`Đã lưu/cập nhật thành công tài khoản CTV [${u}]!`);
+            document.getElementById('newCtvUser').value = '';
+            document.getElementById('newCtvName').value = '';
+            document.getElementById('newCtvPass').value = '';
+            loadDanhSachCTVAdmin();
+        }
+
+        function loadDanhSachCTVAdmin() {
+            let container = document.getElementById('adminCtvListContainer');
+            if(!container) return;
+            if(!danhSachCTV || Object.keys(danhSachCTV).length === 0) {
+                container.innerHTML = 'Chưa có CTV nào.';
+                return;
+            }
+            let html = '';
+            for(let username in danhSachCTV) {
+                let ctv = danhSachCTV[username];
+                html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                    <span><b>${ctv.name}</b> (User: <b style="color:#38bdf8;">${username}</b> - MK: ${ctv.pass})</span>
+                    <button onclick="adminXoaCTV('${username}')" style="background:#ef4444; color:#fff; border:none; padding:2px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Kick / Xóa</button>
+                </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        async function adminXoaCTV(username) {
+            if(confirm(`Bạn có chắc muốn xóa/kick CTV [${username}] không?`)) {
+                await fetchFirebaseData();
+                delete danhSachCTV[username];
+                await saveFirebaseData();
+                loadDanhSachCTVAdmin();
+                alert('Đã xóa CTV thành công!');
+            }
         }
 
         async function adminTaoVoucherMoi() {
