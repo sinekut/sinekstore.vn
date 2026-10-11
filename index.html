@@ -290,6 +290,12 @@
                 <button class="action-btn" style="background:#f87171;" onclick="kiemTraAdmin()">Đăng Nhập Hệ Thống</button>
             </div>
             <div id="adminPanelBox" style="display:none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); padding: 10px; border-radius: 12px; margin-bottom: 15px;">
+                    <div>
+                        <span style="font-size: 12px; color: #f87171; font-weight: bold;">🛡 Bạn đang đăng nhập quyền Quản Trị / CTV</span>
+                    </div>
+                    <button class="action-btn" style="width: 120px; background: #ef4444; font-size: 11px; padding: 6px;" onclick="thucHienDangXuatAdminHoacCTV()">🚪 Đăng Xuất QTV</button>
+                </div>
                 <div class="card" id="khuVucTrangThaiShop" style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <h3 style="font-size:14px; color:#38bdf8; margin-bottom:3px; text-align: left;">Trạng thái Admin Shop</h3>
@@ -512,28 +518,6 @@
             </div>
         </div>
     </div>
-    <div class="modal" id="modalRobux">
-        <div class="modal-content">
-            <div class="modal-title-custom" id="modalRobuxTitle">Mua Robux</div>
-            <div class="form-group"><label>Gói sản phẩm:</label><input type="text" id="rbxProductName" class="form-control" readonly></div>
-            <div class="form-group"><label>Đơn giá:</label><input type="text" id="rbxProductPrice" class="form-control" readonly></div>
-            <div class="form-group"><label>Số lượng gói:</label><input type="number" id="rbxQuantity" class="form-control" value="1" min="1" oninput="tinhTienRobux()"></div>
-            <div class="form-group">
-                <label>Mã Voucher Giảm Giá:</label>
-                <div style="display: flex; gap: 6px;">
-                    <input type="text" id="rbxVoucherInput" class="form-control" placeholder="Mã voucher...">
-                    <button type="button" class="action-btn" style="width: 90px; font-size: 11px;" onclick="apDungVoucherChoRobux()">Áp Dụng</button>
-                </div>
-            </div>
-            <div class="form-group"><label>Tổng tiền thanh toán:</label><input type="text" id="rbxTotalMoney" class="form-control" style="color: #38bdf8; font-weight: bold;" readonly></div>
-            <div class="form-group"><label>Tên đăng nhập Roblox:</label><input type="text" id="rbxGameUser" class="form-control" placeholder="Tên đăng nhập Roblox"></div>
-            <div class="form-group"><label>Số điện thoại / Zalo:</label><input type="text" id="rbxPhone" class="form-control" placeholder="Số điện thoại"></div>
-            <div class="modal-buttons">
-                <button class="btn-close" onclick="dongModal('modalRobux')">Hủy</button>
-                <button class="btn-submit" onclick="xacNhanThanhToanRobux()">Xác Nhận & Gửi Zalo</button>
-            </div>
-        </div>
-    </div>
     <div class="modal" id="modalAuth">
         <div class="modal-content">
             <div class="modal-title-custom">Tài Khoản Sinek Store</div>
@@ -607,9 +591,7 @@
             giftgamepass: [
                 { id: 7, name: "Gamepass X2 Drop / X2 Money", price: 120000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ],
-            robux120h: [
-                { id: 201, name: "Gói 1,000 Robux (120h)", price: 150000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
-            ],
+            robux120h: [],
             robuxglobal: [
                 { id: 301, name: "Gói 800 Robux Global", price: 180000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ]
@@ -716,26 +698,6 @@
 
             document.getElementById(totalId).value = finalPrice.toLocaleString() + ' đ (Đã giảm ' + discount.toLocaleString() + 'đ)';
             alert(`Áp dụng thành công mã [${vCode}]! Đã trừ trực tiếp vào tổng tiền.`);
-        }
-
-        async function apDungVoucherChoRobux() {
-            let vCode = document.getElementById('rbxVoucherInput').value.trim().toUpperCase();
-            if(!vCode) { alert('Vui lòng nhập mã voucher!'); return; }
-            await fetchFirebaseData();
-            let vData = databaseVouchers[vCode];
-            if(!vData) { alert('Mã voucher này không tồn tại!'); return; }
-            if(vData.stock <= 0) { alert('Mã voucher đã hết lượt sử dụng!'); return; }
-            let basePrice = sanphamDangChon.basePrice !== undefined ? sanphamDangChon.basePrice : sanphamDangChon.price;
-            let qty = parseInt(document.getElementById('rbxQuantity').value) || 1;
-            let subTotal = basePrice * qty;
-            let discount = vData.type === 'amount' ? vData.value : subTotal * (vData.value / 100);
-            let finalPrice = subTotal - discount;
-            if(finalPrice < 0) finalPrice = 0;
-            sanphamDangChon.price = finalPrice;
-            appliedVoucherCode = vCode;
-            discountAmountGlobal = discount;
-            document.getElementById('rbxTotalMoney').value = finalPrice.toLocaleString() + ' đ (Đã giảm ' + discount.toLocaleString() + 'đ)';
-            alert(`Áp dụng thành công mã [${vCode}]!`);
         }
 
         async function moModalTopNap() {
@@ -983,6 +945,59 @@
             document.getElementById('pageHome').style.display = 'none';
             document.getElementById('pageProducts').style.display = 'block';
             await fetchFirebaseData();
+
+            if(keyDM === 'robux120h') {
+                document.getElementById('categoryTitle').innerText = 'Dịch Vụ Mua Robux 120h';
+                document.getElementById('productList').innerHTML = `
+                    <div class="card" style="grid-column: span 2; text-align: left; padding: 20px;">
+                        <h3 style="font-size: 16px; color: #38bdf8; margin-bottom: 15px; text-align: center; text-transform: uppercase;">⚡ Đặt Mua Robux 120h Nhanh Chóng</h3>
+                        
+                        <div class="form-group">
+                            <label>Tên đăng nhập Roblox:</label>
+                            <input type="text" id="nhanhRobuxUser" class="form-control" placeholder="Nhập tên đăng nhập Roblox của bạn...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Số lượng Robux cần mua:</label>
+                            <input type="number" id="nhanhRobuxQty" class="form-control" value="1000" min="100" step="50" oninput="tinhTienRobuxNhanh()">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Chọn Rate (VNĐ / 1RB - Từ 100 đến 190):</label>
+                            <select id="nhanhRobuxRate" class="form-control" onchange="tinhTienRobuxNhanh()">
+                                <option value="100">Rate 100 (100đ / 1RB)</option>
+                                <option value="110">Rate 110 (110đ / 1RB)</option>
+                                <option value="120">Rate 120 (120đ / 1RB)</option>
+                                <option value="130">Rate 130 (130đ / 1RB)</option>
+                                <option value="140">Rate 140 (140đ / 1RB)</option>
+                                <option value="150">Rate 150 (150đ / 1RB)</option>
+                                <option value="160">Rate 160 (160đ / 1RB)</option>
+                                <option value="170">Rate 170 (170đ / 1RB)</option>
+                                <option value="180">Rate 180 (180đ / 1RB)</option>
+                                <option value="190">Rate 190 (190đ / 1RB)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Số điện thoại / Zalo liên hệ:</label>
+                            <input type="text" id="nhanhRobuxPhone" class="form-control" placeholder="Số điện thoại của bạn...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tổng tiền thanh toán:</label>
+                            <input type="text" id="nhanhRobuxTotal" class="form-control" style="color: #38bdf8; font-weight: bold; font-size: 15px;" readonly>
+                        </div>
+
+                        <div class="note-box" style="font-size: 11px; text-align: left; margin: 15px 0; line-height: 1.5; color: #f87171; background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.4); padding: 10px; border-radius: 8px;">
+                            ⚠ <b>LƯU Ý:</b> Lưu ý kiểm tra kĩ xem tài khoản đã được tạo gamepass 120h chưa. Nếu không biết check hoặc tạo thì vui lòng liên hệ Admin web để được hỗ trợ!
+                        </div>
+
+                        <button class="action-btn" style="background: #10b981; padding: 12px; font-size: 14px;" onclick="xacNhanDatRobuxNhanh()">Xác Nhận Đặt Đơn & Gửi Zalo</button>
+                    </div>
+                `;
+                tinhTienRobuxNhanh();
+                return;
+            }
             
             let listHTML = '';
             let danhSach = databaseSanPham[keyDM] || [];
@@ -991,12 +1006,11 @@
             else if(keyDM === 'caythue') document.getElementById('categoryTitle').innerText = 'Cày Thuê King Legacy';
             else if(keyDM === 'itemnguyenlieu') document.getElementById('categoryTitle').innerText = 'Item & Nguyên Liệu King Legacy';
             else if(keyDM === 'giftgamepass') document.getElementById('categoryTitle').innerText = 'Gift Gamepass King Legacy';
-            else if(keyDM === 'robux120h') document.getElementById('categoryTitle').innerText = 'Danh Mục Robux 120h';
             else if(keyDM === 'robuxglobal') document.getElementById('categoryTitle').innerText = 'Danh Mục Robux Global';
             
             danhSach.forEach(sp => {
                 let isSoldOut = sp.soldOut;
-                let btnText = (keyDM === 'robux120h' || keyDM === 'robuxglobal') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Mua Ngay') : ((keyDM === 'giftgamepass') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Xác Nhận Đặt Trước') : (isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn'));
+                let btnText = (keyDM === 'robuxglobal') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Mua Ngay') : ((keyDM === 'giftgamepass') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Xác Nhận Đặt Trước') : (isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn'));
                 let btnStyle = isSoldOut ? 'background: #64748b; cursor: not-allowed;' : '';
                 
                 let onclickAttr = '';
@@ -1005,7 +1019,7 @@
                     else if(keyDM === 'caythue') onclickAttr = `onclick="kiemTraTruocKhiMoModal('ct', '${sp.name}', ${sp.price})"`;
                     else if(keyDM === 'itemnguyenlieu') onclickAttr = `onclick="kiemTraTruocKhiMoModal('it', '${sp.name}', ${sp.price})"`;
                     else if(keyDM === 'giftgamepass') onclickAttr = `onclick="kiemTraTruocKhiMoModal('gp', '${sp.name}', ${sp.price})"`;
-                    else if(keyDM === 'robux120h' || keyDM === 'robuxglobal') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbx', '${sp.name}', ${sp.price})"`;
+                    else if(keyDM === 'robuxglobal') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbxglobal', '${sp.name}', ${sp.price})"`;
                 }
                 
                 let productImg = sp.image || fixedImage;
@@ -1014,9 +1028,7 @@
                 let noteAccHTML = (keyDM === 'muaacc') ? `<div style="font-size: 10px; color: #38bdf8; margin-bottom: 8px; font-style: italic; line-height: 1.3;">💡 Nếu muốn xem ảnh của acc trọn vẹn, vui lòng liên hệ qua Zalo hoặc FB của admin!</div>` : '';
                 
                 let customNoteHTML = '';
-                if(keyDM === 'robux120h') {
-                    customNoteHTML = `<div style="font-size: 10px; color: #f87171; margin-bottom: 6px; font-style: italic; line-height: 1.3;">⚠ Lưu ý: Rate càng thấp chờ càng lâu</div>`;
-                } else if(keyDM === 'robuxglobal') {
+                if(keyDM === 'robuxglobal') {
                     customNoteHTML = `<div style="font-size: 10px; color: #38bdf8; margin-bottom: 6px; font-style: italic; line-height: 1.3;">ℹ️ Lưu ý: Robux sẽ tự động vào acc sau 12-24h có thể sớm hơn</div>`;
                 }
 
@@ -1034,7 +1046,6 @@
             });
             document.getElementById('productList').innerHTML = listHTML;
         }
-
         function kiemTraTruocKhiMoModal(loai, ten, gia) {
             if(!currentUser) {
                 alert('Vui lòng Đăng Nhập hoặc Đăng Ký tài khoản trước khi mua hàng!');
@@ -1045,7 +1056,7 @@
             else if(loai === 'ct') moModalCayThue(ten, gia);
             else if(loai === 'it') moModalItem(ten, gia);
             else if(loai === 'gp') moModalGiftGamepass(ten, gia);
-            else if(loai === 'rbx') moModalRobux(ten, gia);
+            else if(loai === 'rbxglobal') moModalRobuxGlobal(ten, gia);
         }
 
         function veTrangChu() {
@@ -1293,24 +1304,75 @@
             document.getElementById('gpTotalMoney').value = total.toLocaleString() + ' đ' + disText;
         }
 
-        function moModalRobux(ten, gia) {
-            sanphamDangChon = { name: ten, price: gia, basePrice: gia };
-            appliedVoucherCode = null;
-            discountAmountGlobal = 0;
-            document.getElementById('modalRobuxTitle').innerText = "Mua " + ten;
-            document.getElementById('rbxProductName').value = ten;
-            document.getElementById('rbxProductPrice').value = gia.toLocaleString() + ' đ';
-            document.getElementById('rbxQuantity').value = 1;
-            document.getElementById('rbxTotalMoney').value = gia.toLocaleString() + ' đ';
-            document.getElementById('modalRobux').style.display = 'flex';
+        function tinhTienRobuxNhanh() {
+            let rate = parseInt(document.getElementById('nhanhRobuxRate').value) || 100;
+            let qty = parseInt(document.getElementById('nhanhRobuxQty').value) || 0;
+            if(qty < 0) qty = 0;
+            let total = rate * qty;
+            document.getElementById('nhanhRobuxTotal').value = total.toLocaleString() + ' đ';
         }
 
-        function tinhTienRobux() {
-            let qty = parseInt(document.getElementById('rbxQuantity').value) || 1;
-            let total = sanphamDangChon.basePrice * qty - discountAmountGlobal;
-            if(total < 0) total = 0;
-            sanphamDangChon.price = total;
-            document.getElementById('rbxTotalMoney').value = total.toLocaleString() + ' đ';
+        async function xacNhanDatRobuxNhanh() {
+            let robuxUser = document.getElementById('nhanhRobuxUser').value.trim();
+            let qty = parseInt(document.getElementById('nhanhRobuxQty').value) || 0;
+            let rate = parseInt(document.getElementById('nhanhRobuxRate').value) || 100;
+            let phone = document.getElementById('nhanhRobuxPhone').value.trim();
+            let totalMoney = parseInt(document.getElementById('nhanhRobuxTotal').value.replace(/[^0-9]/g, '')) || 0;
+
+            if(!robuxUser || !phone) {
+                alert('Vui lòng điền đầy đủ Tên đăng nhập Roblox và Số điện thoại!');
+                return;
+            }
+            if(qty <= 0) {
+                alert('Số lượng Robux không hợp lệ!');
+                return;
+            }
+
+            // Cảnh báo nếu rate <= 140
+            if(rate <= 140) {
+                let xacNhanRateThap = confirm('⚠ Lưu ý việc chọn Rate thấp sẽ dẫn đến việc đơn chờ lâu !\nBạn có chắc chắn muốn tiếp tục đặt đơn với Rate này không?');
+                if(!xacNhanRateThap) return;
+            }
+
+            if(currentUser) {
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
+                let userData = await res.json() || { balance: 0 };
+                let currentBal = userData.balance || 0;
+                
+                if(currentBal < totalMoney) {
+                    alert('Số dư tài khoản web của bạn không đủ để thanh toán đơn này! Vui lòng nạp thêm tiền.');
+                    return;
+                }
+                userData.balance = currentBal - totalMoney;
+                await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(userData)
+                });
+                capNhatGiaoDienUser();
+            }
+
+            let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
+            let timeNow = new Date().toLocaleString('vi-VN');
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Tên đăng nhập Roblox: ${robuxUser}\n- Số lượng RBX: ${qty}\n- Rate chọn: ${rate}\n- SĐT: ${phone}`;
+
+            await luuVaTaoDonHang({
+                code: randomCode,
+                webUser: currentUser || 'Khách vãng lai',
+                item: `Robux 120h (SL: ${qty} RBX - Rate ${rate})`,
+                price: totalMoney,
+                details: chiTiet,
+                status: '⏳ Chờ Duyệt',
+                handledBy: null,
+                time: timeNow
+            });
+
+            let noiDungGui = `[ĐƠN ROBUX 120H - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Roblox: ${robuxUser}\n- Số lượng: ${qty} RBX\n- Rate: ${rate}\n- Tổng tiền: ${totalMoney.toLocaleString()}đ\n- SĐT: ${phone}\n(Lưu ý: Đã kiểm tra gamepass 120h)`;
+
+            navigator.clipboard.writeText(noiDungGui).then(() => {
+                alert(`Đặt đơn thành công! Đã trừ ${totalMoney.toLocaleString()}đ.\nĐã sao chép nội dung đơn hàng! Hệ thống sẽ chuyển sang Zalo.`);
+                window.location.href = "https://zalo.me/0794221549";
+            });
         }
 
         async function luuVaTaoDonHang(chiTietDon) {
@@ -1512,40 +1574,37 @@
             dongModal('modalGiftGamepass');
         }
 
-        async function xacNhanThanhToanRobux() {
-            let gUser = document.getElementById('rbxGameUser').value.trim();
-            let phone = document.getElementById('rbxPhone').value.trim();
-            if(!gUser || !phone) { alert('Vui lòng điền đủ tên Roblox và SĐT!'); return; }
+        async function xacNhanRobuxGlobal(ten, gia) {
+            let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
+            let timeNow = new Date().toLocaleString('vi-VN');
+            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${ten}`;
+            
             if(currentUser) {
                 let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
                 let userData = await res.json() || { balance: 0 };
-                if((userData.balance || 0) < sanphamDangChon.price) { alert('Số dư không đủ!'); return; }
-                userData.balance -= sanphamDangChon.price;
+                if((userData.balance || 0) < gia) { alert('Số dư không đủ!'); return; }
+                userData.balance -= gia;
                 await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {
                     method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(userData)
                 });
                 capNhatGiaoDienUser();
             }
-            let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);
-            let timeNow = new Date().toLocaleString('vi-VN');
-            let chiTiet = `Tài khoản web: ${currentUser || 'Khách vãng lai'}\n- Tên Roblox: ${gUser}\n- SĐT: ${phone}`;
-            
+
             await luuVaTaoDonHang({ 
                 code: randomCode, 
                 webUser: currentUser || 'Vãng lai', 
-                item: sanphamDangChon.name, 
-                price: sanphamDangChon.price, 
+                item: ten, 
+                price: gia, 
                 details: chiTiet, 
                 status: '⏳ Chờ Duyệt', 
                 handledBy: null,
                 time: timeNow 
             });
             
-            navigator.clipboard.writeText(`[ĐƠN ROBUX - ${randomCode}]\n- Sản phẩm: ${sanphamDangChon.name}\n- Roblox: ${gUser}\n- SĐT: ${phone}`).then(() => {
+            navigator.clipboard.writeText(`[ĐƠN ROBUX GLOBAL - ${randomCode}]\n- Sản phẩm: ${ten}\n- Khách: ${currentUser}`).then(() => {
                 alert('Đặt đơn thành công! Đã sao chép nội dung, chuyển sang Zalo.');
                 window.location.href = "https://zalo.me/0794221549";
             });
-            dongModal('modalRobux');
         }
 
         async function hienThiLichSu() {
@@ -1556,10 +1615,17 @@
             let html = '';
             userOrders.forEach(h => {
                 let badgeColor = h.status.includes('Chờ Duyệt') ? '#fbbf24' : (h.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
+                
+                // Ẩn mật khẩu game đối với khách hàng trong lịch sử cá nhân
+                let displayDetails = h.details;
+                if(displayDetails && displayDetails.includes('Mật khẩu:')) {
+                    displayDetails = displayDetails.replace(/(- Mật khẩu: )(.*)/g, '$1••••••••');
+                }
+
                 html += `<div style="background:rgba(15,23,42,0.5); border:1px solid rgba(255,255,255,0.15); padding:10px; border-radius:12px; margin-bottom:8px; text-align:left;">
                     <b style="color:#38bdf8;">Mã đơn: ${h.code}</b> | Trạng thái: <b style="color:${badgeColor};">${h.status}</b><br>
                     <span>Sản phẩm: ${h.item}</span><br><span>Tổng giá: ${h.price.toLocaleString()}đ</span><br>
-                    <pre style="font-size:11px; color:#94a3b8; font-family:inherit; white-space:pre-wrap; margin-top:4px;">${h.details}</pre>
+                    <pre style="font-size:11px; color:#94a3b8; font-family:inherit; white-space:pre-wrap; margin-top:4px;">${displayDetails}</pre>
                     <span style="font-size:10px; color:#64748b;">Thời gian: ${h.time}</span></div>`;
             });
             document.getElementById('historyList').innerHTML = html;
@@ -1608,9 +1674,11 @@
                 return;
             }
 
+            let matchedUsername = null;
             let matchedCTVName = null;
             for(let username in danhSachCTV) {
                 if(danhSachCTV[username].pass === passInput) {
+                    matchedUsername = username;
                     matchedCTVName = danhSachCTV[username].name;
                     break;
                 }
@@ -1619,6 +1687,7 @@
             if(matchedCTVName) {
                 localStorage.setItem('sinek_role', 'ctv');
                 localStorage.setItem('sinek_username', matchedCTVName);
+                localStorage.setItem('sinek_ctv_key', matchedUsername);
                 hienThiGiaoDienTheoQuyen('ctv');
                 alert(`Đăng nhập thành công! Chào mừng ${matchedCTVName}`);
             } else {
@@ -1626,10 +1695,39 @@
             }
         }
 
-        function kiemTraQuyenQTVDaLuu() {
+        async function kiemTraQuyenQTVDaLuu() {
             let savedRole = localStorage.getItem('sinek_role');
+            let savedKey = localStorage.getItem('sinek_ctv_key');
+            
+            if(savedRole === 'ctv' && savedKey) {
+                await fetchFirebaseData();
+                if(!danhSachCTV[savedKey]) {
+                    alert('Tài khoản CTV của bạn đã bị Quản Trị Viên xóa hoặc thay đổi quyền truy cập!');
+                    thucHienDangXuatAdminHoacCTV();
+                    return;
+                }
+            }
+
             if(savedRole === 'admin' || savedRole === 'ctv') {
                 hienThiGiaoDienTheoQuyen(savedRole);
+            }
+        }
+
+        function thucHienDangXuatAdminHoacCTV() {
+            if(confirm('Bạn có chắc chắn muốn đăng xuất khỏi khu vực Quản Trị / CTV không?')) {
+                localStorage.removeItem('sinek_role');
+                localStorage.removeItem('sinek_username');
+                localStorage.removeItem('sinek_ctv_key');
+                
+                let panelBox = document.getElementById('adminPanelBox');
+                let loginBox = document.getElementById('adminLoginBox');
+                if(panelBox) panelBox.style.display = 'none';
+                if(loginBox) loginBox.style.display = 'block';
+                
+                let passInput = document.getElementById('adminPassInput');
+                if(passInput) passInput.value = '';
+                
+                alert('Đã đăng xuất khu vực quản lý thành công!');
             }
         }
 
@@ -1704,7 +1802,7 @@
                 delete danhSachCTV[username];
                 await saveFirebaseData();
                 loadDanhSachCTVAdmin();
-                alert('Đã xóa CTV thành công!');
+                alert('Đã xóa CTV thành công và vô hiệu hóa mọi phiên đăng nhập của họ!');
             }
         }
 
@@ -1765,16 +1863,25 @@
             let listEl = document.getElementById('adminOrderList');
             if(!listEl) return;
             if(allOrders.length === 0) { listEl.innerHTML = 'Chưa có đơn hàng nào chờ duyệt.'; return; }
+            
+            let savedRole = localStorage.getItem('sinek_role');
             let html = '';
+            
             allOrders.forEach((o, index) => {
                 let badgeColor = o.status.includes('Chờ Duyệt') ? '#fbbf24' : (o.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
                 let nguoiDuyetHTML = o.handledBy ? `<br><span style="color: #10b981; font-weight: bold;">👤 Người duyệt/xử lý: ${o.handledBy}</span>` : `<br><span style="color: #94a3b8; font-style: italic;">👤 Người duyệt: Chưa có ai nhận đơn</span>`;
                 
+                // Nếu là CTV thì ẩn mật khẩu game, chỉ Admin chính (role === 'admin') mới xem được Full HD không che
+                let displayDetails = o.details;
+                if(savedRole === 'ctv' && displayDetails && displayDetails.includes('Mật khẩu:')) {
+                    displayDetails = displayDetails.replace(/(- Mật khẩu: )(.*)/g, '$1🔒 [Đã ẩn mật khẩu - Chỉ Admin chính mới xem được]');
+                }
+
                 html += `<div style="background:rgba(30,41,59,0.6); border:1px solid rgba(255,255,255,0.15); padding:10px; border-radius:12px; margin-bottom:8px; text-align:left;">
                     <b style="color:#38bdf8;">Mã đơn: ${o.code}</b> | Trạng thái: <b style="color:${badgeColor};">${o.status}</b>
                     ${nguoiDuyetHTML}<br>
                     <span>Khách đặt: <b>${o.webUser}</b></span><br><span>Sản phẩm: ${o.item} (${o.price.toLocaleString()}đ)</span><br>
-                    <pre style="font-size:11px; color:#cbd5e1; font-family:inherit; white-space:pre-wrap; margin-top:4px; background:rgba(15,23,42,0.7); padding:6px; border-radius:8px;">${o.details}</pre>
+                    <pre style="font-size:11px; color:#cbd5e1; font-family:inherit; white-space:pre-wrap; margin-top:4px; background:rgba(15,23,42,0.7); padding:6px; border-radius:8px;">${displayDetails}</pre>
                     <div style="display:flex; gap:6px; margin-top:8px;">
                         <button class="action-btn" style="background:#38bdf8; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '🔄 Đang Xử Lý')">Nhận Đơn / Xác Nhận</button>
                         <button class="action-btn" style="background:#10b981; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '✅ Thành Công')">Hoàn Thành</button>
@@ -1979,7 +2086,6 @@
                 alert('Đã xóa sản phẩm thành công!');
             }
         }
-
         let currentChatRoomId = null;
         let chatInterval = null;
         let allChats = {};
