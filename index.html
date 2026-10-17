@@ -177,7 +177,9 @@
             <div class="popup-header">THÔNG BÁO</div>  
             <div class="popup-body">  
                 • Khi nạp tiền qua QR ZaloPay, quý khách nhớ ghi <b>Đúng Nội Dung chuyển khoản</b> (VD: <i>NAP_tên_tài_khoản</i>).<br><br>  
-                • Nếu admin bận hoặc phản hồi chậm, vui lòng liên hệ các <b>Cộng Tác Viên (CTV)</b> để được hỗ trợ nhanh chóng!  
+                • Nếu admin bận hoặc phản hồi chậm, quý khách có thể vào <b>Nhóm Duyệt Nhanh</b> để được CTV hỗ trợ ngay lập tức:<br>  
+                👉 <a href="https://zalo.me/g/ew0hzswegva9lpxu3uk4" target="_blank" style="color: #38bdf8;">Nhóm Zalo Duyệt Nhanh</a><br>  
+                👉 <a href="https://m.me/j/3mM40YihdT9zYr0W/?send_source=gc%3Acopy_invite_link_t" target="_blank" style="color: #38bdf8;">Nhóm Messenger Duyệt Nhanh</a>  
             </div>  
             <button class="popup-btn" onclick="dongPopupNotice()">ĐÓNG</button>  
         </div>  
@@ -186,10 +188,12 @@
     <div class="modal" id="modalContactAdmin">  
         <div class="modal-content" style="text-align: center;">  
             <div class="modal-title-custom">Chọn Kênh Liên Hệ</div>  
-            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Vui lòng chọn phương thức liên hệ với Admin:</p>  
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Vui lòng chọn phương thức liên hệ hoặc nhóm duyệt nhanh với Admin & CTV:</p>  
             <div style="display: flex; flex-direction: column; gap: 10px;">  
-                <button class="action-btn" style="background: #0284c7; padding: 12px; font-size: 14px;" onclick="lienHeZalo()">💬 Liên Hệ Qua Zalo</button>  
-                <button class="action-btn" style="background: #2563eb; padding: 12px; font-size: 14px;" onclick="lienHeFB()">🌐 Liên Hệ Qua Facebook</button>  
+                <button class="action-btn" style="background: #0284c7; padding: 10px; font-size: 13px;" onclick="lienHeZalo()">💬 Chat Zalo Cá Nhân</button>  
+                <button class="action-btn" style="background: #2563eb; padding: 10px; font-size: 13px;" onclick="lienHeFB()">🌐 Chat Facebook Cá Nhân</button>  
+                <button class="action-btn" style="background: #10b981; padding: 10px; font-size: 13px;" onclick="window.open('https://zalo.me/g/ew0hzswegva9lpxu3uk4', '_blank')">👥 Tham Gia Nhóm Zalo Duyệt Nhanh</button>  
+                <button class="action-btn" style="background: #7c3aed; padding: 10px; font-size: 13px;" onclick="window.open('https://m.me/j/3mM40YihdT9zYr0W/?send_source=gc%3Acopy_invite_link_t', '_blank')">👥 Tham Gia Nhóm Mess Duyệt Nhanh</button>  
             </div>  
             <button class="btn-close" style="width: 100%; margin-top: 15px;" onclick="dongModal('modalContactAdmin')">Đóng</button>  
         </div>  
@@ -272,6 +276,10 @@
             <div class="card" style="margin-bottom:15px; text-align:center;">  
                 <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align:left;">1. Nạp qua ZaloPay</h3>  
                 <div id="depositQrContainer"></div>  
+                <div style="margin-top: 12px; display: flex; gap: 8px; flex-direction: column;">  
+                    <a href="https://zalo.me/g/ew0hzswegva9lpxu3uk4" target="_blank" class="action-btn" style="background: #0284c7; text-decoration: none; text-align: center; padding: 10px;">👥 Vào Nhóm Zalo Duyệt Nhanh</a>  
+                    <a href="https://m.me/j/3mM40YihdT9zYr0W/?send_source=gc%3Acopy_invite_link_t" target="_blank" class="action-btn" style="background: #2563eb; text-decoration: none; text-align: center; padding: 10px;">👥 Vào Nhóm Messenger Duyệt Nhanh</a>  
+                </div>  
             </div>  
             <div class="card">  
                 <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">2. Nạp qua Thẻ Cào</h3>  
@@ -481,7 +489,7 @@
             <div class="form-group"><label>Số điện thoại liên hệ:</label><input type="text" id="accPhone" class="form-control" placeholder="Số điện thoại của bạn"></div>  
             <div class="modal-buttons">  
                 <button class="btn-close" onclick="dongModal('modalMuaAcc')">Hủy</button>  
-                <button class="btn-submit" onclick="xacNhanThanhToanMuaAcc()">Xác Nhận & Gửi Zalo</button>  
+                <button class="btn-submit" onclick="xacNhanThanhToanMuaAcc()">Xác Nhận & Gửi</button>  
             </div>  
         </div>  
     </div>  
@@ -506,7 +514,7 @@
             <div class="form-group"><label>Số điện thoại:</label><input type="text" id="ctPhone" class="form-control" placeholder="Số điện thoại"></div>  
             <div class="modal-buttons">  
                 <button class="btn-close" onclick="dongModal('modalCayThue')">Hủy</button>  
-                <button class="btn-submit" onclick="xacNhanThanhToanCayThue()">Xác Nhận & Gửi Zalo</button>  
+                <button class="btn-submit" onclick="xacNhanThanhToanCayThue()">Xác Nhận & Gửi</button>  
             </div>  
         </div>  
     </div>  
@@ -518,7 +526,7 @@
             <div class="form-group"><label>Đơn giá:</label><input type="text" id="itProductPrice" class="form-control" readonly></div>  
             <div class="form-group"><label>Số lượng cần mua:</label><input type="number" id="itQuantity" class="form-control" value="1" min="1" oninput="tinhTienItem()"></div>  
             <div class="form-group">  
-                <label>Mã Voucher Giảm Giá (Если có):</label>  
+                <label>Mã Voucher Giảm Giá (Nếu có):</label>  
                 <div style="display: flex; gap: 6px;">  
                     <input type="text" id="itVoucherInput" class="form-control" placeholder="Nhập mã voucher...">  
                     <button type="button" class="action-btn" style="width: 90px; font-size: 11px;" onclick="apDungVoucherChoDonHang('it')">Áp Dụng</button>  
@@ -529,7 +537,7 @@
             <div class="form-group"><label>Số điện thoại:</label><input type="text" id="itPhone" class="form-control" placeholder="Số điện thoại"></div>  
             <div class="modal-buttons">  
                 <button class="btn-close" onclick="dongModal('modalItem')">Hủy</button>  
-                <button class="btn-submit" onclick="xacNhanThanhToanItem()">Xác Nhận & Gửi Zalo</button>  
+                <button class="btn-submit" onclick="xacNhanThanhToanItem()">Xác Nhận & Gửi</button>  
             </div>  
         </div>  
     </div>  
@@ -579,7 +587,7 @@
             </div>  
             <div class="modal-buttons">  
                 <button class="btn-close" onclick="dongModal('modalRobux120h')">Hủy</button>  
-                <button class="btn-submit" style="background:#10b981;" onclick="xacNhanDatRobux120hModal()">Xác Nhận & Gửi Zalo</button>  
+                <button class="btn-submit" style="background:#10b981;" onclick="xacNhanDatRobux120hModal()">Xác Nhận & Gửi</button>  
             </div>  
         </div>  
     </div>  
@@ -646,13 +654,16 @@
         </div>  
     </div>
 
-    <!-- Modal Hiển Thị Ảnh Cảm Ơn Khi Đặt Hàng Thành Công -->
+    <!-- Modal Hiển Thị Ảnh Cảm Ơn Khi Đặt Hàng Thành Công (Có nút chọn Zalo hoặc Facebook) -->
     <div class="modal" id="modalThankYouCard">
         <div class="modal-content" style="max-width: 440px; text-align: center; background: rgba(15, 23, 42, 0.95);">
             <div class="modal-title-custom" style="color: #fbbf24; margin-bottom: 10px;">🎉 ĐẶT HÀNG THÀNH CÔNG!</div>
-            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">Cảm ơn bạn đã ủng hộ Sinek Store[span_1](start_span)[span_1](end_span). Hệ thống đã sao chép nội dung đơn hàng.</p>
-            <img src="https://i.ibb.co/1000005246.png" alt="Cảm ơn khách hàng" style="width: 100%; border-radius: 12px; border: 2px solid rgba(56,189,248,0.5); margin-bottom: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.5);">
-            <button class="action-btn" style="background: linear-gradient(135deg, #10b981, #047857); padding: 12px; font-size: 14px;" onclick="dongModalVaChuyenHuong()">Tiếp Tục Kết Nối Shop</button>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">Cảm ơn bạn đã ủng hộ Sinek Store. Nội dung đơn đã được sao chép, vui lòng chọn kênh gửi đơn bên dưới:</p>
+            <img src="https://i.ibb.co/674J0BCp/1792129936397.png" alt="Cảm ơn khách hàng" style="width: 100%; border-radius: 12px; border: 2px solid rgba(56,189,248,0.5); margin-bottom: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.5);">
+            <div style="display: flex; gap: 8px;">
+                <button class="action-btn" style="background: #0284c7; flex: 1; padding: 10px; font-size: 13px;" onclick="dongModalVaChuyenZalo()">💬 Gửi Qua Zalo</button>
+                <button class="action-btn" style="background: #2563eb; flex: 1; padding: 10px; font-size: 13px;" onclick="dongModalVaChuyenFB()">🌐 Gửi Qua Facebook</button>
+            </div>
         </div>
     </div>
 <script>  
@@ -698,13 +709,12 @@
     let databaseSanPham = defaultDatabaseSanPham;  
     let danhSachCTV = defaultDanhSachCTV;  
     let databaseVouchers = {};  
-    let moneyHistory = []; // Lưu lịch sử cộng trừ tiền
+    let moneyHistory = [];  
     let adminStatus = true;  
     let allOrders = [];  
     let appliedVoucherCode = null;  
     let discountAmountGlobal = 0;  
     let memoryProductCache = {};  
-    let targetZaloLink = "https://zalo.me/0794221549";
 
     function showToast(message, type = 'info') {  
         let container = document.getElementById('toastNotificationContainer');  
@@ -755,7 +765,7 @@
     }  
     function moMenuLienHe() { document.getElementById('modalContactAdmin').style.display = 'flex'; }  
     function lienHeZalo() { window.location.href = "https://zalo.me/0794221549"; }  
-    function lienHeFB() { window.location.href = "https://www.facebook.com/share/1Dy3Rqke3P/"; }  
+    function lienHeFB() { window.location.href = "https://www.facebook.com/share/1GurruAhF3/"; }  
     function hienThiMatKhau() {  
         let pwdInput = document.getElementById('authPassword');  
         pwdInput.type = (pwdInput.type === 'password') ? 'text' : 'password';  
@@ -766,14 +776,18 @@
         moModalDoiMk();  
     }  
 
-    function hienModalCamOnVaChuyenHuong(zaloUrl) {
-        targetZaloLink = zaloUrl;
+    function hienModalCamOn() {
         document.getElementById('modalThankYouCard').style.display = 'flex';
     }
 
-    function dongModalVaChuyenHuong() {
+    function dongModalVaChuyenZalo() {
         document.getElementById('modalThankYouCard').style.display = 'none';
-        window.location.href = targetZaloLink;
+        window.location.href = "https://zalo.me/0794221549";
+    }
+
+    function dongModalVaChuyenFB() {
+        document.getElementById('modalThankYouCard').style.display = 'none';
+        window.location.href = "https://www.facebook.com/share/1GurruAhF3/";
     }
     async function apDungVoucherChoDonHang(modalType) {  
         let inputId = modalType === 'acc' ? 'accVoucherInput' : (modalType === 'ct' ? 'ctVoucherInput' : (modalType === 'it' ? 'itVoucherInput' : 'gpVoucherInput'));  
@@ -1455,7 +1469,7 @@
 
         navigator.clipboard.writeText(noiDungGui).then(() => {  
             showToast('Đặt đơn thành công! Đã sao chép nội dung.', 'success');  
-            hienModalCamOnVaChuyenHuong("https://zalo.me/0794221549");  
+            hienModalCamOn();  
         });  
         dongModal('modalRobux120h');  
     }  
@@ -1510,7 +1524,7 @@
           
         navigator.clipboard.writeText(noiDungGui).then(() => {  
             showToast('Đặt đơn thành công! Đã sao chép nội dung.', 'success');  
-            hienModalCamOnVaChuyenHuong("https://zalo.me/0794221549");  
+            hienModalCamOn();  
         });  
         dongModal('modalMuaAcc');  
     }
@@ -1558,7 +1572,7 @@
           
         navigator.clipboard.writeText(noiDungGui).then(() => {  
             showToast('Đặt đơn thành công! Đã sao chép nội dung.', 'success');  
-            hienModalCamOnVaChuyenHuong("https://zalo.me/0794221549");  
+            hienModalCamOn();  
         });  
         dongModal('modalCayThue');  
     }  
@@ -1605,7 +1619,7 @@
           
         navigator.clipboard.writeText(noiDungGui).then(() => {  
             showToast('Đặt đơn thành công! Đã sao chép nội dung.', 'success');  
-            hienModalCamOnVaChuyenHuong("https://zalo.me/0794221549");  
+            hienModalCamOn();  
         });  
         dongModal('modalItem');  
     }  
@@ -1653,7 +1667,7 @@
           
         navigator.clipboard.writeText(noiDungGui).then(() => {  
             showToast('Đặt trước thành công! Đã sao chép nội dung đơn hàng.', 'success');  
-            hienModalCamOnVaChuyenHuong("https://zalo.me/0794221549");  
+            hienModalCamOn();  
         });  
         dongModal('modalGiftGamepass');  
     }  
@@ -1687,7 +1701,7 @@
           
         navigator.clipboard.writeText(`[ĐƠN ROBUX GLOBAL - ${randomCode}]\n- Sản phẩm: ${ten}\n- Khách: ${currentUser}`).then(() => {  
             showToast('Đặt đơn thành công!', 'success');  
-            hienModalCamOnVaChuyenHuong("https://zalo.me/0794221549");  
+            hienModalCamOn();  
         });  
     }  
 
@@ -1739,7 +1753,7 @@
         let noiDungGui = `[NẠP THẺ CÀO]\n- Tài khoản: ${currentUser || 'Chưa ĐN'}\n- Loại: ${tType}\n- Lựa chọn: ${selectedText}\n- Seri: ${tSeri}\n- Mã: ${tPin}`;  
         navigator.clipboard.writeText(noiDungGui).then(() => {  
             showToast('Đã sao chép thông tin thẻ!', 'success');  
-            hienModalCamOnVaChuyenHuong("https://zalo.me/0794221549");  
+            hienModalCamOn();  
         });  
     }  
 
@@ -1754,7 +1768,7 @@
         let noiDungGui = `[NẠP THẺ CÀO]\n- Tài khoản: ${currentUser || 'Chưa ĐN'}\n- Loại: ${tType}\n- Lựa chọn: ${selectedText}\n- Seri: ${tSeri}\n- Mã: ${tPin}`;  
         navigator.clipboard.writeText(noiDungGui).then(() => {  
             showToast('Đã sao chép thông tin thẻ!', 'success');  
-            hienModalCamOnVaChuyenHuong("https://www.facebook.com/share/1Dy3Rqke3P/");  
+            hienModalCamOn();  
         });  
     }
     async function kiemTraAdmin() {  
@@ -1850,7 +1864,7 @@
 
             if(canHandleMoney) {  
                 if(khuVucSuaTien) khuVucSuaTien.style.display = 'block';  
-                if(khuVucLichSuTien) khuVucLichSuTien.style.display = 'none'; // Chỉ admin chính thấy lịch sử tiền  
+                if(khuVucLichSuTien) khuVucLichSuTien.style.display = 'none';  
             } else {  
                 if(khuVucSuaTien) khuVucSuaTien.style.display = 'none';  
                 if(khuVucLichSuTien) khuVucLichSuTien.style.display = 'none';  
@@ -1906,7 +1920,7 @@
                     <button onclick="adminToggleQuyenTienCTV('${username}')" style="background:${btnToggleBg}; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">${btnToggleText}</button>  
                     <button onclick="adminXoaCTV('${username}')" style="background:#ef4444; color:#fff; border:none; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Xóa</button>  
                 </div>  
-            </div>`;  
+            `;  
         }  
         container.innerHTML = html;  
     }  
