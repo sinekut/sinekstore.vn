@@ -73,6 +73,32 @@
         .vip-6 { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; border: 1px solid #f87171; }
         .vip-7 { background: linear-gradient(135deg, #ec4899, #be185d); color: #fff; border: 1px solid #f472b6; }
         .vip-8 { background: linear-gradient(135deg, #ffd700, #ff8c00, #ff0000); color: #fff; border: 1px solid #fff; animation: goldFlameAura 1.5s infinite alternate; }
+
+        .scrollable-box-container { max-height: 420px; overflow-y: auto; padding-right: 4px; }
+        .scrollable-box-container::-webkit-scrollbar { width: 5px; }
+        .scrollable-box-container::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 10px; }
+        
+        #toastNotificationContainer {
+            position: fixed; top: 20px; right: 20px; z-index: 99999;
+            display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        }
+        .toast-item {
+            background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(15px);
+            border: 1px solid rgba(56, 189, 248, 0.5); color: #f8fafc;
+            padding: 12px 18px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-size: 12px; display: flex; align-items: center; gap: 10px;
+            animation: slideInToast 0.3s ease, fadeOutToast 0.3s ease 2.7s forwards;
+            pointer-events: auto; max-width: 300px;
+        }
+        @keyframes slideInToast { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOutToast { to { opacity: 0; transform: translateY(-10px); } }
+
+        .chat-badge-dot {
+            position: absolute; top: -2px; right: -2px; width: 12px; height: 12px;
+            background: #ef4444; border-radius: 50%; border: 2px solid #0f172a;
+            animation: pulseDot 1.5s infinite;
+        }
+        @keyframes pulseDot { 0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
         .header-left { display: flex; align-items: center; gap: 8px; position: relative; }
         .menu-hamburger-btn { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; width: 36px; height: 36px; border-radius: 10px; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; z-index: 10; }
         .menu-hamburger-btn:hover { background: #38bdf8; color: #0f172a; }
@@ -145,6 +171,7 @@
         <div class="shooting-star"></div>
         <div class="shooting-star"></div>
     </div>
+    <div id="toastNotificationContainer"></div>
 
     <div class="modal" id="popupNotice" style="display: flex;">
         <div class="popup-box">
@@ -202,7 +229,10 @@
             <button class="auth-btn" id="authBtn" onclick="moModalAuth()">Đăng Nhập</button>
         </div>
     </div>
-    <div class="chat-float-btn" onclick="toggleChatBox()">💬</div>
+    <div class="chat-float-btn" onclick="toggleChatBox()">
+        💬
+        <div id="chatNotificationDot" class="chat-badge-dot" style="display: none;"></div>
+    </div>
     <div class="chat-box-container" id="chatBoxContainer">
         <div class="chat-header">
             <span id="chatHeaderTitle">Sinek Store - Hỗ Trợ 24/7</span>
@@ -278,6 +308,9 @@
         </div>
         <div id="pageHistory" class="page-view" style="display: none;">
             <div class="section-title">Lịch Sử Đặt Đơn</div>
+            <div style="margin-bottom: 12px;">
+                <input type="text" id="historySearchInput" class="form-control" placeholder="🔍 Nhập mã đơn hoặc tên SP để lọc..." oninput="locLichSuDonHang()">
+            </div>
             <div id="historyList" class="card" style="font-size:12px; color:#94a3b8; text-align:center; padding:20px;">Chưa có đơn hàng nào.</div>
         </div>
         <div id="pageAdmin" class="page-view" style="display: none;">
@@ -305,6 +338,9 @@
                 </div>
                 <div class="card" style="margin-bottom:15px;">
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">📦 Quản Lý Đơn Hàng Khách Đặt</h3>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" id="adminOrderSearchInput" class="form-control" placeholder="🔍 Lọc mã đơn hoặc tên khách..." oninput="loadQuanLyDonHangAdmin()">
+                    </div>
                     <div id="adminOrderList" style="font-size:12px; color:#94a3b8; text-align: left;">Chưa có đơn hàng nào chờ duyệt.</div>
                 </div>
                 <div class="card" style="margin-bottom:15px;">
@@ -518,6 +554,26 @@
             </div>
         </div>
     </div>
+    
+    <div class="modal" id="modalRobux120h">
+        <div class="modal-content">
+            <div class="modal-title-custom">Đặt Đơn Robux 120h</div>
+            <div class="form-group"><label>Sản phẩm:</label><input type="text" id="rbx120ProductName" class="form-control" readonly></div>
+            <div class="form-group"><label>Đơn giá (Rate):</label><input type="text" id="rbx120ProductPrice" class="form-control" readonly></div>
+            <div class="form-group"><label>Số lượng Robux cần mua:</label><input type="number" id="rbx120Quantity" class="form-control" value="1000" min="100" step="50" oninput="tinhTienRobux120hModal()"></div>
+            <div class="form-group"><label>Tổng tiền thanh toán:</label><input type="text" id="rbx120TotalMoney" class="form-control" style="color: #38bdf8; font-weight: bold;" readonly></div>
+            <div class="form-group"><label>Tên đăng nhập Roblox:</label><input type="text" id="rbx120GameUser" class="form-control" placeholder="Tên đăng nhập Roblox"></div>
+            <div class="form-group"><label>Số điện thoại / Zalo liên hệ:</label><input type="text" id="rbx120Phone" class="form-control" placeholder="Số điện thoại của bạn"></div>
+            <div class="note-box" style="font-size: 10px; text-align: left; margin: 8px 0; color: #f87171; background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.4); padding: 8px; border-radius: 6px;">
+                ⚠ Lưu ý kiểm tra kĩ xem tài khoản đã được tạo gamepass 120h chưa.
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-close" onclick="dongModal('modalRobux120h')">Hủy</button>
+                <button class="btn-submit" style="background:#10b981;" onclick="xacNhanDatRobux120hModal()">Xác Nhận & Gửi Zalo</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="modalAuth">
         <div class="modal-content">
             <div class="modal-title-custom">Tài Khoản Sinek Store</div>
@@ -591,7 +647,18 @@
             giftgamepass: [
                 { id: 7, name: "Gamepass X2 Drop / X2 Money", price: 120000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ],
-            robux120h: [],
+            robux120h: [
+                { id: 201, name: "Robux 120h - Rate 100", price: 100, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
+                { id: 202, name: "Robux 120h - Rate 110", price: 110, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
+                { id: 203, name: "Robux 120h - Rate 120", price: 120, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
+                { id: 204, name: "Robux 120h - Rate 130", price: 130, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
+                { id: 205, name: "Robux 120h - Rate 140", price: 140, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
+                { id: 206, name: "Robux 120h - Rate 150", price: 150, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
+                { id: 207, name: "Robux 120h - Rate 160", price: 160, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
+                { id: 208, name: "Robux 120h - Rate 170", price: 170, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
+                { id: 209, name: "Robux 120h - Rate 180", price: 180, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },
+                { id: 210, name: "Robux 120h - Rate 190", price: 190, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
+            ],
             robuxglobal: [
                 { id: 301, name: "Gói 800 Robux Global", price: 180000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }
             ]
@@ -611,6 +678,18 @@
         let allOrders = [];
         let appliedVoucherCode = null;
         let discountAmountGlobal = 0;
+        let memoryProductCache = {};
+
+        function showToast(message, type = 'info') {
+            let container = document.getElementById('toastNotificationContainer');
+            if (!container) return;
+            let icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : '🔔');
+            let toast = document.createElement('div');
+            toast.className = 'toast-item';
+            toast.innerHTML = `<span style="font-size: 16px;">${icon}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        }
 
         function layHuyHieuVip(tongTienNap) {
             let total = parseInt(tongTienNap) || 0;
@@ -638,7 +717,7 @@
         function chonMenuLeft(tabName) {
             document.getElementById('dropdownMenuLeft').style.display = 'none';
             if(tabName === 'deposit' && !currentUser) {
-                alert('Vui lòng đăng nhập tài khoản trước khi nạp tiền!');
+                showToast('Vui lòng đăng nhập tài khoản trước khi nạp tiền!', 'error');
                 moModalAuth();
                 return;
             }
@@ -666,13 +745,12 @@
             let totalId = modalType === 'acc' ? 'accTotalMoney' : (modalType === 'ct' ? 'ctTotalMoney' : (modalType === 'it' ? 'itTotalMoney' : 'gpTotalMoney'));
             let vCode = document.getElementById(inputId).value.trim().toUpperCase();
 
-            if(!vCode) { alert('Vui lòng nhập mã voucher!'); return; }
+            if(!vCode) { showToast('Vui lòng nhập mã voucher!', 'error'); return; }
 
-            await fetchFirebaseData();
             let vData = databaseVouchers[vCode];
 
-            if(!vData) { alert('Mã voucher này không tồn tại!'); return; }
-            if(vData.stock <= 0) { alert('Mã voucher này đã hết lượt sử dụng!'); return; }
+            if(!vData) { showToast('Mã voucher này không tồn tại!', 'error'); return; }
+            if(vData.stock <= 0) { showToast('Mã voucher này đã hết lượt sử dụng!', 'error'); return; }
 
             let basePrice = sanphamDangChon.basePrice !== undefined ? sanphamDangChon.basePrice : sanphamDangChon.price;
             let qty = 1;
@@ -697,7 +775,7 @@
             discountAmountGlobal = discount;
 
             document.getElementById(totalId).value = finalPrice.toLocaleString() + ' đ (Đã giảm ' + discount.toLocaleString() + 'đ)';
-            alert(`Áp dụng thành công mã [${vCode}]! Đã trừ trực tiếp vào tổng tiền.`);
+            showToast(`Áp dụng thành công mã [${vCode}]!`, 'success');
         }
 
         async function moModalTopNap() {
@@ -740,7 +818,7 @@
         }
 
         async function moModalDiemVip() {
-            if(!currentUser) { alert('Vui lòng đăng nhập để xem thông tin VIP!'); return; }
+            if(!currentUser) { showToast('Vui lòng đăng nhập để xem thông tin VIP!', 'error'); return; }
             try {
                 let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
                 let userData = await res.json() || { totalDeposit: 0 };
@@ -901,16 +979,15 @@
             `;
         }
 
-        async function chuyenTab(tabName) {
+        function chuyenTab(tabName) {
             document.querySelectorAll('.page-view').forEach(el => el.style.display = 'none');
-            await fetchFirebaseData();
             
             if(tabName === 'home') {
                 document.getElementById('pageHome').style.display = 'block';
                 renderCategoryGrid();
             } else if(tabName === 'deposit') {
                 if(!currentUser) {
-                    alert('Vui lòng đăng nhập tài khoản trước khi nạp tiền!');
+                    showToast('Vui lòng đăng nhập tài khoản trước khi nạp tiền!', 'error');
                     moModalAuth();
                     return;
                 }
@@ -944,73 +1021,26 @@
         async function moDanhMuc(keyDM) {
             document.getElementById('pageHome').style.display = 'none';
             document.getElementById('pageProducts').style.display = 'block';
-            await fetchFirebaseData();
-
-            if(keyDM === 'robux120h') {
-                document.getElementById('categoryTitle').innerText = 'Dịch Vụ Mua Robux 120h';
-                document.getElementById('productList').innerHTML = `
-                    <div class="card" style="grid-column: span 2; text-align: left; padding: 20px;">
-                        <h3 style="font-size: 16px; color: #38bdf8; margin-bottom: 15px; text-align: center; text-transform: uppercase;">⚡ Đặt Mua Robux 120h Nhanh Chóng</h3>
-                        
-                        <div class="form-group">
-                            <label>Tên đăng nhập Roblox:</label>
-                            <input type="text" id="nhanhRobuxUser" class="form-control" placeholder="Nhập tên đăng nhập Roblox của bạn...">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Số lượng Robux cần mua:</label>
-                            <input type="number" id="nhanhRobuxQty" class="form-control" value="1000" min="100" step="50" oninput="tinhTienRobuxNhanh()">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Chọn Rate (VNĐ / 1RB - Từ 100 đến 190):</label>
-                            <select id="nhanhRobuxRate" class="form-control" onchange="tinhTienRobuxNhanh()">
-                                <option value="100">Rate 100 (100đ / 1RB)</option>
-                                <option value="110">Rate 110 (110đ / 1RB)</option>
-                                <option value="120">Rate 120 (120đ / 1RB)</option>
-                                <option value="130">Rate 130 (130đ / 1RB)</option>
-                                <option value="140">Rate 140 (140đ / 1RB)</option>
-                                <option value="150">Rate 150 (150đ / 1RB)</option>
-                                <option value="160">Rate 160 (160đ / 1RB)</option>
-                                <option value="170">Rate 170 (170đ / 1RB)</option>
-                                <option value="180">Rate 180 (180đ / 1RB)</option>
-                                <option value="190">Rate 190 (190đ / 1RB)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Số điện thoại / Zalo liên hệ:</label>
-                            <input type="text" id="nhanhRobuxPhone" class="form-control" placeholder="Số điện thoại của bạn...">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Tổng tiền thanh toán:</label>
-                            <input type="text" id="nhanhRobuxTotal" class="form-control" style="color: #38bdf8; font-weight: bold; font-size: 15px;" readonly>
-                        </div>
-
-                        <div class="note-box" style="font-size: 11px; text-align: left; margin: 15px 0; line-height: 1.5; color: #f87171; background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.4); padding: 10px; border-radius: 8px;">
-                            ⚠ <b>LƯU Ý:</b> Lưu ý kiểm tra kĩ xem tài khoản đã được tạo gamepass 120h chưa. Nếu không biết check hoặc tạo thì vui lòng liên hệ Admin web để được hỗ trợ!
-                        </div>
-
-                        <button class="action-btn" style="background: #10b981; padding: 12px; font-size: 14px;" onclick="xacNhanDatRobuxNhanh()">Xác Nhận Đặt Đơn & Gửi Zalo</button>
-                    </div>
-                `;
-                tinhTienRobuxNhanh();
-                return;
+            
+            let danhSach = [];
+            if (memoryProductCache[keyDM]) {
+                danhSach = memoryProductCache[keyDM];
+            } else {
+                danhSach = databaseSanPham[keyDM] || [];
+                memoryProductCache[keyDM] = danhSach;
             }
             
             let listHTML = '';
-            let danhSach = databaseSanPham[keyDM] || [];
-            
             if(keyDM === 'muaacc') document.getElementById('categoryTitle').innerText = 'Acc King Legacy VIP';
             else if(keyDM === 'caythue') document.getElementById('categoryTitle').innerText = 'Cày Thuê King Legacy';
             else if(keyDM === 'itemnguyenlieu') document.getElementById('categoryTitle').innerText = 'Item & Nguyên Liệu King Legacy';
             else if(keyDM === 'giftgamepass') document.getElementById('categoryTitle').innerText = 'Gift Gamepass King Legacy';
+            else if(keyDM === 'robux120h') document.getElementById('categoryTitle').innerText = 'Dịch Vụ Mua Robux 120h';
             else if(keyDM === 'robuxglobal') document.getElementById('categoryTitle').innerText = 'Danh Mục Robux Global';
             
             danhSach.forEach(sp => {
                 let isSoldOut = sp.soldOut;
-                let btnText = (keyDM === 'robuxglobal') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Mua Ngay') : ((keyDM === 'giftgamepass') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Xác Nhận Đặt Trước') : (isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn'));
+                let btnText = (keyDM === 'robuxglobal' || keyDM === 'robux120h') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Mua Ngay') : ((keyDM === 'giftgamepass') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Xác Nhận Đặt Trước') : (isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn'));
                 let btnStyle = isSoldOut ? 'background: #64748b; cursor: not-allowed;' : '';
                 
                 let onclickAttr = '';
@@ -1019,6 +1049,7 @@
                     else if(keyDM === 'caythue') onclickAttr = `onclick="kiemTraTruocKhiMoModal('ct', '${sp.name}', ${sp.price})"`;
                     else if(keyDM === 'itemnguyenlieu') onclickAttr = `onclick="kiemTraTruocKhiMoModal('it', '${sp.name}', ${sp.price})"`;
                     else if(keyDM === 'giftgamepass') onclickAttr = `onclick="kiemTraTruocKhiMoModal('gp', '${sp.name}', ${sp.price})"`;
+                    else if(keyDM === 'robux120h') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbx120h', '${sp.name}', ${sp.price})"`;
                     else if(keyDM === 'robuxglobal') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbxglobal', '${sp.name}', ${sp.price})"`;
                 }
                 
@@ -1030,13 +1061,15 @@
                 let customNoteHTML = '';
                 if(keyDM === 'robuxglobal') {
                     customNoteHTML = `<div style="font-size: 10px; color: #38bdf8; margin-bottom: 6px; font-style: italic; line-height: 1.3;">ℹ️ Lưu ý: Robux sẽ tự động vào acc sau 12-24h có thể sớm hơn</div>`;
+                } else if(keyDM === 'robux120h') {
+                    customNoteHTML = `<div style="font-size: 10px; color: #38bdf8; margin-bottom: 6px; font-style: italic; line-height: 1.3;">⚡ Rate ${sp.price}đ / 1 Robux</div>`;
                 }
 
                 listHTML += `
                     <div class="card" ${isSoldOut ? 'style="opacity: 0.6;"' : ''}>
                         ${mediaHTML}
                         <div class="card-title">${sp.name}</div>
-                        <div class="card-desc" style="color: #38bdf8; font-weight: bold; margin-bottom: 4px;">${sp.price.toLocaleString()} đ</div>
+                        <div class="card-desc" style="color: #38bdf8; font-weight: bold; margin-bottom: 4px;">${keyDM === 'robux120h' ? sp.price + ' đ / 1RB' : sp.price.toLocaleString() + ' đ'}</div>
                         ${stockHTML}
                         ${noteAccHTML}
                         ${customNoteHTML}
@@ -1048,7 +1081,7 @@
         }
         function kiemTraTruocKhiMoModal(loai, ten, gia) {
             if(!currentUser) {
-                alert('Vui lòng Đăng Nhập hoặc Đăng Ký tài khoản trước khi mua hàng!');
+                showToast('Vui lòng Đăng Nhập hoặc Đăng Ký tài khoản trước khi mua hàng!', 'error');
                 moModalAuth();
                 return;
             }
@@ -1056,6 +1089,7 @@
             else if(loai === 'ct') moModalCayThue(ten, gia);
             else if(loai === 'it') moModalItem(ten, gia);
             else if(loai === 'gp') moModalGiftGamepass(ten, gia);
+            else if(loai === 'rbx120h') moModalRobux120h(ten, gia);
             else if(loai === 'rbxglobal') moModalRobuxGlobal(ten, gia);
         }
 
@@ -1079,12 +1113,12 @@
             let p = document.getElementById('authPassword').value.trim();
             let contact = document.getElementById('authContact').value.trim();
 
-            if(!u || !p) { alert('Vui lòng điền đầy đủ Tên tài khoản và Mật khẩu!'); return; }
-            if(!contact) { alert('Vui lòng nhập Số điện thoại hoặc Email để liên hệ khi cần!'); return; }
+            if(!u || !p) { showToast('Vui lòng điền đầy đủ Tên tài khoản và Mật khẩu!', 'error'); return; }
+            if(!contact) { showToast('Vui lòng nhập Số điện thoại hoặc Email để liên hệ khi cần!', 'error'); return; }
             
             let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + u + ".json");
             let existingUser = await res.json();
-            if(existingUser !== null) { alert('Tên tài khoản này đã tồn tại trên hệ thống!'); return; }
+            if(existingUser !== null) { showToast('Tên tài khoản này đã tồn tại trên hệ thống!', 'error'); return; }
 
             let defaultAvatar = fixedImage;
             await fetch(FIREBASE_DB_URL + "sinek_users/" + u + ".json", {
@@ -1092,7 +1126,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ password: p, contact: contact, balance: 0, avatar: defaultAvatar, totalDeposit: 0 })
             });
-            alert('Đăng ký tài khoản thành công! Bạn có thể bấm đăng nhập ngay.');
+            showToast('Đăng ký tài khoản thành công!', 'success');
             document.getElementById('authContact').value = '';
         }
 
@@ -1106,11 +1140,11 @@
             if(userData && userData.password === p) {
                 currentUser = u;
                 localStorage.setItem('sinek_logged_user', u);
-                alert('Đăng nhập thành công!');
+                showToast('Đăng nhập thành công!', 'success');
                 dongModal('modalAuth');
                 capNhatGiaoDienUser();
             } else {
-                alert('Sai tên đăng nhập hoặc mật khẩu!');
+                showToast('Sai tên đăng nhập hoặc mật khẩu!', 'error');
             }
         }
 
@@ -1121,11 +1155,11 @@
         }
 
         async function thucHienDoiMatKhau() {
-            if(!currentUser) { alert('Vui lòng đăng nhập trước!'); return; }
+            if(!currentUser) { showToast('Vui lòng đăng nhập trước!', 'error'); return; }
             let oldPass = document.getElementById('oldPassword').value.trim();
             let newPass = document.getElementById('newPassword').value.trim();
 
-            if(!oldPass || !newPass) { alert('Vui lòng điền đầy đủ mật khẩu cũ và mới!'); return; }
+            if(!oldPass || !newPass) { showToast('Vui lòng điền đầy đủ mật khẩu cũ và mới!', 'error'); return; }
 
             await fetchFirebaseData();
             let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
@@ -1138,15 +1172,15 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(userData)
                 });
-                alert('Đổi mật khẩu thành công!');
+                showToast('Đổi mật khẩu thành công!', 'success');
                 dongModal('modalDoiMk');
             } else {
-                alert('Mật khẩu cũ không chính xác!');
+                showToast('Mật khẩu cũ không chính xác!', 'error');
             }
         }
 
         async function luuAvatarTuThuVien() {
-            if(!currentUser) { alert('Vui lòng đăng nhập trước!'); return; }
+            if(!currentUser) { showToast('Vui lòng đăng nhập trước!', 'error'); return; }
             let fileInput = document.getElementById('newAvatarFile');
             
             if(fileInput.files && fileInput.files[0]) {
@@ -1163,7 +1197,7 @@
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(userData)
                         });
-                        alert('Cập nhật Avatar thành công!');
+                        showToast('Cập nhật Avatar thành công!', 'success');
                         dongModal('modalDoiAvatar');
                         fileInput.value = '';
                         capNhatGiaoDienUser();
@@ -1171,7 +1205,7 @@
                 };
                 reader.readAsDataURL(file);
             } else {
-                alert('Vui lòng chọn một hình ảnh từ thư viện!');
+                showToast('Vui lòng chọn một hình ảnh từ thư viện!', 'error');
             }
         }
 
@@ -1304,31 +1338,42 @@
             document.getElementById('gpTotalMoney').value = total.toLocaleString() + ' đ' + disText;
         }
 
-        function tinhTienRobuxNhanh() {
-            let rate = parseInt(document.getElementById('nhanhRobuxRate').value) || 100;
-            let qty = parseInt(document.getElementById('nhanhRobuxQty').value) || 0;
-            if(qty < 0) qty = 0;
-            let total = rate * qty;
-            document.getElementById('nhanhRobuxTotal').value = total.toLocaleString() + ' đ';
+        function moModalRobux120h(ten, gia) {
+            sanphamDangChon = { name: ten, price: gia, basePrice: gia };
+            document.getElementById('rbx120ProductName').value = ten;
+            document.getElementById('rbx120ProductPrice').value = gia + ' đ / 1 RB';
+            document.getElementById('rbx120Quantity').value = 1000;
+            document.getElementById('rbx120GameUser').value = '';
+            document.getElementById('rbx120Phone').value = '';
+            tinhTienRobux120hModal();
+            document.getElementById('modalRobux120h').style.display = 'flex';
         }
 
-        async function xacNhanDatRobuxNhanh() {
-            let robuxUser = document.getElementById('nhanhRobuxUser').value.trim();
-            let qty = parseInt(document.getElementById('nhanhRobuxQty').value) || 0;
-            let rate = parseInt(document.getElementById('nhanhRobuxRate').value) || 100;
-            let phone = document.getElementById('nhanhRobuxPhone').value.trim();
-            let totalMoney = parseInt(document.getElementById('nhanhRobuxTotal').value.replace(/[^0-9]/g, '')) || 0;
+        function tinhTienRobux120hModal() {
+            let rate = sanphamDangChon.basePrice || 100;
+            let qty = parseInt(document.getElementById('rbx120Quantity').value) || 0;
+            if(qty < 0) qty = 0;
+            let total = rate * qty;
+            sanphamDangChon.computedPrice = total;
+            document.getElementById('rbx120TotalMoney').value = total.toLocaleString() + ' đ';
+        }
+
+        async function xacNhanDatRobux120hModal() {
+            let robuxUser = document.getElementById('rbx120GameUser').value.trim();
+            let qty = parseInt(document.getElementById('rbx120Quantity').value) || 0;
+            let rate = sanphamDangChon.basePrice || 100;
+            let phone = document.getElementById('rbx120Phone').value.trim();
+            let totalMoney = sanphamDangChon.computedPrice || 0;
 
             if(!robuxUser || !phone) {
-                alert('Vui lòng điền đầy đủ Tên đăng nhập Roblox và Số điện thoại!');
+                showToast('Vui lòng điền đầy đủ Tên đăng nhập Roblox và Số điện thoại!', 'error');
                 return;
             }
             if(qty <= 0) {
-                alert('Số lượng Robux không hợp lệ!');
+                showToast('Số lượng Robux không hợp lệ!', 'error');
                 return;
             }
 
-            // Cảnh báo nếu rate <= 140
             if(rate <= 140) {
                 let xacNhanRateThap = confirm('⚠ Lưu ý việc chọn Rate thấp sẽ dẫn đến việc đơn chờ lâu !\nBạn có chắc chắn muốn tiếp tục đặt đơn với Rate này không?');
                 if(!xacNhanRateThap) return;
@@ -1340,7 +1385,7 @@
                 let currentBal = userData.balance || 0;
                 
                 if(currentBal < totalMoney) {
-                    alert('Số dư tài khoản web của bạn không đủ để thanh toán đơn này! Vui lòng nạp thêm tiền.');
+                    showToast('Số dư tài khoản web của bạn không đủ để thanh toán đơn này!', 'error');
                     return;
                 }
                 userData.balance = currentBal - totalMoney;
@@ -1370,13 +1415,13 @@
             let noiDungGui = `[ĐƠN ROBUX 120H - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Roblox: ${robuxUser}\n- Số lượng: ${qty} RBX\n- Rate: ${rate}\n- Tổng tiền: ${totalMoney.toLocaleString()}đ\n- SĐT: ${phone}\n(Lưu ý: Đã kiểm tra gamepass 120h)`;
 
             navigator.clipboard.writeText(noiDungGui).then(() => {
-                alert(`Đặt đơn thành công! Đã trừ ${totalMoney.toLocaleString()}đ.\nĐã sao chép nội dung đơn hàng! Hệ thống sẽ chuyển sang Zalo.`);
+                showToast('Đặt đơn thành công! Đã sao chép nội dung.', 'success');
                 window.location.href = "https://zalo.me/0794221549";
             });
+            dongModal('modalRobux120h');
         }
 
         async function luuVaTaoDonHang(chiTietDon) {
-            await fetchFirebaseData();
             if(appliedVoucherCode && databaseVouchers[appliedVoucherCode]) {
                 databaseVouchers[appliedVoucherCode].stock -= 1;
                 if(databaseVouchers[appliedVoucherCode].stock < 0) databaseVouchers[appliedVoucherCode].stock = 0;
@@ -1388,14 +1433,14 @@
         async function xacNhanThanhToanMuaAcc() {
             let accCode = document.getElementById('accCodeInput').value.trim();
             let phone = document.getElementById('accPhone').value.trim();
-            if(!accCode || !phone) { alert('Vui lòng điền đầy đủ Mã Acc và Số Điện Thoại!'); return; }
+            if(!accCode || !phone) { showToast('Vui lòng điền đầy đủ Mã Acc và Số Điện Thoại!', 'error'); return; }
 
             if(currentUser) {
                 let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
                 let userData = await res.json() || { balance: 0 };
                 let currentBal = userData.balance || 0;
                 if(currentBal < sanphamDangChon.price) {
-                    alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
+                    showToast('Số dư tài khoản không đủ để thanh toán!', 'error');
                     return;
                 }
                 userData.balance = currentBal - sanphamDangChon.price;
@@ -1425,7 +1470,7 @@
             let noiDungGui = `[ĐƠN MUA ACC VIP - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Mã Acc: ${accCode}\n- Tổng tiền: ${sanphamDangChon.price.toLocaleString()}đ\n- SĐT: ${phone}`;
             
             navigator.clipboard.writeText(noiDungGui).then(() => {
-                alert(`Đặt đơn thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
+                showToast('Đặt đơn thành công! Đã sao chép nội dung.', 'success');
                 window.location.href = "https://zalo.me/0794221549";
             });
             dongModal('modalMuaAcc');
@@ -1436,14 +1481,14 @@
             let gPass = document.getElementById('ctGamePass').value.trim();
             let note = document.getElementById('ctNote').value.trim() || 'Không có';
             let phone = document.getElementById('ctPhone').value.trim();
-            if(!gUser || !gPass || !phone) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
+            if(!gUser || !gPass || !phone) { showToast('Vui lòng điền đầy đủ thông tin!', 'error'); return; }
 
             if(currentUser) {
                 let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
                 let userData = await res.json() || { balance: 0 };
                 let currentBal = userData.balance || 0;
                 if(currentBal < sanphamDangChon.price) {
-                    alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
+                    showToast('Số dư tài khoản không đủ để thanh toán!', 'error');
                     return;
                 }
                 userData.balance = currentBal - sanphamDangChon.price;
@@ -1473,7 +1518,7 @@
             let noiDungGui = `[ĐƠN CÀY THUÊ KING LEGACY - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Số lượng: ${qty}\n- Tổng tiền: ${sanphamDangChon.price.toLocaleString()}đ\n${chiTiet}`;
             
             navigator.clipboard.writeText(noiDungGui).then(() => {
-                alert(`Đặt đơn thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
+                showToast('Đặt đơn thành công! Đã sao chép nội dung.', 'success');
                 window.location.href = "https://zalo.me/0794221549";
             });
             dongModal('modalCayThue');
@@ -1483,14 +1528,14 @@
             let qty = document.getElementById('itQuantity').value;
             let gUser = document.getElementById('itGameUser').value.trim();
             let phone = document.getElementById('itPhone').value.trim();
-            if(!gUser || !phone) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
+            if(!gUser || !phone) { showToast('Vui lòng điền đầy đủ thông tin!', 'error'); return; }
 
             if(currentUser) {
                 let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
                 let userData = await res.json() || { balance: 0 };
                 let currentBal = userData.balance || 0;
                 if(currentBal < sanphamDangChon.price) {
-                    alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
+                    showToast('Số dư tài khoản không đủ để thanh toán!', 'error');
                     return;
                 }
                 userData.balance = currentBal - sanphamDangChon.price;
@@ -1520,7 +1565,7 @@
             let noiDungGui = `[ĐƠN MUA ITEM - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name}\n- Số lượng: ${qty}\n- Tổng tiền: ${sanphamDangChon.price.toLocaleString()}đ\n${chiTiet}`;
             
             navigator.clipboard.writeText(noiDungGui).then(() => {
-                alert(`Đặt đơn thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung! Hệ thống sẽ chuyển sang Zalo.`);
+                showToast('Đặt đơn thành công! Đã sao chép nội dung.', 'success');
                 window.location.href = "https://zalo.me/0794221549";
             });
             dongModal('modalItem');
@@ -1531,14 +1576,14 @@
             let gUser = document.getElementById('gpGameUser').value.trim();
             let note = document.getElementById('gpNote').value.trim() || 'Không có';
             let phone = document.getElementById('gpPhone').value.trim();
-            if(!gUser || !phone) { alert('Vui lòng điền đầy đủ Tên Roblox và Số Điện Thoại!'); return; }
+            if(!gUser || !phone) { showToast('Vui lòng điền đầy đủ Tên Roblox và Số Điện Thoại!', 'error'); return; }
 
             if(currentUser) {
                 let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
                 let userData = await res.json() || { balance: 0 };
                 let currentBal = userData.balance || 0;
                 if(currentBal < sanphamDangChon.price) {
-                    alert('Số dư tài khoản không đủ để thanh toán! Vui lòng nạp thêm tiền.');
+                    showToast('Số dư tài khoản không đủ để thanh toán!', 'error');
                     return;
                 }
                 userData.balance = currentBal - sanphamDangChon.price;
@@ -1568,7 +1613,7 @@
             let noiDungGui = `[ĐƠN ĐẶT TRƯỚC GIFT GAMEPASS - ${randomCode}]\n- Khách web: ${currentUser || 'Khách vãng lai'}\n- Sản phẩm: ${sanphamDangChon.name} (SL: ${qty})\n- Tổng tiền: ${sanphamDangChon.price.toLocaleString()}đ (Đã thanh toán)\n- Tên Roblox: ${gUser}\n- Ghi chú: ${note}\n- SĐT: ${phone}\n(Lưu ý: Khách đặt trước 1-3 tuần)`;
             
             navigator.clipboard.writeText(noiDungGui).then(() => {
-                alert(`Đặt trước thành công! Đã trừ ${sanphamDangChon.price.toLocaleString()}đ.\nĐã sao chép nội dung đơn hàng! Hệ thống sẽ chuyển sang Zalo.`);
+                showToast('Đặt trước thành công! Đã sao chép nội dung đơn hàng.', 'success');
                 window.location.href = "https://zalo.me/0794221549";
             });
             dongModal('modalGiftGamepass');
@@ -1582,7 +1627,7 @@
             if(currentUser) {
                 let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");
                 let userData = await res.json() || { balance: 0 };
-                if((userData.balance || 0) < gia) { alert('Số dư không đủ!'); return; }
+                if((userData.balance || 0) < gia) { showToast('Số dư không đủ!', 'error'); return; }
                 userData.balance -= gia;
                 await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {
                     method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(userData)
@@ -1602,21 +1647,33 @@
             });
             
             navigator.clipboard.writeText(`[ĐƠN ROBUX GLOBAL - ${randomCode}]\n- Sản phẩm: ${ten}\n- Khách: ${currentUser}`).then(() => {
-                alert('Đặt đơn thành công! Đã sao chép nội dung, chuyển sang Zalo.');
+                showToast('Đặt đơn thành công!', 'success');
                 window.location.href = "https://zalo.me/0794221549";
             });
         }
 
-        async function hienThiLichSu() {
+        function hienThiLichSu() {
             if(!currentUser) { document.getElementById('historyList').innerHTML = 'Vui lòng đăng nhập để xem lịch sử.'; return; }
-            await fetchFirebaseData();
             let userOrders = allOrders.filter(o => o.webUser === currentUser);
-            if(userOrders.length === 0) { document.getElementById('historyList').innerHTML = 'Chưa có đơn hàng nào.'; return; }
-            let html = '';
-            userOrders.forEach(h => {
+            renderDanhSachLichSuGoi(userOrders);
+        }
+
+        function locLichSuDonHang() {
+            if(!currentUser) return;
+            let kw = document.getElementById('historySearchInput').value.trim().toLowerCase();
+            let userOrders = allOrders.filter(o => o.webUser === currentUser);
+            let filtered = userOrders.filter(o => o.code.toLowerCase().includes(kw) || o.item.toLowerCase().includes(kw));
+            renderDanhSachLichSuGoi(filtered);
+        }
+
+        function renderDanhSachLichSuGoi(arrayDon) {
+            let container = document.getElementById('historyList');
+            if(!container) return;
+            if(arrayDon.length === 0) { container.innerHTML = 'Chưa có đơn hàng nào phù hợp.'; return; }
+            
+            let html = '<div class="scrollable-box-container">';
+            arrayDon.forEach(h => {
                 let badgeColor = h.status.includes('Chờ Duyệt') ? '#fbbf24' : (h.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
-                
-                // Ẩn mật khẩu game đối với khách hàng trong lịch sử cá nhân
                 let displayDetails = h.details;
                 if(displayDetails && displayDetails.includes('Mật khẩu:')) {
                     displayDetails = displayDetails.replace(/(- Mật khẩu: )(.*)/g, '$1••••••••');
@@ -1628,7 +1685,8 @@
                     <pre style="font-size:11px; color:#94a3b8; font-family:inherit; white-space:pre-wrap; margin-top:4px;">${displayDetails}</pre>
                     <span style="font-size:10px; color:#64748b;">Thời gian: ${h.time}</span></div>`;
             });
-            document.getElementById('historyList').innerHTML = html;
+            html += '</div>';
+            container.innerHTML = html;
         }
 
         function guiTheCaoZalo() {
@@ -1638,10 +1696,10 @@
             let selectedText = tAmountSelect.options[tAmountSelect.selectedIndex].text;
             let tSeri = document.getElementById('cardSeri').value.trim();
             let tPin = document.getElementById('cardPin').value.trim();
-            if(!tSeri || !tPin) { alert('Vui lòng nhập đầy đủ Số Seri và Mã Thẻ!'); return; }
+            if(!tSeri || !tPin) { showToast('Vui lòng nhập đầy đủ Số Seri và Mã Thẻ!', 'error'); return; }
             let noiDungGui = `[NẠP THẺ CÀO]\n- Tài khoản: ${currentUser || 'Chưa ĐN'}\n- Loại: ${tType}\n- Lựa chọn: ${selectedText}\n- Seri: ${tSeri}\n- Mã: ${tPin}`;
             navigator.clipboard.writeText(noiDungGui).then(() => {
-                alert('Đã sao chép thông tin thẻ! Chuyển sang Zalo.');
+                showToast('Đã sao chép thông tin thẻ!', 'success');
                 window.location.href = "https://zalo.me/0794221549";
             });
         }
@@ -1653,24 +1711,22 @@
             let selectedText = tAmountSelect.options[tAmountSelect.selectedIndex].text;
             let tSeri = document.getElementById('cardSeri').value.trim();
             let tPin = document.getElementById('cardPin').value.trim();
-            if(!tSeri || !tPin) { alert('Vui lòng nhập đầy đủ Số Seri và Mã Thẻ!'); return; }
+            if(!tSeri || !tPin) { showToast('Vui lòng nhập đầy đủ Số Seri và Mã Thẻ!', 'error'); return; }
             let noiDungGui = `[NẠP THẺ CÀO]\n- Tài khoản: ${currentUser || 'Chưa ĐN'}\n- Loại: ${tType}\n- Lựa chọn: ${selectedText}\n- Seri: ${tSeri}\n- Mã: ${tPin}`;
             navigator.clipboard.writeText(noiDungGui).then(() => {
-                alert('Đã sao chép thông tin thẻ! Chuyển sang Facebook.');
+                showToast('Đã sao chép thông tin thẻ!', 'success');
                 window.location.href = "https://www.facebook.com/share/1Dy3Rqke3P/";
             });
         }
         async function kiemTraAdmin() {
             let passInput = document.getElementById('adminPassInput').value.trim();
-            if(!passInput) { alert('Vui lòng nhập mật khẩu quản lý!'); return; }
-
-            await fetchFirebaseData();
+            if(!passInput) { showToast('Vui lòng nhập mật khẩu quản lý!', 'error'); return; }
 
             if(passInput === 'Sinek@Admin$2026#Pro') {
                 localStorage.setItem('sinek_role', 'admin');
                 localStorage.setItem('sinek_username', 'Quản Trị Viên (Admin Tổng)');
                 hienThiGiaoDienTheoQuyen('admin');
-                alert('Đăng nhập Quản Trị Viên Tổng thành công!');
+                showToast('Đăng nhập Quản Trị Viên Tổng thành công!', 'success');
                 return;
             }
 
@@ -1689,9 +1745,9 @@
                 localStorage.setItem('sinek_username', matchedCTVName);
                 localStorage.setItem('sinek_ctv_key', matchedUsername);
                 hienThiGiaoDienTheoQuyen('ctv');
-                alert(`Đăng nhập thành công! Chào mừng ${matchedCTVName}`);
+                showToast(`Đăng nhập thành công! Chào ${matchedCTVName}`, 'success');
             } else {
-                alert('Mật khẩu không chính xác hoặc không có quyền truy cập!');
+                showToast('Mật khẩu không chính xác hoặc không có quyền!', 'error');
             }
         }
 
@@ -1700,9 +1756,8 @@
             let savedKey = localStorage.getItem('sinek_ctv_key');
             
             if(savedRole === 'ctv' && savedKey) {
-                await fetchFirebaseData();
                 if(!danhSachCTV[savedKey]) {
-                    alert('Tài khoản CTV của bạn đã bị Quản Trị Viên xóa hoặc thay đổi quyền truy cập!');
+                    showToast('Tài khoản CTV của bạn đã bị Quản Trị Viên xóa!', 'error');
                     thucHienDangXuatAdminHoacCTV();
                     return;
                 }
@@ -1727,7 +1782,7 @@
                 let passInput = document.getElementById('adminPassInput');
                 if(passInput) passInput.value = '';
                 
-                alert('Đã đăng xuất khu vực quản lý thành công!');
+                showToast('Đã đăng xuất khu vực quản lý!', 'success');
             }
         }
 
@@ -1767,11 +1822,10 @@
             let u = document.getElementById('newCtvUser').value.trim().toLowerCase();
             let name = document.getElementById('newCtvName').value.trim();
             let pass = document.getElementById('newCtvPass').value.trim();
-            if(!u || !name || !pass) { alert('Vui lòng điền đầy đủ thông tin tài khoản, tên và mật khẩu CTV!'); return; }
-            await fetchFirebaseData();
+            if(!u || !name || !pass) { showToast('Vui lòng điền đầy đủ thông tin CTV!', 'error'); return; }
             danhSachCTV[u] = { pass: pass, name: name };
             await saveFirebaseData();
-            alert(`Đã lưu/cập nhật thành công tài khoản CTV [${u}]!`);
+            showToast(`Đã lưu CTV [${u}] thành công!`, 'success');
             document.getElementById('newCtvUser').value = '';
             document.getElementById('newCtvName').value = '';
             document.getElementById('newCtvPass').value = '';
@@ -1797,12 +1851,11 @@
         }
 
         async function adminXoaCTV(username) {
-            if(confirm(`Bạn có chắc muốn xóa/kick CTV [${username}] không?`)) {
-                await fetchFirebaseData();
+            if(confirm(`Bạn có chắc muốn xóa CTV [${username}] không?`)) {
                 delete danhSachCTV[username];
                 await saveFirebaseData();
                 loadDanhSachCTVAdmin();
-                alert('Đã xóa CTV thành công và vô hiệu hóa mọi phiên đăng nhập của họ!');
+                showToast('Đã xóa CTV thành công!', 'success');
             }
         }
 
@@ -1813,15 +1866,14 @@
             let vStock = parseInt(document.getElementById('adVoucherStock').value) || 1;
 
             if(!vCode || isNaN(vVal)) {
-                alert('Vui lòng nhập đầy đủ Mã Voucher và Giá trị giảm hợp lệ!');
+                showToast('Vui lòng nhập đầy đủ Mã Voucher và Giá trị giảm!', 'error');
                 return;
             }
 
-            await fetchFirebaseData();
             databaseVouchers[vCode] = { type: vType, value: vVal, stock: vStock };
 
             await saveFirebaseData();
-            alert(`Tạo thành công mã voucher: [${vCode}]!`);
+            showToast(`Tạo thành công mã voucher: [${vCode}]!`, 'success');
             document.getElementById('adVoucherCode').value = '';
             document.getElementById('adVoucherValue').value = '';
             loadDanhSachVoucherAdmin();
@@ -1850,28 +1902,32 @@
 
         async function adminXoaVoucher(code) {
             if(confirm(`Bạn có chắc muốn xóa mã voucher [${code}] không?`)) {
-                await fetchFirebaseData();
                 delete databaseVouchers[code];
                 await saveFirebaseData();
                 loadDanhSachVoucherAdmin();
-                alert('Đã xóa voucher thành công!');
+                showToast('Đã xóa voucher thành công!', 'success');
             }
         }
 
-        async function loadQuanLyDonHangAdmin() {
-            await fetchFirebaseData();
+        function loadQuanLyDonHangAdmin() {
             let listEl = document.getElementById('adminOrderList');
             if(!listEl) return;
             if(allOrders.length === 0) { listEl.innerHTML = 'Chưa có đơn hàng nào chờ duyệt.'; return; }
             
+            let searchInputEl = document.getElementById('adminOrderSearchInput');
+            let kw = searchInputEl ? searchInputEl.value.trim().toLowerCase() : '';
+            let filteredOrders = allOrders.filter(o => o.code.toLowerCase().includes(kw) || o.webUser.toLowerCase().includes(kw) || o.item.toLowerCase().includes(kw));
+
+            if(filteredOrders.length === 0) { listEl.innerHTML = 'Không tìm thấy đơn hàng phù hợp.'; return; }
+
             let savedRole = localStorage.getItem('sinek_role');
-            let html = '';
+            let html = '<div class="scrollable-box-container">';
             
-            allOrders.forEach((o, index) => {
+            filteredOrders.forEach((o, index) => {
+                let originalIndex = allOrders.findIndex(item => item.code === o.code);
                 let badgeColor = o.status.includes('Chờ Duyệt') ? '#fbbf24' : (o.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');
                 let nguoiDuyetHTML = o.handledBy ? `<br><span style="color: #10b981; font-weight: bold;">👤 Người duyệt/xử lý: ${o.handledBy}</span>` : `<br><span style="color: #94a3b8; font-style: italic;">👤 Người duyệt: Chưa có ai nhận đơn</span>`;
                 
-                // Nếu là CTV thì ẩn mật khẩu game, chỉ Admin chính (role === 'admin') mới xem được Full HD không che
                 let displayDetails = o.details;
                 if(savedRole === 'ctv' && displayDetails && displayDetails.includes('Mật khẩu:')) {
                     displayDetails = displayDetails.replace(/(- Mật khẩu: )(.*)/g, '$1🔒 [Đã ẩn mật khẩu - Chỉ Admin chính mới xem được]');
@@ -1883,30 +1939,30 @@
                     <span>Khách đặt: <b>${o.webUser}</b></span><br><span>Sản phẩm: ${o.item} (${o.price.toLocaleString()}đ)</span><br>
                     <pre style="font-size:11px; color:#cbd5e1; font-family:inherit; white-space:pre-wrap; margin-top:4px; background:rgba(15,23,42,0.7); padding:6px; border-radius:8px;">${displayDetails}</pre>
                     <div style="display:flex; gap:6px; margin-top:8px;">
-                        <button class="action-btn" style="background:#38bdf8; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '🔄 Đang Xử Lý')">Nhận Đơn / Xác Nhận</button>
-                        <button class="action-btn" style="background:#10b981; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${index}, '✅ Thành Công')">Hoàn Thành</button>
-                        <button class="action-btn" style="background:#ef4444; font-size:11px; padding:4px;" onclick="adminXoaDonHang(${index})">Xóa</button>
+                        <button class="action-btn" style="background:#38bdf8; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${originalIndex}, '🔄 Đang Xử Lý')">Nhận Đơn</button>
+                        <button class="action-btn" style="background:#10b981; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${originalIndex}, '✅ Thành Công')">Hoàn Thành</button>
+                        <button class="action-btn" style="background:#ef4444; font-size:11px; padding:4px;" onclick="adminXoaDonHang(${originalIndex})">Xóa</button>
                     </div></div>`;
             });
+            html += '</div>';
             listEl.innerHTML = html;
         }
 
         async function adminDoiTrangThaiDon(index, trangThaiMoi) {
-            await fetchFirebaseData();
             let currentHandler = localStorage.getItem('sinek_username') || 'Nhân viên';
             allOrders[index].status = trangThaiMoi;
             allOrders[index].handledBy = currentHandler;
             await saveFirebaseData();
             loadQuanLyDonHangAdmin();
-            alert('Đã cập nhật trạng thái đơn hàng thành: ' + trangThaiMoi);
+            showToast('Đã cập nhật trạng thái đơn thành: ' + trangThaiMoi, 'success');
         }
 
         async function adminXoaDonHang(index) {
             if(confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
-                await fetchFirebaseData();
                 allOrders.splice(index, 1);
                 await saveFirebaseData();
                 loadQuanLyDonHangAdmin();
+                showToast('Đã xóa đơn hàng!', 'success');
             }
         }
 
@@ -1927,7 +1983,7 @@
         async function adminXuLyTien() {
             let targetUser = document.getElementById('adUserTarget').value.trim();
             let amount = parseInt(document.getElementById('adAmountTarget').value);
-            if(!targetUser || isNaN(amount)) { alert('Vui lòng nhập đúng tên tài khoản và số tiền!'); return; }
+            if(!targetUser || isNaN(amount)) { showToast('Vui lòng nhập đúng tên tài khoản và số tiền!', 'error'); return; }
             
             let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + targetUser + ".json");
             let userData = await res.json() || { password: "123456", balance: 0, totalDeposit: 0 };
@@ -1944,7 +2000,7 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(userData)
                 });
-                alert(`Đã cộng thành công ${amount.toLocaleString()}đ cho tài khoản: ${targetUser}\nSố dư mới: ${newBal.toLocaleString()}đ`);
+                showToast(`Đã cộng ${amount.toLocaleString()}đ cho [${targetUser}]`, 'success');
             } else {
                 newBal = currentBal - amount;
                 if(newBal < 0) newBal = 0;
@@ -1954,7 +2010,7 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(userData)
                 });
-                alert(`Đã trừ thành công ${amount.toLocaleString()}đ của tài khoản: ${targetUser}\nSố dư còn lại: ${newBal.toLocaleString()}đ`);
+                showToast(`Đã trừ ${amount.toLocaleString()}đ của [${targetUser}]`, 'success');
             }
 
             if(currentUser === targetUser) { capNhatGiaoDienUser(); }
@@ -1968,7 +2024,7 @@
             let stock = parseInt(document.getElementById('newProStock').value) || 1;
             let imageInput = document.getElementById('newProImageFile');
 
-            if(!name || isNaN(price)) { alert('Vui lòng điền đầy đủ tên và giá sản phẩm!'); return; }
+            if(!name || isNaN(price)) { showToast('Vui lòng điền đầy đủ tên và giá sản phẩm!', 'error'); return; }
 
             let defaultImg = fixedImage;
             if (imageInput.files && imageInput.files[0]) {
@@ -1985,21 +2041,20 @@
         }
 
         async function luuSanPhamVaoFirebase(cat, name, price, stock, imageUrl) {
-            await fetchFirebaseData();
             if(!databaseSanPham[cat]) { databaseSanPham[cat] = []; }
 
             let newId = Date.now();
             databaseSanPham[cat].push({ id: newId, name: name, price: price, stock: stock, image: imageUrl, soldOut: false });
+            memoryProductCache[cat] = null;
             await saveFirebaseData();
             loadDanhSachSanPhamAdmin();
-            alert(`Thêm sản phẩm "${name}" thành công!`);
+            showToast(`Thêm sản phẩm "${name}" thành công!`, 'success');
             document.getElementById('newProName').value = '';
             document.getElementById('newProPrice').value = '';
             document.getElementById('newProImageFile').value = '';
         }
 
-        async function loadDanhSachSanPhamAdmin() {
-            await fetchFirebaseData();
+        function loadDanhSachSanPhamAdmin() {
             let selectEl = document.getElementById('adSelectProduct');
             if(!selectEl) return;
             selectEl.innerHTML = '';
@@ -2043,35 +2098,35 @@
 
         async function adminLuuThongTinSanPham() {
             let { dm, id, spObj } = timSanPhamHienTai();
-            if(!spObj) { alert('Chưa chọn sản phẩm nào!'); return; }
+            if(!spObj) { showToast('Chưa chọn sản phẩm nào!', 'error'); return; }
             let newName = document.getElementById('adProductNameEdit').value.trim();
             let newPrice = parseInt(document.getElementById('adProductPriceEdit').value);
             let newStock = parseInt(document.getElementById('adProductStock').value);
 
-            if(!newName || isNaN(newPrice) || isNaN(newStock)) { alert('Vui lòng điền đầy đủ thông tin hợp lệ!'); return; }
+            if(!newName || isNaN(newPrice) || isNaN(newStock)) { showToast('Vui lòng điền đầy đủ thông tin hợp lệ!', 'error'); return; }
 
-            await fetchFirebaseData();
             let targetSp = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
             if(targetSp) {
                 targetSp.name = newName;
                 targetSp.price = newPrice;
                 targetSp.stock = newStock;
+                memoryProductCache[dm] = null;
                 await saveFirebaseData();
                 loadDanhSachSanPhamAdmin();
-                alert(`Cập nhật thành công sản phẩm "${newName}"!`);
+                showToast('Cập nhật sản phẩm thành công!', 'success');
             }
         }
 
         async function adminToggleHetHang() {
             let { dm, id, spObj } = timSanPhamHienTai();
             if(!spObj) return;
-            await fetchFirebaseData();
             let targetSp = databaseSanPham[dm] ? databaseSanPham[dm].find(item => item.id === id) : null;
             if(targetSp) {
                 targetSp.soldOut = !targetSp.soldOut;
+                memoryProductCache[dm] = null;
                 await saveFirebaseData();
                 loadThongTinSanPhamAdmin();
-                alert(`Đã đổi trạng thái sản phẩm thành: ${targetSp.soldOut ? 'HẾT HÀNG' : 'ĐANG MỞ BÁN'}`);
+                showToast(`Đã đổi trạng thái thành: ${targetSp.soldOut ? 'HẾT HÀNG' : 'ĐANG MỞ BÁN'}`, 'success');
             }
         }
 
@@ -2079,11 +2134,11 @@
             let { dm, id, spObj } = timSanPhamHienTai();
             if(!spObj) return;
             if(confirm(`Bạn có chắc chắn muốn XÓA sản phẩm "${spObj.name}" không?`)) {
-                await fetchFirebaseData();
                 databaseSanPham[dm] = databaseSanPham[dm].filter(item => item.id !== id);
+                memoryProductCache[dm] = null;
                 await saveFirebaseData();
                 loadDanhSachSanPhamAdmin();
-                alert('Đã xóa sản phẩm thành công!');
+                showToast('Đã xóa sản phẩm thành công!', 'success');
             }
         }
         let currentChatRoomId = null;
@@ -2113,6 +2168,8 @@
             } else {
                 box.style.display = 'flex';
                 khoiTaoHoacTaiPhienChat();
+                let dot = document.getElementById('chatNotificationDot');
+                if(dot) dot.style.display = 'none';
             }
         }
 
@@ -2148,7 +2205,7 @@
 
             if(!msg) return;
             if((role === 'admin' || role === 'ctv') && !currentChatRoomId) {
-                alert('Vui lòng chọn phòng chat cần trả lời trước!');
+                showToast('Vui lòng chọn phòng chat cần trả lời trước!', 'error');
                 return;
             }
 
@@ -2239,7 +2296,7 @@
         }
 
         async function staffJoinChat() {
-            if(!currentChatRoomId) { alert('Chưa chọn phòng chat nào để tham gia!'); return; }
+            if(!currentChatRoomId) { showToast('Chưa chọn phòng chat nào để tham gia!', 'error'); return; }
             await taiDuLieuChatTuFirebase();
             let staffName = localStorage.getItem('sinek_username') || 'Nhân viên';
             if(!allChats[currentChatRoomId]) allChats[currentChatRoomId] = { messages: [], status: 'waiting' };
@@ -2254,19 +2311,19 @@
             });
 
             await saveFirebaseChats();
-            alert('Bạn đã tham gia tư vấn phiên chat này thành công!');
+            showToast('Đã tham gia tư vấn phiên chat!', 'success');
             taiNoiDungChatHienTai();
         }
 
         async function staffOutChat() {
-            if(!currentChatRoomId) { alert('Chưa chọn phòng chat nào để kết thúc!'); return; }
+            if(!currentChatRoomId) { showToast('Chưa chọn phòng chat nào để kết thúc!', 'error'); return; }
             if(confirm('Bạn có chắc chắn muốn kết thúc và xóa phiên tư vấn này không?')) {
                 await taiDuLieuChatTuFirebase();
                 if(allChats[currentChatRoomId]) {
                     delete allChats[currentChatRoomId];
                     await saveFirebaseChats();
                 }
-                alert('Đã kết thúc và dọn sạch phòng chat thành công!');
+                showToast('Đã kết thúc phòng chat!', 'success');
                 document.getElementById('chatBoxContainer').style.display = 'none';
                 currentChatRoomId = null;
                 loadDanhSachChatChoAdmin();
@@ -2281,6 +2338,8 @@
             if(!allChats || Object.keys(allChats).length === 0) {
                 container.innerHTML = 'Chưa có đoạn chat nào đang hoạt động.';
                 lastWaitingCount = 0;
+                let dot = document.getElementById('chatNotificationDot');
+                if(dot) dot.style.display = 'none';
                 return;
             }
 
@@ -2308,7 +2367,13 @@
                 </div>`;
             }
 
-            if(currentWaitingRooms > lastWaitingCount) { playNotificationSound(); }
+            let dot = document.getElementById('chatNotificationDot');
+            if(currentWaitingRooms > 0) {
+                playNotificationSound();
+                if(dot) dot.style.display = 'block';
+            } else {
+                if(dot) dot.style.display = 'none';
+            }
             lastWaitingCount = currentWaitingRooms;
 
             if(countValidRooms === 0 && role === 'ctv') {
