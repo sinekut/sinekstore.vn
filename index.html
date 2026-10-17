@@ -654,7 +654,7 @@
         </div>  
     </div>
 
-    <!-- Modal Hiển Thị Ảnh Cảm Ơn Khi Đặt Hàng Thành Công (Có nút chọn Zalo hoặc Facebook) -->
+    <!-- Modal Hiển Thị Ảnh Cảm Ơn Khi Đặt Hàng Thành Công -->
     <div class="modal" id="modalThankYouCard">
         <div class="modal-content" style="max-width: 440px; text-align: center; background: rgba(15, 23, 42, 0.95);">
             <div class="modal-title-custom" style="color: #fbbf24; margin-bottom: 10px;">🎉 ĐẶT HÀNG THÀNH CÔNG!</div>
@@ -843,6 +843,17 @@
                 }  
             }  
 
+            // Thêm cứng Admin nếu có tiền tích lũy/giao dịch trong hệ thống để hiển thị chính xác lên bảng top
+            let adminTotal = 0;  
+            if(moneyHistory && moneyHistory.length > 0) {  
+                moneyHistory.forEach(mh => {  
+                    if(mh.type === 'Cộng Tiền') adminTotal += mh.amount;  
+                });  
+            }  
+            if(adminTotal > 0 && !rankList.some(r => r.name === 'ADSINEK')) {  
+                rankList.push({ name: 'ADSINEK (Admin)', total: adminTotal });  
+            }  
+
             rankList.sort((a, b) => b.total - a.total);  
 
             let htmlContent = '';  
@@ -867,33 +878,48 @@
     }  
 
     async function moModalDiemVip() {  
-        if(!currentUser) { showToast('Vui lòng đăng nhập để xem thông tin VIP!', 'error'); return; }  
-        try {  
-            let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");  
-            let userData = await res.json() || { totalDeposit: 0 };  
-            let total = userData.totalDeposit || 0;  
+        let total = 0;  
+        let role = localStorage.getItem('sinek_role');  
 
-            let nextTarget = 150000;  
-            let currentVip = "Thành viên Mới";  
-            if(total >= 10000000) { currentVip = "👑 VIP 8 (Cấp độ tối đa)"; nextTarget = 10000000; }  
-            else if(total >= 5000000) { currentVip = "💎 VIP 7"; nextTarget = 10000000; }  
-            else if(total >= 3000000) { currentVip = "🔥 VIP 6"; nextTarget = 5000000; }  
-            else if(total >= 1500000) { currentVip = "⚡ VIP 5"; nextTarget = 3000000; }  
-            else if(total >= 800000) { currentVip = "⭐ VIP 4"; nextTarget = 1500000; }  
-            else if(total >= 400000) { currentVip = "🛡️ VIP 3"; nextTarget = 800000; }  
-            else if(total >= 150000) { currentVip = "🔷 VIP 2"; nextTarget = 400000; }  
-            else if(total > 0) { currentVip = "🟢 VIP 1"; nextTarget = 150000; }  
+        if (role === 'admin') {  
+            // Tính tổng tiền cộng từ lịch sử biến động cho Admin hoặc mặc định lấy mức khủng  
+            total = 111111111; // Lấy theo con số hiển thị thực tế trên Header của Admin  
+            if(moneyHistory && moneyHistory.length > 0) {  
+                let calc = 0;  
+                moneyHistory.forEach(mh => { if(mh.type === 'Cộng Tiền') calc += mh.amount; });  
+                if(calc > 0) total = calc;  
+            }  
+        } else if (currentUser) {  
+            try {  
+                let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");  
+                let userData = await res.json() || { totalDeposit: 0 };  
+                total = userData.totalDeposit || userData.balance || 0;  
+            } catch(e) {}  
+        } else {  
+            showToast('Vui lòng đăng nhập để xem thông tin VIP!', 'error');  
+            return;  
+        }  
 
-            let thieuNha = nextTarget > total ? (nextTarget - total).toLocaleString() + ' đ' : 'Đã đạt cấp tối đa!';  
-            let html = `  
-                • Tài khoản: <b>${currentUser}</b><br>  
-                • Tổng tiền đã nạp tích lũy: <b style="color:#38bdf8;">${total.toLocaleString()} đ</b><br>  
-                • Hạng VIP hiện tại: <b style="color:#fbbf24;">${currentVip}</b><br>  
-                • Cần nạp thêm: <b style="color:#f87171;">${thieuNha}</b> để lên hạng tiếp theo!<br><br>  
-                <i>💡 Mẹo: Nạp nhiều để nhận ưu đãi chiết khấu cao và quà tặng độc quyền từ Sinek Store!</i>  
-            `;  
-            document.getElementById('vipInfoContent').innerHTML = html;  
-        } catch(e) {}  
+        let nextTarget = 150000;  
+        let currentVip = "Thành viên Mới";  
+        if(total >= 10000000) { currentVip = "👑 VIP 8 (Cấp độ tối đa)"; nextTarget = 10000000; }  
+        else if(total >= 5000000) { currentVip = "💎 VIP 7"; nextTarget = 10000000; }  
+        else if(total >= 3000000) { currentVip = "🔥 VIP 6"; nextTarget = 5000000; }  
+        else if(total >= 1500000) { currentVip = "⚡ VIP 5"; nextTarget = 3000000; }  
+        else if(total >= 800000) { currentVip = "⭐ VIP 4"; nextTarget = 1500000; }  
+        else if(total >= 400000) { currentVip = "🛡️ VIP 3"; nextTarget = 800000; }  
+        else if(total >= 150000) { currentVip = "🔷 VIP 2"; nextTarget = 400000; }  
+        else if(total > 0) { currentVip = "🟢 VIP 1"; nextTarget = 150000; }  
+
+        let thieuNha = nextTarget > total ? (nextTarget - total).toLocaleString() + ' đ' : 'Đã đạt cấp tối đa!';  
+        let html = `  
+            • Tài khoản: <b>${currentUser || 'Quản Trị Viên (Admin)'}</b><br>  
+            • Tổng tiền đã nạp tích lũy: <b style="color:#38bdf8;">${total.toLocaleString()} đ</b><br>  
+            • Hạng VIP hiện tại: <b style="color:#fbbf24;">${currentVip}</b><br>  
+            • Cần nạp thêm: <b style="color:#f87171;">${thieuNha}</b> để lên hạng tiếp theo!<br><br>  
+            <i>💡 Mẹo: Nạp nhiều để nhận ưu đãi chiết khấu cao và quà tặng độc quyền từ Sinek Store!</i>  
+        `;  
+        document.getElementById('vipInfoContent').innerHTML = html;  
         document.getElementById('modalDiemVip').style.display = 'flex';  
     }  
 
@@ -1920,7 +1946,7 @@
                     <button onclick="adminToggleQuyenTienCTV('${username}')" style="background:${btnToggleBg}; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">${btnToggleText}</button>  
                     <button onclick="adminXoaCTV('${username}')" style="background:#ef4444; color:#fff; border:none; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Xóa</button>  
                 </div>  
-            `;  
+            </div>`;  
         }  
         container.innerHTML = html;  
     }  
