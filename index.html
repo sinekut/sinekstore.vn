@@ -280,10 +280,6 @@
             <div class="card" style="margin-bottom:15px; text-align:center;">  
                 <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align:left;">1. Nạp qua ZaloPay</h3>  
                 <div id="depositQrContainer"></div>  
-                <div style="margin-top: 12px; display: flex; gap: 8px; flex-direction: column;">  
-                    <a href="https://zalo.me/g/ew0hzswegva9lpxu3uk4" target="_blank" class="action-btn" style="background: #0284c7; text-decoration: none; text-align: center; padding: 10px;">👥 Vào Nhóm Zalo Duyệt Nhanh</a>  
-                    <a href="https://m.me/j/3mM40YihdT9zYr0W/?send_source=gc%3Acopy_invite_link_t" target="_blank" class="action-btn" style="background: #2563eb; text-decoration: none; text-align: center; padding: 10px;">👥 Vào Nhóm Messenger Duyệt Nhanh</a>  
-                </div>  
             </div>  
             <div class="card">  
                 <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">2. Nạp qua Thẻ Cào</h3>  
@@ -370,11 +366,29 @@
                     <div id="adminCtvListContainer" style="font-size: 11px; color: #cbd5e1; text-align: left; background: rgba(15,23,42,0.6); padding: 8px; border-radius: 8px;">Đang tải...</div>  
                 </div>  
                 <div id="khuVucQuanLyDanhMuc" class="card" style="margin-bottom:15px;">  
-                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">📂 Quản Lý Danh Mục (Thêm, Sửa, Ảnh Minh Họa)</h3>  
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">📂 Quản Lý Danh Mục & Tùy Chỉnh Tiêu Đề Form Mua Hàng</h3>  
                     <div class="form-group"><label>Mã danh mục (Viết liền không dấu, VD: robuxvip):</label><input type="text" id="newCatKey" class="form-control" placeholder="Mã danh mục (key)"></div>  
                     <div class="form-group"><label>Tên hiển thị danh mục:</label><input type="text" id="newCatName" class="form-control" placeholder="Tên danh mục"></div>  
-                    <div class="form-group"><label>Ảnh minh họa danh mục (Chọn từ thư viện):</label><input type="file" id="newCatImageFile" class="form-control" accept="image/*" style="padding: 6px;"></div>  
-                    <button class="action-btn" style="background:#10b981; margin-bottom:12px;" onclick="adminThemHoacSuaDanhMuc()">Thêm Mới / Lưu Danh Mục & Ảnh</button>  
+                    <div class="form-group">
+                        <label>Chọn Form Mua Hàng:</label>
+                        <select id="newCatFormType" class="form-control" onchange="toggleAdminCustomField()">
+                            <option value="item">Mua Item / Nạp Thường (Form chuẩn)</option>
+                            <option value="acc">Mua Acc (Yêu cầu nhập Mã Acc)</option>
+                            <option value="ct">Cày Thuê (Yêu cầu User/Pass game)</option>
+                            <option value="gp">Gift Gamepass (Đặt trước 1-3 tuần)</option>
+                            <option value="rbx120h">Robux 120h (Chọn rate & số lượng)</option>
+                            <option value="custom">Tùy chỉnh tên các dòng chữ theo ý muốn ✨</option>
+                        </select>
+                    </div>
+                    
+                    <div id="adminCustomFieldBox" style="display: none; background: rgba(56,189,248,0.1); border: 1px dashed rgba(56,189,248,0.4); padding: 10px; border-radius: 8px; margin-bottom: 12px;">
+                        <h4 style="font-size: 11px; color: #38bdf8; margin-bottom: 6px;">Tùy chỉnh nhãn điền thông tin (Form Custom):</h4>
+                        <div class="form-group"><label>Nhãn dòng 1 (Thay vì Tên đăng nhập):</label><input type="text" id="customField1" class="form-control" placeholder="VD: Nhập tên nhân vật hoặc ID..."></div>
+                        <div class="form-group"><label>Nhãn dòng 2 (Thay vì Mật khẩu / SĐT):</label><input type="text" id="customField2" class="form-control" placeholder="VD: Nhập mã code hoặc link FB..."></div>
+                    </div>
+
+                    <div class="form-group"><label>Ảnh minh họa danh mục:</label><input type="file" id="newCatImageFile" class="form-control" accept="image/*" style="padding: 6px;"></div>  
+                    <button class="action-btn" style="background:#10b981; margin-bottom:12px;" onclick="adminThemHoacSuaDanhMuc()">Thêm Mới / Lưu Danh Mục & Tùy Chỉnh</button>  
                     <h4 style="font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-align: left;">Danh sách danh mục hiện tại:</h4>  
                     <div id="adminCategoryListContainer" style="font-size: 11px; color: #cbd5e1; text-align: left; background: rgba(15,23,42,0.6); padding: 8px; border-radius: 8px;">Đang tải...</div>  
                 </div>  
@@ -548,6 +562,23 @@
         </div>  
     </div>  
 
+    <div class="modal" id="modalCustomForm">  
+        <div class="modal-content">  
+            <div class="modal-title-custom" id="customModalTitle">Đặt Đơn Hàng</div>  
+            <div class="form-group"><label>Sản phẩm:</label><input type="text" id="csProductName" class="form-control" readonly></div>  
+            <div class="form-group"><label>Đơn giá:</label><input type="text" id="csProductPrice" class="form-control" readonly></div>  
+            <div class="form-group"><label>Số lượng:</label><input type="number" id="csQuantity" class="form-control" value="1" min="1" oninput="tinhTienCustom()"></div>  
+            <div class="form-group"><label>Tổng tiền thanh toán:</label><input type="text" id="csTotalMoney" class="form-control" style="color: #38bdf8; font-weight: bold;" readonly></div>  
+            <div class="form-group"><label id="labelField1">Thông tin 1:</label><input type="text" id="csField1" class="form-control" placeholder="Nhập thông tin..."></div>  
+            <div class="form-group"><label id="labelField2">Thông tin 2:</label><input type="text" id="csField2" class="form-control" placeholder="Nhập thông tin..."></div>  
+            <div class="form-group"><label>Số điện thoại / Zalo:</label><input type="text" id="csPhone" class="form-control" placeholder="Số điện thoại của bạn"></div>  
+            <div class="modal-buttons">  
+                <button class="btn-close" onclick="dongModal('modalCustomForm')">Hủy</button>  
+                <button class="btn-submit" style="background:#10b981;" onclick="xacNhanThanhToanCustomForm()">Xác Nhận & Gửi</button>  
+            </div>  
+        </div>  
+    </div>  
+
     <div class="modal" id="modalGiftGamepass">  
         <div class="modal-content">  
             <div class="modal-title-custom">Đặt Trước Gift Gamepass</div>  
@@ -660,7 +691,6 @@
         </div>  
     </div>
 
-    <!-- Modal Hiển Thị Ảnh Cảm Ơn Khi Đặt Hàng Thành Công -->
     <div class="modal" id="modalThankYouCard">
         <div class="modal-content" style="max-width: 440px; text-align: center; background: rgba(15, 23, 42, 0.95);">
             <div class="modal-title-custom" style="color: #fbbf24; margin-bottom: 10px;">🎉 ĐẶT HÀNG THÀNH CÔNG!</div>
@@ -672,7 +702,25 @@
             </div>
         </div>
     </div>
-<script>  
+
+    <div class="modal" id="modalXacNhanNapTien">
+        <div class="modal-content">
+            <div class="modal-title-custom">Xác Nhận Đã Chuyển Khoản</div>
+            <div class="form-group"><label>Số tiền vừa chuyển (VNĐ):</label><input type="number" id="napTienSoTien" class="form-control" placeholder="VD: 50000"></div>
+            <div class="form-group"><label>Tải ảnh bill chuyển khoản:</label><input type="file" id="napTienBillFile" class="form-control" accept="image/*" style="padding: 6px;"></div>
+            <div class="note-box" style="font-size: 11px; text-align: left; line-height: 1.4;">
+                💡 Sau khi bấm xác nhận, hệ thống sẽ sao chép thông tin và cho phép bạn gửi bill qua Zalo, Facebook hoặc các nhóm duyệt nhanh tức thì!
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                <button class="action-btn" style="background: #0284c7;" onclick="guiBillQuaKenh('zalo')">💬 Gửi Bill Qua Zalo Cá Nhân</button>
+                <button class="action-btn" style="background: #2563eb;" onclick="guiBillQuaKenh('fb')">🌐 Gửi Bill Qua Facebook Cá Nhân</button>
+                <button class="action-btn" style="background: #10b981;" onclick="guiBillQuaKenh('nhomzalo')">👥 Gửi Bill Qua Nhóm Zalo Duyệt Nhanh</button>
+                <button class="action-btn" style="background: #7c3aed;" onclick="guiBillQuaKenh('nhomfb')">👥 Gửi Bill Qua Nhóm Mess Duyệt Nhanh</button>
+            </div>
+            <button class="btn-close" style="width: 100%; margin-top: 12px;" onclick="dongModal('modalXacNhanNapTien')">Đóng</button>
+        </div>
+    </div>
+<script>
     const FIREBASE_DB_URL = "https://sinek-store-default-rtdb.asia-southeast1.firebasedatabase.app/";  
       
     const defaultDatabaseSanPham = {  
@@ -706,12 +754,12 @@
     };  
 
     const defaultDanhSachDanhMuc = {
-        "muaacc": { name: "Acc King Legacy VIP", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" },
-        "caythue": { name: "Cày Thuê King Legacy", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" },
-        "itemnguyenlieu": { name: "Item & Nguyên Liệu", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" },
-        "giftgamepass": { name: "Gift Gamepass", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" },
-        "robux120h": { name: "⏳ Robux 120h", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" },
-        "robuxglobal": { name: "🌍 Robux Global", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" }
+        "muaacc": { name: "Acc King Legacy VIP", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", formType: "acc" },
+        "caythue": { name: "Cày Thuê King Legacy", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", formType: "ct" },
+        "itemnguyenlieu": { name: "Item & Nguyên Liệu", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", formType: "item" },
+        "giftgamepass": { name: "Gift Gamepass", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", formType: "gp" },
+        "robux120h": { name: "⏳ Robux 120h", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", formType: "rbx120h" },
+        "robuxglobal": { name: "🌍 Robux Global", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", formType: "item" }
     };
 
     const defaultDanhSachCTV = {  
@@ -731,6 +779,12 @@
     let appliedVoucherCode = null;  
     let discountAmountGlobal = 0;  
     let memoryProductCache = {};  
+
+    // KHAI BÁO HÀM NÀY NGAY ĐẦU ĐỂ KHÔNG BỊ LỖI `dongPopupNotice is not defined`
+    function dongPopupNotice() {   
+        let popup = document.getElementById('popupNotice');  
+        if(popup) { popup.style.display = 'none'; }  
+    }  
 
     function showToast(message, type = 'info') {  
         let container = document.getElementById('toastNotificationContainer');  
@@ -754,11 +808,6 @@
         if(total >= 150000) return `<span class="vip-badge vip-2">🔷 VIP 2</span>`;  
         if(total > 0) return `<span class="vip-badge vip-1">🟢 VIP 1</span>`;  
         return `<span class="vip-badge vip-1">Mới</span>`;  
-    }  
-
-    function dongPopupNotice() {   
-        let popup = document.getElementById('popupNotice');  
-        if(popup) { popup.style.display = 'none'; }  
     }  
 
     function toggleMenuLeft(event) {  
@@ -804,6 +853,46 @@
     function dongModalVaChuyenFB() {
         document.getElementById('modalThankYouCard').style.display = 'none';
         window.location.href = "https://www.facebook.com/share/1GurruAhF3/";
+    }
+
+    function moModalXacNhanNapTien() {
+        if(!currentUser) {
+            showToast('Vui lòng đăng nhập trước khi nạp tiền!', 'error');
+            moModalAuth();
+            return;
+        }
+        document.getElementById('napTienSoTien').value = '';
+        document.getElementById('napTienBillFile').value = '';
+        document.getElementById('modalXacNhanNapTien').style.display = 'flex';
+    }
+
+    function guiBillQuaKenh(kenh) {
+        let soTien = document.getElementById('napTienSoTien').value.trim();
+        if(!soTien) {
+            showToast('Vui lòng nhập số tiền vừa chuyển!', 'error');
+            return;
+        }
+
+        let noiDungGui = `[XÁC NHẬN NẠP TIỀN QR ZALOPAY]\n- Tài khoản: ${currentUser}\n- Số tiền đã chuyển: ${parseInt(soTien).toLocaleString()} đ\n- Nội dung chuyển khoản: NAP_${currentUser}\n(Đã đính kèm ảnh bill chuyển khoản)`;
+        
+        navigator.clipboard.writeText(noiDungGui).then(() => {
+            showToast('Đã sao chép nội dung chuyển khoản! Đang chuyển hướng...', 'success');
+            document.getElementById('modalXacNhanNapTien').style.display = 'none';
+            
+            setTimeout(() => {
+                if(kenh === 'zalo') window.location.href = "https://zalo.me/0794221549";
+                else if(kenh === 'fb') window.location.href = "https://www.facebook.com/share/1GurruAhF3/";
+                else if(kenh === 'nhomzalo') window.location.href = "https://zalo.me/g/ew0hzswegva9lpxu3uk4";
+                else if(kenh === 'nhomfb') window.location.href = "https://m.me/j/3mM40YihdT9zYr0W/?send_source=gc%3Acopy_invite_link_t";
+            }, 1000);
+        });
+    }
+
+    function toggleAdminCustomField() {
+        let val = document.getElementById('newCatFormType').value;
+        let box = document.getElementById('adminCustomFieldBox');
+        if(val === 'custom') box.style.display = 'block';
+        else box.style.display = 'none';
     }
     async function apDungVoucherChoDonHang(modalType) {  
         let inputId = modalType === 'acc' ? 'accVoucherInput' : (modalType === 'ct' ? 'ctVoucherInput' : (modalType === 'it' ? 'itVoucherInput' : 'gpVoucherInput'));  
@@ -965,7 +1054,9 @@
                     if(data.categories) {
                         for(let k in data.categories) {
                             if(typeof data.categories[k] === 'string') {
-                                data.categories[k] = { name: data.categories[k], image: fixedImage };
+                                data.categories[k] = { name: data.categories[k], image: fixedImage, formType: 'item' };
+                            } else if(!data.categories[k].formType) {
+                                data.categories[k].formType = 'item';
                             }
                         }
                         danhSachDanhMuc = data.categories;
@@ -1049,7 +1140,7 @@
             let catImg = (typeof catObj === 'object' && catObj.image) ? catObj.image : fixedImage;
             html += `  
                 <div class="card" onclick="moDanhMuc('${keyDM}')">  
-                    <img src="${catImg}" class="card-img">  
+                    <img src="${catImg}" class="card-img" loading="lazy">  
                     <div class="card-title">${catName}</div>  
                     <div class="card-desc">Dịch vụ uy tín, giá rẻ tại Sinek Store</div>  
                     <button class="action-btn">Xem Sản Phẩm</button>  
@@ -1078,6 +1169,9 @@
                     <p style="font-size:12px; color:#94a3b8; margin-bottom:10px; text-align:left;">Quét mã QR ZaloPay bên dưới và <b>nhập đúng nội dung chuyển khoản</b>:</p>  
                     <div class="note-box" id="bankSyntaxContent">Nội dung chuyển khoản: NAP_${currentUser}</div>  
                     <img src="https://i.ibb.co/tPsgyfKT/IMG-20261004-214345.jpg" alt="QR ZaloPay" class="qr-img">  
+                    <div style="margin-top: 12px;">
+                        <button class="action-btn" style="background: #10b981; padding: 12px; font-size: 13px;" onclick="moModalXacNhanNapTien()">✅ Xác Nhận Đã Chuyển Khoản & Gửi Bill</button>
+                    </div>
                     <div style="font-size:11px; color:#38bdf8; margin-top:10px; line-height: 1.4;">ℹ️ Lưu ý: Tiền được cộng sau 1-12h. Nếu quá hạn chưa thấy, liên hệ Admin!</div>  
                 `;  
             } else {  
@@ -1122,41 +1216,32 @@
               
             let onclickAttr = '';  
             if(!isSoldOut) {  
-                if(keyDM === 'muaacc') onclickAttr = `onclick="kiemTraTruocKhiMoModal('acc', '${sp.name}', ${sp.price})"`;  
-                else if(keyDM === 'caythue') onclickAttr = `onclick="kiemTraTruocKhiMoModal('ct', '${sp.name}', ${sp.price})"`;  
-                else if(keyDM === 'itemnguyenlieu') onclickAttr = `onclick="kiemTraTruocKhiMoModal('it', '${sp.name}', ${sp.price})"`;  
-                else if(keyDM === 'giftgamepass') onclickAttr = `onclick="kiemTraTruocKhiMoModal('gp', '${sp.name}', ${sp.price})"`;  
-                else if(keyDM === 'robux120h') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbx120h', '${sp.name}', ${sp.price})"`;  
-                else onclickAttr = `onclick="kiemTraTruocKhiMoModal('generic', '${sp.name}', ${sp.price})"`;  
+                let formType = (typeof catInfo === 'object' && catInfo.formType) ? catInfo.formType : 'item';
+                if(keyDM === 'muaacc' || formType === 'acc') onclickAttr = `onclick="kiemTraTruocKhiMoModal('acc', '${sp.name}', ${sp.price})"`;  
+                else if(keyDM === 'caythue' || formType === 'ct') onclickAttr = `onclick="kiemTraTruocKhiMoModal('ct', '${sp.name}', ${sp.price})"`;  
+                else if(keyDM === 'giftgamepass' || formType === 'gp') onclickAttr = `onclick="kiemTraTruocKhiMoModal('gp', '${sp.name}', ${sp.price})"`;  
+                else if(keyDM === 'robux120h' || formType === 'rbx120h') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbx120h', '${sp.name}', ${sp.price})"`;  
+                else if(formType === 'custom') onclickAttr = `onclick="kiemTraTruocKhiMoModal('custom', '${sp.name}', ${sp.price}, '${keyDM}')"`;
+                else onclickAttr = `onclick="kiemTraTruocKhiMoModal('it', '${sp.name}', ${sp.price})"`;  
             }  
               
             let productImg = sp.image || fixedImage;  
-            let mediaHTML = `<img src="${productImg}" class="card-img">`;  
+            let mediaHTML = `<img src="${productImg}" class="card-img" loading="lazy">`;  
             let stockHTML = `<div style="font-size: 11px; color: #fbbf24; margin-bottom: 4px;">Kho còn: <b>${sp.stock}</b></div>`;  
-            let noteAccHTML = (keyDM === 'muaacc') ? `<div style="font-size: 10px; color: #38bdf8; margin-bottom: 8px; font-style: italic; line-height: 1.3;">💡 Nếu muốn xem ảnh của acc trọn vẹn, vui lòng liên hệ qua Zalo hoặc FB của admin!</div>` : '';  
               
-            let customNoteHTML = '';  
-            if(keyDM === 'robuxglobal') {  
-                customNoteHTML = `<div style="font-size: 10px; color: #38bdf8; margin-bottom: 6px; font-style: italic; line-height: 1.3;">ℹ️ Lưu ý: Robux sẽ tự động vào acc sau 12-24h có thể sớm hơn</div>`;  
-            } else if(keyDM === 'robux120h') {  
-                customNoteHTML = `<div style="font-size: 10px; color: #38bdf8; margin-bottom: 6px; font-style: italic; line-height: 1.3;">⚡ Rate ${sp.price}đ / 1 Robux</div>`;  
-            }  
-
             listHTML += `  
                 <div class="card" ${isSoldOut ? 'style="opacity: 0.6;"' : ''}>  
                     ${mediaHTML}  
                     <div class="card-title">${sp.name}</div>  
                     <div class="card-desc" style="color: #38bdf8; font-weight: bold; margin-bottom: 4px;">${keyDM === 'robux120h' ? sp.price + ' đ / 1RB' : sp.price.toLocaleString() + ' đ'}</div>  
                     ${stockHTML}  
-                    ${noteAccHTML}  
-                    ${customNoteHTML}  
                     <button class="action-btn" ${btnStyle} ${onclickAttr}>${btnText}</button>  
                 </div>  
             `;  
         });  
         document.getElementById('productList').innerHTML = listHTML;  
     }
-    function kiemTraTruocKhiMoModal(loai, ten, gia) {  
+    function kiemTraTruocKhiMoModal(loai, ten, gia, keyDM = '') {  
         if(!currentUser) {  
             showToast('Vui lòng Đăng Nhập hoặc Đăng Ký tài khoản trước khi mua hàng!', 'error');  
             moModalAuth();  
@@ -1167,8 +1252,90 @@
         else if(loai === 'it') moModalItem(ten, gia);  
         else if(loai === 'gp') moModalGiftGamepass(ten, gia);  
         else if(loai === 'rbx120h') moModalRobux120h(ten, gia);  
+        else if(loai === 'custom') moModalCustomForm(ten, gia, keyDM);
         else xacNhanRobuxGlobal(ten, gia);  
-    }  
+    }
+
+    let currentCustomCategoryKey = '';
+    function moModalCustomForm(ten, gia, keyDM) {
+        currentCustomCategoryKey = keyDM;
+        let catObj = danhSachDanhMuc[keyDM] || {};
+        let f1 = catObj.field1 || 'Thông tin 1';
+        let f2 = catObj.field2 || 'Thông tin 2';
+
+        document.getElementById('customModalTitle').innerText = catObj.name || 'Đặt Đơn Hàng';
+        document.getElementById('csProductName').value = ten;
+        document.getElementById('csProductPrice').value = gia.toLocaleString() + ' đ';
+        document.getElementById('csQuantity').value = 1;
+        document.getElementById('csTotalMoney').value = gia.toLocaleString() + ' đ';
+        document.getElementById('labelField1').innerText = f1 + ':';
+        document.getElementById('labelField2').innerText = f2 + ':';
+        document.getElementById('csField1').value = '';
+        document.getElementById('csField2').value = '';
+        document.getElementById('csPhone').value = '';
+        document.getElementById('modalCustomForm').style.display = 'flex';
+    }
+
+    function tinhTienCustom() {
+        let qty = parseInt(document.getElementById('csQuantity').value) || 1;
+        if(qty < 1) qty = 1;
+        let total = sanphamDangChon.basePrice * qty;
+        sanphamDangChon.price = total;
+        document.getElementById('csTotalMoney').value = total.toLocaleString() + ' đ';
+    }
+
+    async function xacNhanThanhToanCustomForm() {
+        let qty = document.getElementById('csQuantity').value;
+        let val1 = document.getElementById('csField1').value.trim();
+        let val2 = document.getElementById('csField2').value.trim();
+        let phone = document.getElementById('csPhone').value.trim();
+
+        if(!val1 || !phone) { showToast('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error'); return; }
+
+        if(currentUser) {  
+            let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json");  
+            let userData = await res.json() || { balance: 0 };  
+            let currentBal = userData.balance || 0;  
+            if(currentBal < sanphamDangChon.price) {  
+                showToast('Số dư tài khoản không đủ để thanh toán!', 'error');  
+                return;  
+            }  
+            userData.balance = currentBal - sanphamDangChon.price;  
+            await fetch(FIREBASE_DB_URL + "sinek_users/" + currentUser + ".json", {  
+                method: "PUT",  
+                headers: { "Content-Type": "application/json" },  
+                body: JSON.stringify(userData)  
+            });  
+            capNhatGiaoDienUser();  
+        }  
+
+        let randomCode = 'SNK-' + Math.floor(100000 + Math.random() * 900000);  
+        let timeNow = new Date().toLocaleString('vi-VN');  
+        let catObj = danhSachDanhMuc[currentCustomCategoryKey] || {};
+        let f1Name = catObj.field1 || 'Thông tin 1';
+        let f2Name = catObj.field2 || 'Thông tin 2';
+
+        let chiTiet = `Tài khoản web: ${currentUser}\n- Số lượng: ${qty}\n- ${f1Name}: ${val1}\n- ${f2Name}: ${val2}\n- SĐT: ${phone}`;  
+          
+        await luuVaTaoDonHang({  
+            code: randomCode,  
+            webUser: currentUser || 'Khách vãng lai',  
+            item: sanphamDangChon.name + ` (SL: ${qty})`,  
+            price: sanphamDangChon.price,  
+            details: chiTiet,  
+            status: '⏳ Chờ Duyệt',  
+            handledBy: null,  
+            time: timeNow  
+        });  
+
+        let noiDungGui = `[ĐƠN HÀNG - ${randomCode}]\n- Sản phẩm: ${sanphamDangChon.name}\n- Số lượng: ${qty}\n- ${f1Name}: ${val1}\n- ${f2Name}: ${val2}\n- Tổng tiền: ${sanphamDangChon.price.toLocaleString()}đ\n- SĐT: ${phone}`;  
+          
+        navigator.clipboard.writeText(noiDungGui).then(() => {  
+            showToast('Đặt đơn thành công! Đã sao chép nội dung.', 'success');  
+            hienModalCamOn();  
+        });  
+        dongModal('modalCustomForm');  
+    }
 
     function veTrangChu() {  
         document.getElementById('pageProducts').style.display = 'none';  
@@ -1861,8 +2028,7 @@
               
             showToast('Đã đăng xuất khu vực quản lý!', 'success');  
         }  
-    }  
-
+    }
     function hienThiGiaoDienTheoQuyen(role) {  
         document.getElementById('adminLoginBox').style.display = 'none';  
         document.getElementById('adminPanelBox').style.display = 'block';  
@@ -1913,6 +2079,7 @@
         }  
         loadQuanLyDonHangAdmin();  
     }
+
     async function adminThemHoacDoiMkCTV() {  
         let u = document.getElementById('newCtvUser').value.trim().toLowerCase();  
         let name = document.getElementById('newCtvName').value.trim();  
@@ -1943,7 +2110,7 @@
             let btnToggleBg = isAllowed ? '#10b981' : '#64748b';  
 
             html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">  
-                <span><b>${ctv.name}</b> (User: <b style="color:#38bdf8;">${username}</b> - MK: ${ctv.pass})<br><span style="font-size:10px; color:#fbbf24; ">Quyền cộng trừ tiền: ${isAllowed ? 'BẬT' : 'TẮT'}</span></span>  
+                <span><b>${ctv.name}</b> (User: <b style="color:#38bdf8;">${username}</b> - MK: ${ctv.pass})<br><span style="font-size:10px; color:#fbbf24;">Quyền cộng trừ tiền: ${isAllowed ? 'BẬT' : 'TẮT'}</span></span>  
                 <div style="display: flex; gap: 4px;">  
                     <button onclick="adminToggleQuyenTienCTV('${username}')" style="background:${btnToggleBg}; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">${btnToggleText}</button>  
                     <button onclick="adminXoaCTV('${username}')" style="background:#ef4444; color:#fff; border:none; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Xóa</button>  
@@ -1974,34 +2141,43 @@
     async function adminThemHoacSuaDanhMuc() {
         let key = document.getElementById('newCatKey').value.trim().toLowerCase();
         let name = document.getElementById('newCatName').value.trim();
+        let formType = document.getElementById('newCatFormType').value;
+        let field1 = document.getElementById('customField1').value.trim();
+        let field2 = document.getElementById('customField2').value.trim();
         let fileInput = document.getElementById('newCatImageFile');
         if(!key || !name) { showToast('Vui lòng nhập đầy đủ mã và tên danh mục!', 'error'); return; }
 
-        let existingImg = (danhSachDanhMuc[key] && typeof danhSachDanhMuc[key] === 'object') ? danhSachDanhMuc[key].image : fixedImage;
+        let existingObj = danhSachDanhMuc[key] || {};
+        let existingImg = (typeof existingObj === 'object' && existingObj.image) ? existingObj.image : fixedImage;
+
+        let categoryData = { 
+            name: name, 
+            image: existingImg, 
+            formType: formType,
+            field1: field1 || 'Thông tin 1',
+            field2: field2 || 'Thông tin 2'
+        };
 
         if (fileInput.files && fileInput.files[0]) {
             let file = fileInput.files[0];
             let reader = new FileReader();
             reader.onload = async function(e) {
-                let base64Img = e.target.result;
-                danhSachDanhMuc[key] = { name: name, image: base64Img };
+                categoryData.image = e.target.result;
+                danhSachDanhMuc[key] = categoryData;
                 if(!databaseSanPham[key]) databaseSanPham[key] = [];
+                memoryProductCache[key] = null;
                 await saveFirebaseData();
-                showToast(`Đã lưu danh mục [${name}] kèm ảnh thành công!`, 'success');
-                document.getElementById('newCatKey').value = '';
-                document.getElementById('newCatName').value = '';
-                fileInput.value = '';
+                showToast(`Đã lưu danh mục [${name}] thành công!`, 'success');
                 loadDanhSachDanhMucAdmin();
                 renderCategoryGrid();
             };
             reader.readAsDataURL(file);
         } else {
-            danhSachDanhMuc[key] = { name: name, image: existingImg };
+            danhSachDanhMuc[key] = categoryData;
             if(!databaseSanPham[key]) databaseSanPham[key] = [];
+            memoryProductCache[key] = null;
             await saveFirebaseData();
             showToast(`Đã lưu danh mục [${name}] thành công!`, 'success');
-            document.getElementById('newCatKey').value = '';
-            document.getElementById('newCatName').value = '';
             loadDanhSachDanhMucAdmin();
             renderCategoryGrid();
         }
@@ -2023,10 +2199,11 @@
         for(let key in danhSachDanhMuc) {
             let catObj = danhSachDanhMuc[key];
             let catName = typeof catObj === 'object' ? catObj.name : catObj;
+            let formType = typeof catObj === 'object' ? (catObj.formType || 'item') : 'item';
             html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
-                <span><b>${catName}</b> (Mã: <b style="color:#38bdf8;">${key}</b>)</span>
+                <span><b>${catName}</b> (Mã: <b style="color:#38bdf8;">${key}</b> - Form: <i>${formType}</i>)</span>
                 <div style="display: flex; gap: 4px;">
-                    <button onclick="dienThongTinDanhMuc('${key}', '${catName}')" style="background:#0284c7; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">Sửa</button>
+                    <button onclick="dienThongTinDanhMuc('${key}', '${catName}', '${formType}')" style="background:#0284c7; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">Sửa</button>
                     <button onclick="adminXoaDanhMuc('${key}')" style="background:#ef4444; color:#fff; border:none; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Xóa</button>
                 </div>
             </div>`;
@@ -2036,9 +2213,12 @@
         if(selectProCat) selectProCat.innerHTML = selectHtml;
     }
 
-    function dienThongTinDanhMuc(key, name) {
+    function dienThongTinDanhMuc(key, name, formType) {
         document.getElementById('newCatKey').value = key;
         document.getElementById('newCatName').value = name;
+        let selectForm = document.getElementById('newCatFormType');
+        if(selectForm) selectForm.value = formType || 'item';
+        toggleAdminCustomField();
         showToast(`Đã điền thông tin danh mục [${key}] để sửa`, 'success');
     }
 
@@ -2046,6 +2226,7 @@
         if(confirm(`Bạn có chắc muốn xóa danh mục [${key}] và toàn bộ sản phẩm trong đó không?`)) {
             delete danhSachDanhMuc[key];
             delete databaseSanPham[key];
+            memoryProductCache[key] = null;
             await saveFirebaseData();
             loadDanhSachDanhMucAdmin();
             loadDanhSachSanPhamAdmin();
