@@ -46,16 +46,17 @@
         .header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.15); position: sticky; top: 0; z-index: 100; animation: glowingBorder 4s infinite; }
     .chat-float-btn { position: fixed; bottom: 20px; right: 20px; background: rgba(2, 132, 199, 0.85); backdrop-filter: blur(10px); color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 8px 25px rgba(56,189,248,0.4); z-index: 1500; border: 1px solid rgba(255,255,255,0.25); transition: 0.3s; }  
     .chat-float-btn:hover { transform: scale(1.1); background: rgba(56, 189, 248, 0.9); color: #0f172a; }  
-    .chat-box-container { display: none; position: fixed; bottom: 80px; right: 20px; width: 340px; height: 450px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 18px; z-index: 2000; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,0.5); overflow: hidden; }  
+    .chat-box-container { display: none; position: fixed; bottom: 80px; right: 20px; width: 340px; height: 480px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 18px; z-index: 2000; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,0.5); overflow: hidden; }  
     .chat-header { background: rgba(30, 41, 59, 0.5); padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.15); font-weight: bold; color: #38bdf8; }  
     .chat-messages { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px; }  
     .chat-input-area { padding: 10px; background: rgba(30, 41, 59, 0.5); display: flex; gap: 6px; border-top: 1px solid rgba(255, 255, 255, 0.15); }  
     .chat-msg { max-width: 80%; padding: 8px 10px; border-radius: 12px; line-height: 1.4; word-break: break-word; }  
     .chat-msg.user { background: rgba(2, 132, 199, 0.85); backdrop-filter: blur(8px); color: #fff; align-self: flex-end; border: 1px solid rgba(255,255,255,0.2); }  
     .chat-msg.staff { background: rgba(51, 65, 85, 0.75); backdrop-filter: blur(8px); color: #f8fafc; align-self: flex-start; border: 1px solid rgba(255,255,255,0.15); }  
+    .chat-msg.ai { background: rgba(139, 92, 246, 0.3); backdrop-filter: blur(8px); color: #e2e8f0; align-self: flex-start; border: 1px solid rgba(139, 92, 246, 0.5); }  
     .chat-msg.system { background: rgba(251,191,36,0.15); color: #fbbf24; align-self: center; text-align: center; width: 100%; font-size: 11px; border: 1px dashed rgba(251,191,36,0.4); border-radius: 8px; }  
-    .waiting-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; color: #fbbf24; font-size: 11px; text-align: center; gap: 6px; background: rgba(30,41,59,0.6); border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.15); }  
-    .spinner { width: 20px; height: 20px; border: 3px solid rgba(251,191,36,0.3); border-top-color: #fbbf24; border-radius: 50%; animation: spin 0.8s linear infinite; }  
+    .waiting-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; color: #fbbf24; font-size: 11px; text-align: center; gap: 6px; background: rgba(30,41,59,0.6); border-top: 1px solid rgba(255,255,255,0.15); }  
+    .spinner { width: 18px; height: 18px; border: 3px solid rgba(251,191,36,0.3); border-top-color: #fbbf24; border-radius: 50%; animation: spin 0.8s linear infinite; }  
     @keyframes spin { to { transform: rotate(360deg); } }  
 
     .vip-badge {  
@@ -244,12 +245,15 @@
             <button onclick="toggleChatBox()" style="background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer;">✕</button>  
         </div>  
         <div class="chat-messages" id="chatMessagesList">  
-            <div class="chat-msg system">Xin chào! Hãy gửi tin nhắn, hệ thống sẽ kết nối bạn với CTV hoặc Admin ngay lập tức.</div>  
+            <div class="chat-msg system">Xin chào! Hãy gửi tin nhắn, Bot AI hoặc Admin sẽ hỗ trợ bạn ngay lập tức.</div>  
         </div>  
         <div id="waitingArea" style="display: none;">  
             <div class="waiting-loader">  
-                <div class="spinner"></div>  
-                <span>Đang chờ CTV hoặc Admin tham gia vào cuộc hội thoại tư vấn khách...</span>  
+                <div style="display: flex; align-items: center; gap: 6px;">  
+                    <div class="spinner"></div>  
+                    <span>Bot AI đang tư vấn tự động...</span>  
+                </div>  
+                <button class="action-btn" style="background: #7c3aed; font-size: 11px; padding: 5px; margin-top: 4px;" onclick="yeuCauGặpNhanVienTuChat()">👥 Yêu Cầu Gặp Nhân Viên</button>  
             </div>  
         </div>  
         <div class="chat-input-area" id="chatInputArea">  
@@ -365,18 +369,20 @@
                     <h4 style="font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-align: left;">Danh sách CTV hiện tại (Bật/Tắt quyền cộng trừ tiền):</h4>  
                     <div id="adminCtvListContainer" style="font-size: 11px; color: #cbd5e1; text-align: left; background: rgba(15,23,42,0.6); padding: 8px; border-radius: 8px;">Đang tải...</div>  
                 </div>  
+                <div id="khuVucQuanLyDanhMuc" class="card" style="margin-bottom:15px;">  
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">📂 Quản Lý Danh Mục (Thêm, Sửa, Ảnh Minh Họa)</h3>  
+                    <div class="form-group"><label>Mã danh mục (Viết liền không dấu, VD: robuxvip):</label><input type="text" id="newCatKey" class="form-control" placeholder="Mã danh mục (key)"></div>  
+                    <div class="form-group"><label>Tên hiển thị danh mục:</label><input type="text" id="newCatName" class="form-control" placeholder="Tên danh mục"></div>  
+                    <div class="form-group"><label>Ảnh minh họa danh mục (Chọn từ thư viện):</label><input type="file" id="newCatImageFile" class="form-control" accept="image/*" style="padding: 6px;"></div>  
+                    <button class="action-btn" style="background:#10b981; margin-bottom:12px;" onclick="adminThemHoacSuaDanhMuc()">Thêm Mới / Lưu Danh Mục & Ảnh</button>  
+                    <h4 style="font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-align: left;">Danh sách danh mục hiện tại:</h4>  
+                    <div id="adminCategoryListContainer" style="font-size: 11px; color: #cbd5e1; text-align: left; background: rgba(15,23,42,0.6); padding: 8px; border-radius: 8px;">Đang tải...</div>  
+                </div>  
                 <div id="khuVucThemSanPham" class="card" style="margin-bottom:15px;">  
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">1. Thêm Sản Phẩm Mới (Chọn ảnh từ thư viện)</h3>  
                     <div class="form-group">  
                         <label>Chọn danh mục:</label>  
-                        <select id="newProCategory" class="form-control">  
-                            <option value="muaacc">Acc King Legacy VIP</option>  
-                            <option value="caythue">Cày Thuê King Legacy</option>  
-                            <option value="itemnguyenlieu">Item & Nguyên Liệu</option>  
-                            <option value="giftgamepass">Gift Gamepass King Legacy</option>  
-                            <option value="robux120h">Robux 120h</option>  
-                            <option value="robuxglobal">Robux Global</option>  
-                        </select>  
+                        <select id="newProCategory" class="form-control"></select>  
                     </div>  
                     <div class="form-group">  
                         <label>Tên sản phẩm / Gói:</label>  
@@ -699,6 +705,15 @@
         ]  
     };  
 
+    const defaultDanhSachDanhMuc = {
+        "muaacc": { name: "Acc King Legacy VIP", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" },
+        "caythue": { name: "Cày Thuê King Legacy", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" },
+        "itemnguyenlieu": { name: "Item & Nguyên Liệu", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" },
+        "giftgamepass": { name: "Gift Gamepass", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" },
+        "robux120h": { name: "⏳ Robux 120h", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" },
+        "robuxglobal": { name: "🌍 Robux Global", image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg" }
+    };
+
     const defaultDanhSachCTV = {  
         "trieu": { pass: "Tr@u#9281_Trieu", name: "CTV Phạm Văn Triều", allowMoney: false },  
         "tung": { pass: "Tung!8832$Pro", name: "CTV Lê Mạnh Tùng", allowMoney: false },  
@@ -707,6 +722,7 @@
     };  
 
     let databaseSanPham = defaultDatabaseSanPham;  
+    let danhSachDanhMuc = defaultDanhSachDanhMuc;
     let danhSachCTV = defaultDanhSachCTV;  
     let databaseVouchers = {};  
     let moneyHistory = [];  
@@ -843,7 +859,6 @@
                 }  
             }  
 
-            // Thêm cứng Admin nếu có tiền tích lũy/giao dịch trong hệ thống để hiển thị chính xác lên bảng top
             let adminTotal = 0;  
             if(moneyHistory && moneyHistory.length > 0) {  
                 moneyHistory.forEach(mh => {  
@@ -882,8 +897,7 @@
         let role = localStorage.getItem('sinek_role');  
 
         if (role === 'admin') {  
-            // Tính tổng tiền cộng từ lịch sử biến động cho Admin hoặc mặc định lấy mức khủng  
-            total = 111111111; // Lấy theo con số hiển thị thực tế trên Header của Admin  
+            total = 111111111;   
             if(moneyHistory && moneyHistory.length > 0) {  
                 let calc = 0;  
                 moneyHistory.forEach(mh => { if(mh.type === 'Cộng Tiền') calc += mh.amount; });  
@@ -948,6 +962,14 @@
                 let data = await res.json();  
                 if(data) {  
                     if(data.products) databaseSanPham = data.products;  
+                    if(data.categories) {
+                        for(let k in data.categories) {
+                            if(typeof data.categories[k] === 'string') {
+                                data.categories[k] = { name: data.categories[k], image: fixedImage };
+                            }
+                        }
+                        danhSachDanhMuc = data.categories;
+                    }
                     if(data.ctvList) danhSachCTV = data.ctvList;  
                     if(typeof data.adminStatus !== 'undefined') adminStatus = data.adminStatus;  
                     if(data.orders) allOrders = data.orders;  
@@ -961,6 +983,7 @@
         capNhatGiaoDienTrangThaiAdmin();  
         loadDanhSachVoucherAdmin();  
         loadDanhSachCTVAdmin();  
+        loadDanhSachDanhMucAdmin();
         loadLichSuCongTienAdmin();  
     }  
 
@@ -971,6 +994,7 @@
                 headers: { "Content-Type": "application/json" },  
                 body: JSON.stringify({  
                     products: databaseSanPham,  
+                    categories: danhSachDanhMuc,
                     ctvList: danhSachCTV,  
                     adminStatus: adminStatus,  
                     orders: allOrders,  
@@ -1018,44 +1042,21 @@
         let grid = document.getElementById('categoryGrid');  
         if(!grid) return;  
 
-        grid.innerHTML = `  
-            <div class="card" onclick="moDanhMuc('muaacc')">  
-                <img src="${fixedImage}" class="card-img">  
-                <div class="card-title">Acc King Legacy VIP</div>  
-                <div class="card-desc">Acc ngon, level max, nhiều item hiếm</div>  
-                <button class="action-btn">Xem Sản Phẩm</button>  
-            </div>  
-            <div class="card" onclick="moDanhMuc('caythue')">  
-                <img src="${fixedImage}" class="card-img">  
-                <div class="card-title">Cày Thuê King Legacy</div>  
-                <div class="card-desc">Cày level, quái, sea king fin...</div>  
-                <button class="action-btn">Xem Sản Phẩm</button>  
-            </div>  
-            <div class="card" onclick="moDanhMuc('itemnguyenlieu')">  
-                <img src="${fixedImage}" class="card-img">  
-                <div class="card-title">Item & Nguyên Liệu</div>  
-                <div class="card-desc">Kiếm, phụ kiện, nguyên liệu hiếm</div>  
-                <button class="action-btn">Xem Sản Phẩm</button>  
-            </div>  
-            <div class="card" onclick="moDanhMuc('giftgamepass')">  
-                <img src="${fixedImage}" class="card-img">  
-                <div class="card-title">Gift Gamepass</div>  
-                <div class="card-desc">Đặt trước gamepass giá rẻ, uy tín</div>  
-                <button class="action-btn">Xem Sản Phẩm</button>  
-            </div>  
-            <div class="card" onclick="moDanhMuc('robux120h')">  
-                <img src="${fixedImage}" class="card-img">  
-                <div class="card-title">⏳ Robux 120h</div>  
-                <div class="card-desc">Giá siêu hời, tiết kiệm tối đa</div>  
-                <button class="action-btn">Xem Gói</button>  
-            </div>  
-            <div class="card" onclick="moDanhMuc('robuxglobal')">  
-                <img src="${fixedImage}" class="card-img">  
-                <div class="card-title">🌍 Robux Global</div>  
-                <div class="card-desc">Nạp nhanh chóng, an toàn</div>  
-                <button class="action-btn">Xem Gói</button>  
-            </div>  
-        `;  
+        let html = '';
+        for(let keyDM in danhSachDanhMuc) {
+            let catObj = danhSachDanhMuc[keyDM];
+            let catName = typeof catObj === 'object' ? catObj.name : catObj;
+            let catImg = (typeof catObj === 'object' && catObj.image) ? catObj.image : fixedImage;
+            html += `  
+                <div class="card" onclick="moDanhMuc('${keyDM}')">  
+                    <img src="${catImg}" class="card-img">  
+                    <div class="card-title">${catName}</div>  
+                    <div class="card-desc">Dịch vụ uy tín, giá rẻ tại Sinek Store</div>  
+                    <button class="action-btn">Xem Sản Phẩm</button>  
+                </div>  
+            `;
+        }
+        grid.innerHTML = html;  
     }  
 
     function chuyenTab(tabName) {  
@@ -1109,14 +1110,11 @@
             memoryProductCache[keyDM] = danhSach;  
         }  
           
-        let listHTML = '';  
-        if(keyDM === 'muaacc') document.getElementById('categoryTitle').innerText = 'Acc King Legacy VIP';  
-        else if(keyDM === 'caythue') document.getElementById('categoryTitle').innerText = 'Cày Thuê King Legacy';  
-        else if(keyDM === 'itemnguyenlieu') document.getElementById('categoryTitle').innerText = 'Item & Nguyên Liệu King Legacy';  
-        else if(keyDM === 'giftgamepass') document.getElementById('categoryTitle').innerText = 'Gift Gamepass King Legacy';  
-        else if(keyDM === 'robux120h') document.getElementById('categoryTitle').innerText = 'Dịch Vụ Mua Robux 120h';  
-        else if(keyDM === 'robuxglobal') document.getElementById('categoryTitle').innerText = 'Danh Mục Robux Global';  
+        let catInfo = danhSachDanhMuc[keyDM];
+        let tenDanhMucHienThi = typeof catInfo === 'object' ? catInfo.name : (catInfo || 'Sản Phẩm');
+        document.getElementById('categoryTitle').innerText = tenDanhMucHienThi;  
           
+        let listHTML = '';  
         danhSach.forEach(sp => {  
             let isSoldOut = sp.soldOut;  
             let btnText = (keyDM === 'robuxglobal' || keyDM === 'robux120h') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Mua Ngay') : ((keyDM === 'giftgamepass') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Xác Nhận Đặt Trước') : (isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn'));  
@@ -1129,7 +1127,7 @@
                 else if(keyDM === 'itemnguyenlieu') onclickAttr = `onclick="kiemTraTruocKhiMoModal('it', '${sp.name}', ${sp.price})"`;  
                 else if(keyDM === 'giftgamepass') onclickAttr = `onclick="kiemTraTruocKhiMoModal('gp', '${sp.name}', ${sp.price})"`;  
                 else if(keyDM === 'robux120h') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbx120h', '${sp.name}', ${sp.price})"`;  
-                else if(keyDM === 'robuxglobal') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbxglobal', '${sp.name}', ${sp.price})"`;  
+                else onclickAttr = `onclick="kiemTraTruocKhiMoModal('generic', '${sp.name}', ${sp.price})"`;  
             }  
               
             let productImg = sp.image || fixedImage;  
@@ -1169,7 +1167,7 @@
         else if(loai === 'it') moModalItem(ten, gia);  
         else if(loai === 'gp') moModalGiftGamepass(ten, gia);  
         else if(loai === 'rbx120h') moModalRobux120h(ten, gia);  
-        else if(loai === 'rbxglobal') moModalRobuxGlobal(ten, gia);  
+        else xacNhanRobuxGlobal(ten, gia);  
     }  
 
     function veTrangChu() {  
@@ -1876,6 +1874,7 @@
         let khuVucSuaSP = document.getElementById('khuVucQuanLySanPham');  
         let khuVucVoucher = document.getElementById('khuVucQuanLyVoucher');  
         let khuVucQuanLyCTV = document.getElementById('khuVucQuanLyCTV');  
+        let khuVucQuanLyDanhMuc = document.getElementById('khuVucQuanLyDanhMuc');
 
         let savedKey = localStorage.getItem('sinek_ctv_key');  
         let ctvData = (role === 'ctv' && savedKey) ? danhSachCTV[savedKey] : null;  
@@ -1887,6 +1886,7 @@
             if(khuVucSuaSP) khuVucSuaSP.style.display = 'none';  
             if(khuVucVoucher) khuVucVoucher.style.display = 'none';  
             if(khuVucQuanLyCTV) khuVucQuanLyCTV.style.display = 'none';  
+            if(khuVucQuanLyDanhMuc) khuVucQuanLyDanhMuc.style.display = 'none';
 
             if(canHandleMoney) {  
                 if(khuVucSuaTien) khuVucSuaTien.style.display = 'block';  
@@ -1903,14 +1903,16 @@
             if(khuVucSuaSP) khuVucSuaSP.style.display = 'block';  
             if(khuVucVoucher) khuVucVoucher.style.display = 'block';  
             if(khuVucQuanLyCTV) khuVucQuanLyCTV.style.display = 'block';  
+            if(khuVucQuanLyDanhMuc) khuVucQuanLyDanhMuc.style.display = 'block';
+
             loadDanhSachSanPhamAdmin();  
             loadDanhSachVoucherAdmin();  
             loadDanhSachCTVAdmin();  
+            loadDanhSachDanhMucAdmin();
             loadLichSuCongTienAdmin();  
         }  
         loadQuanLyDonHangAdmin();  
-    }  
-
+    }
     async function adminThemHoacDoiMkCTV() {  
         let u = document.getElementById('newCtvUser').value.trim().toLowerCase();  
         let name = document.getElementById('newCtvName').value.trim();  
@@ -1941,7 +1943,7 @@
             let btnToggleBg = isAllowed ? '#10b981' : '#64748b';  
 
             html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">  
-                <span><b>${ctv.name}</b> (User: <b style="color:#38bdf8;">${username}</b> - MK: ${ctv.pass})<br><span style="font-size:10px; color:#fbbf24;">Quyền cộng trừ tiền: ${isAllowed ? 'BẬT' : 'TẮT'}</span></span>  
+                <span><b>${ctv.name}</b> (User: <b style="color:#38bdf8;">${username}</b> - MK: ${ctv.pass})<br><span style="font-size:10px; color:#fbbf24; ">Quyền cộng trừ tiền: ${isAllowed ? 'BẬT' : 'TẮT'}</span></span>  
                 <div style="display: flex; gap: 4px;">  
                     <button onclick="adminToggleQuyenTienCTV('${username}')" style="background:${btnToggleBg}; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">${btnToggleText}</button>  
                     <button onclick="adminXoaCTV('${username}')" style="background:#ef4444; color:#fff; border:none; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Xóa</button>  
@@ -1969,6 +1971,88 @@
         }  
     }  
 
+    async function adminThemHoacSuaDanhMuc() {
+        let key = document.getElementById('newCatKey').value.trim().toLowerCase();
+        let name = document.getElementById('newCatName').value.trim();
+        let fileInput = document.getElementById('newCatImageFile');
+        if(!key || !name) { showToast('Vui lòng nhập đầy đủ mã và tên danh mục!', 'error'); return; }
+
+        let existingImg = (danhSachDanhMuc[key] && typeof danhSachDanhMuc[key] === 'object') ? danhSachDanhMuc[key].image : fixedImage;
+
+        if (fileInput.files && fileInput.files[0]) {
+            let file = fileInput.files[0];
+            let reader = new FileReader();
+            reader.onload = async function(e) {
+                let base64Img = e.target.result;
+                danhSachDanhMuc[key] = { name: name, image: base64Img };
+                if(!databaseSanPham[key]) databaseSanPham[key] = [];
+                await saveFirebaseData();
+                showToast(`Đã lưu danh mục [${name}] kèm ảnh thành công!`, 'success');
+                document.getElementById('newCatKey').value = '';
+                document.getElementById('newCatName').value = '';
+                fileInput.value = '';
+                loadDanhSachDanhMucAdmin();
+                renderCategoryGrid();
+            };
+            reader.readAsDataURL(file);
+        } else {
+            danhSachDanhMuc[key] = { name: name, image: existingImg };
+            if(!databaseSanPham[key]) databaseSanPham[key] = [];
+            await saveFirebaseData();
+            showToast(`Đã lưu danh mục [${name}] thành công!`, 'success');
+            document.getElementById('newCatKey').value = '';
+            document.getElementById('newCatName').value = '';
+            loadDanhSachDanhMucAdmin();
+            renderCategoryGrid();
+        }
+    }
+
+    function loadDanhSachDanhMucAdmin() {
+        let container = document.getElementById('adminCategoryListContainer');
+        let selectProCat = document.getElementById('newProCategory');
+        if(!container) return;
+
+        if(!danhSachDanhMuc || Object.keys(danhSachDanhMuc).length === 0) {
+            container.innerHTML = 'Chưa có danh mục nào.';
+            if(selectProCat) selectProCat.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+        let selectHtml = '';
+        for(let key in danhSachDanhMuc) {
+            let catObj = danhSachDanhMuc[key];
+            let catName = typeof catObj === 'object' ? catObj.name : catObj;
+            html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <span><b>${catName}</b> (Mã: <b style="color:#38bdf8;">${key}</b>)</span>
+                <div style="display: flex; gap: 4px;">
+                    <button onclick="dienThongTinDanhMuc('${key}', '${catName}')" style="background:#0284c7; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">Sửa</button>
+                    <button onclick="adminXoaDanhMuc('${key}')" style="background:#ef4444; color:#fff; border:none; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Xóa</button>
+                </div>
+            </div>`;
+            selectHtml += `<option value="${key}">${catName}</option>`;
+        }
+        container.innerHTML = html;
+        if(selectProCat) selectProCat.innerHTML = selectHtml;
+    }
+
+    function dienThongTinDanhMuc(key, name) {
+        document.getElementById('newCatKey').value = key;
+        document.getElementById('newCatName').value = name;
+        showToast(`Đã điền thông tin danh mục [${key}] để sửa`, 'success');
+    }
+
+    async function adminXoaDanhMuc(key) {
+        if(confirm(`Bạn có chắc muốn xóa danh mục [${key}] và toàn bộ sản phẩm trong đó không?`)) {
+            delete danhSachDanhMuc[key];
+            delete databaseSanPham[key];
+            await saveFirebaseData();
+            loadDanhSachDanhMucAdmin();
+            loadDanhSachSanPhamAdmin();
+            renderCategoryGrid();
+            showToast('Đã xóa danh mục thành công!', 'success');
+        }
+    }
     async function adminTaoVoucherMoi() {  
         let vCode = document.getElementById('adVoucherCode').value.trim().toUpperCase();  
         let vType = document.getElementById('adVoucherType').value;  
@@ -2359,6 +2443,69 @@
         }  
     }  
 
+    async function xuLyTraLoiTuBotAI(roomId, userMsg) {
+        await taiDuLieuChatTuFirebase();
+        if(!allChats[roomId] || allChats[roomId].status !== 'waiting') return; 
+
+        let textLower = userMsg.toLowerCase();
+        let botReply = "";
+
+        if(textLower.includes('nạp') || textLower.includes('zalopay') || textLower.includes('thẻ cào') || textLower.includes('qr') || textLower.includes('chiết khấu')) {
+            botReply = "💳 **Hướng dẫn nạp tiền tại Sinek Store:**\n1. **ZaloPay:** Quét mã QR ở mục Nạp Tiền và nhớ ghi đúng nội dung chuyển khoản `NAP_<tên_tài_khoản>`.\n2. **Thẻ cào:** Hỗ trợ Viettel (chiết khấu 25%), Vina (22%), Mobi (28%), Zing, Garena...\n👉 Nếu cần gặp nhân viên hỗ trợ ngay, bạn có thể bấm nút **'Yêu Cầu Gặp Nhân Viên'** bên dưới nhé!";
+        } else if(textLower.includes('acc') || textLower.includes('tài khoản') || textLower.includes('mua acc') || textLower.includes('nick')) {
+            botReply = "🛡️ **Acc King Legacy VIP:** Shop chuyên cung cấp acc max level, full item hiếm, trái ác quỷ ngon. Bạn hãy vào danh mục Acc King Legacy trên web, chọn mã acc ưa thích rồi bấm mua ngay nhé!";
+        } else if(textLower.includes('cày') || textLower.includes('thuê') || textLower.includes('level') || textLower.includes('quái') || textLower.includes('sea king')) {
+            botReply = "⚡ **Dịch vụ Cày Thuê King Legacy:** Shop nhận cày level max, farm quái, săn sea king fin, luyện kiếm cực kỳ an toàn và uy tín. Bạn chỉ cần vào mục Cày Thuê, điền thông tin tài khoản game và tạo đơn!";
+        } else if(textLower.includes('item') || textLower.includes('đtp') || textLower.includes('kiếm') || textLower.includes('nguyên liệu') || textLower.includes('phụ kiện')) {
+            botReply = "⚔️ **Item & Nguyên Liệu:** Shop cung cấp đầy đủ các loại kiếm, phụ kiện, donate ĐTP trong King Legacy. Mời bạn ghé danh mục Item trên web để xem giá và đặt đơn nha!";
+        } else if(textLower.includes('robux') || textLower.includes('120h') || textLower.includes('global') || textLower.includes('rate')) {
+            botReply = "💎 **Dịch vụ Robux tại Sinek Store:**\n- **Robux 120h:** Rate siêu hời từ 100 đến 190, tiết kiệm tối đa.\n- **Robux Global:** Nạp nhanh chóng, an toàn tuyệt đối.\nBạn chỉ cần chọn gói Robux tương ứng trên trang chủ để đặt đơn nhé!";
+        } else if(textLower.includes('voucher') || textLower.includes('mã giảm giá') || textLower.includes('ưu đãi')) {
+            botReply = "🎁 **Mã Giảm Giá / Voucher:** Bạn có thể nhập các mã voucher khuyến mãi của shop vào ô mã giảm giá trong bảng thanh toán đơn hàng để được giảm trực tiếp nhé!";
+        } else if(textLower.includes('uy tín') || textLower.includes('lừa đảo') || textLower.includes('an toàn') || textLower.includes('bảo hành')) {
+            botReply = "🔒 **Cam kết uy tín:** Sinek Store hoạt động lâu năm, uy tín đặt lên hàng đầu với hàng ngàn khách hàng đã ủng hộ. Mọi giao dịch đều được bảo mật tuyệt đối 100%!";
+        } else if(textLower.includes('admin') || textLower.includes('nhân viên') || textLower.includes('ctv') || textLower.includes('giúp') || textLower.includes('người thật')) {
+            botReply = "👥 Để gặp trực tiếp Admin hoặc CTV, bạn có thể bấm nút **'Yêu Cầu Gặp Nhân Viên'** bên dưới, hoặc liên hệ trực tiếp qua:\n👉 Zalo Admin: https://zalo.me/0794221549\n👉 Facebook Admin: https://www.facebook.com/share/1GurruAhF3/\n👉 Nhóm Zalo Duyệt Nhanh: https://zalo.me/g/ew0hzswegva9lpxu3uk4";
+        } else {
+            botReply = "🤖 Xin chào! Chào mừng bạn đến với **Sinek Store**. Bot AI đang túc trực 24/7. Bạn cần shop hỗ trợ thông tin gì cứ nhắn tự nhiên nhé! Nếu cần gặp người thật, hãy bấm nút **'Yêu Cầu Gặp Nhân Viên'** bên dưới.";
+        }
+
+        setTimeout(async () => {
+            await taiDuLieuChatTuFirebase();
+            if(!allChats[roomId] || allChats[roomId].status !== 'waiting') return; 
+
+            if(!allChats[roomId].messages) allChats[roomId].messages = [];
+            allChats[roomId].messages.push({
+                sender: '🤖 Sinek AI Bot',
+                text: botReply,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                isStaff: true
+            });
+
+            await saveFirebaseChats();
+            taiNoiDungChatHienTai();
+        }, 1000);
+    }
+
+    async function yeuCauGặpNhanVienTuChat() {
+        if(!currentChatRoomId) return;
+        await taiDuLieuChatTuFirebase();
+        if(!allChats[currentChatRoomId]) allChats[currentChatRoomId] = { messages: [], status: 'waiting' };
+
+        let replyYeuCau = "👥 **Yêu cầu gặp nhân viên đã được ghi nhận!** Trong lúc chờ nhân viên trực tiếp vào web hỗ trợ, bạn có thể liên hệ ngay với Admin & CTV qua các kênh sau để được hỗ trợ tức thì:\n\n👉 **Zalo Admin:** https://zalo.me/0794221549\n👉 **Facebook Admin:** https://www.facebook.com/share/1GurruAhF3/\n👉 **Nhóm Zalo Duyệt Nhanh:** https://zalo.me/g/ew0hzswegva9lpxu3uk4\n👉 **Nhóm Messenger Duyệt Nhanh:** https://m.me/j/3mM40YihdT9zYr0W";
+
+        allChats[currentChatRoomId].messages.push({
+            sender: '🤖 Sinek AI Bot',
+            text: replyYeuCau,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            isStaff: true
+        });
+
+        await saveFirebaseChats();
+        taiNoiDungChatHienTai();
+        showToast('Đã gửi thông tin liên hệ của Admin & CTV!', 'success');
+    }
+
     async function guiTinNhanChat() {  
         let txtInput = document.getElementById('chatInputText');  
         let msg = txtInput.value.trim();  
@@ -2389,6 +2536,10 @@
         await saveFirebaseChats();  
         txtInput.value = '';  
         taiNoiDungChatHienTai();  
+
+        if (!role && allChats[currentChatRoomId].status === 'waiting') {
+            xuLyTraLoiTuBotAI(currentChatRoomId, msg);
+        }
     }  
 
     function checkEnterChat(e) {  
@@ -2440,7 +2591,7 @@
         let html = '';  
         if(room && room.messages && room.messages.length > 0) {  
             room.messages.forEach(m => {  
-                let cssClass = m.isStaff ? 'chat-msg staff' : 'chat-msg user';  
+                let cssClass = m.isStaff ? (m.sender.includes('Bot') ? 'chat-msg ai' : 'chat-msg staff') : 'chat-msg user';  
                 html += `<div class="${cssClass}"><b>${m.sender}:</b> ${m.text} <span style="font-size:9px; opacity:0.7; float:right; margin-left:6px;">${m.time}</span></div>`;  
             });  
         } else {  
@@ -2466,7 +2617,7 @@
         allChats[currentChatRoomId].handler = staffName;  
         allChats[currentChatRoomId].messages.push({  
             sender: 'Hệ Thống',  
-            text: `✨ ${staffName} đã tham gia vào cuộc hội thoại để hỗ trợ bạn!`,  
+            text: `✨ ${staffName} đã tham gia vào cuộc hội thoại để hỗ trợ bạn! (Bot AI đã ngắt kết nối)`,  
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),  
             isStaff: true  
         });  
@@ -2518,7 +2669,7 @@
             }  
 
             countValidRooms++;  
-            let statusText = room.status === 'waiting' ? '⏳ Đang chờ tư vấn' : (room.status === 'active' ? '🟢 Đang tư vấn (' + (room.handler || 'Nhân viên') + ')' : '🔒 Đã đóng');  
+            let statusText = room.status === 'waiting' ? '⏳ Bot AI đang tư vấn' : (room.status === 'active' ? '🟢 Đang tư vấn (' + (room.handler || 'Nhân viên') + ')' : '🔒 Đã đóng');  
             let lastMsg = (room.messages && room.messages.length > 0) ? room.messages[room.messages.length - 1].text : 'Trống';  
             let borderStyle = (currentChatRoomId === roomId) ? 'border: 2px solid #38bdf8;' : 'border: 1px solid rgba(255,255,255,0.15);';  
 
