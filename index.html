@@ -206,7 +206,20 @@
     </div>  
     <div id="toastNotificationContainer"></div>  
     
-    <div class="modal" id="popupNotice" style="display: flex;">  
+    <!-- Bảng Chào Mừng (Hiện trước tiên khi vô web) -->
+    <div class="modal" id="popupWelcome" style="display: flex;">  
+        <div class="popup-box">  
+            <div class="popup-header" style="color: #fbbf24;">CHÀO MỪNG BẠN ĐẾN VỚI SINEK STORE</div>  
+            <div class="popup-body" style="text-align: center;">  
+                ✨ Hệ thống dịch vụ game Roblox, King Legacy, Robux & Cày thuê uy tín hàng đầu Việt Nam.<br><br>  
+                🚀 Chúc bạn có những trải nghiệm tuyệt vời và săn được nhiều món hời giá rẻ tại shop!  
+            </div>  
+            <button class="popup-btn" onclick="dongPopupWelcome()">TIẾP TỤC VÀO WEB</button>  
+        </div>  
+    </div>
+
+    <!-- Bảng Thông Báo (Hiện sau bảng chào mừng, có đếm ngược 5s mới cho đóng) -->
+    <div class="modal" id="popupNotice" style="display: none;">  
         <div class="popup-box">  
             <div class="popup-header">THÔNG BÁO</div>  
             <div class="popup-body">  
@@ -215,7 +228,7 @@
                 👉 <a href="https://zalo.me/g/ew0hzswegva9lpxu3uk4" target="_blank" style="color: #38bdf8;">Nhóm Zalo Duyệt Nhanh</a><br>  
                 👉 <a href="https://m.me/j/3mM40YihdT9zYr0W/?send_source=gc%3Acopy_invite_link_t" target="_blank" style="color: #38bdf8;">Nhóm Messenger Duyệt Nhanh</a>  
             </div>  
-            <button class="popup-btn" onclick="dongPopupNotice()">ĐÓNG</button>  
+            <button class="popup-btn" id="btnCloseNotice" disabled style="background: #475569; cursor: not-allowed;" onclick="dongPopupNotice()">Vui lòng chờ web load... (5s)</button>  
         </div>  
     </div>  
 
@@ -238,6 +251,7 @@
             <button class="menu-hamburger-btn" onclick="toggleMenuLeft(event)">☰</button>  
             <div class="dropdown-menu-left" id="dropdownMenuLeft">  
                 <div class="dropdown-item" onclick="chonMenuLeft('home')">🏠 Trang Chủ</div>  
+                <div class="dropdown-item" onclick="chonMenuLeft('wheel')">🎡 Vòng Quay May Mắn</div>  
                 <div class="dropdown-item" onclick="chonMenuLeft('deposit')">💳 Nạp Tiền</div>  
                 <div class="dropdown-item" onclick="chonMenuLeft('history')">📜 Lịch Sử Đơn</div>  
                 <div class="dropdown-item" onclick="moModalTopNap()" style="color: #fbbf24;">🏆 Top Nạp</div>  
@@ -307,6 +321,21 @@
             <div class="section-title">Danh Mục Sinek Store</div>  
             <div class="grid-container" id="categoryGrid"></div>  
         </div>  
+
+        <!-- Trang Vòng Quay May Mắn -->
+        <div id="pageWheel" class="page-view" style="display: none; text-align: center;">  
+            <div class="section-title">🎡 Vòng Quay May Mắn Sinek Store</div>  
+            <div class="card" style="max-width: 420px; margin: 0 auto; padding: 25px;">  
+                <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">Thử vận may mỗi ngày để nhận quà khủng, Robux và mã giảm giá hấp dẫn!</p>  
+                <div style="width: 220px; height: 220px; border-radius: 50%; border: 6px solid #38bdf8; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #1e293b, #0f172a); box-shadow: 0 0 30px rgba(56,189,248,0.5); position: relative;" id="wheelCircle">  
+                    <div id="wheelPointer" style="position: absolute; top: -15px; font-size: 24px;">▼</div>  
+                    <span id="wheelCenterText" style="font-size: 14px; font-weight: bold; color: #fbbf24;">SINEK WHEEL</span>  
+                </div>  
+                <div id="wheelResultBox" style="font-size: 14px; color: #38bdf8; font-weight: bold; margin-bottom: 15px; min-height: 24px;"></div>  
+                <button class="action-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 12px; font-size: 14px;" onclick="quayVongQuayMayMan()">QUAY NGAY (Miễn phí 1 lần/ngày)</button>  
+            </div>  
+        </div>  
+
         <div id="pageProducts" class="page-view" style="display: none;">  
             <button onclick="veTrangChuMoi()" style="background:rgba(30, 41, 59, 0.6); backdrop-filter: blur(8px); color:#38bdf8; border:1px solid rgba(255,255,255,0.15); padding:6px 12px; border-radius:10px; cursor:pointer; margin-bottom:15px; font-weight:bold;">← Quay lại danh mục</button>  
             <div class="section-title" id="categoryTitle">Sản Phẩm</div>  
@@ -382,6 +411,16 @@
                     </div>  
                     <button class="action-btn" id="btnToggleAdminStatus" style="width: 100px; background: #10b981;" onclick="toggleAdminStatus()">Online</button>  
                 </div>  
+
+                <!-- Cài đặt Chế Độ Bảo Trì Web -->
+                <div class="card" id="khuVucBaoTriWeb" style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">  
+                    <div>  
+                        <h3 style="font-size:14px; color:#f87171; margin-bottom:3px; text-align: left;">🚨 Bật/Tắt Chế Độ Bảo Trì Web</h3>  
+                        <p style="font-size:11px; color:#94a3b8; text-align: left;">Khi bật, khách vào web sẽ nhận được thông báo bảo trì</p>  
+                    </div>  
+                    <button class="action-btn" id="btnToggleMaintenance" style="width: 110px; background: #64748b;" onclick="toggleMaintenanceMode()">Đang Tắt</button>  
+                </div>  
+
                 <div class="card" id="khuVucQuanLyBanner" style="margin-bottom:15px;">  
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">🖼 Quản Lý Banner Chạy Slide (Nhiều ảnh)</h3>  
                     <div class="form-group"><label>Chọn ảnh banner từ thư viện máy:</label><input type="file" id="newBannerFile" class="form-control" accept="image/*" style="padding: 6px;"></div>  
@@ -390,6 +429,16 @@
                     <h4 style="font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-align: left;">Danh sách Banner hiện tại:</h4>  
                     <div id="adminBannerListContainer" style="font-size: 11px; color: #cbd5e1; text-align: left; background: rgba(15,23,42,0.6); padding: 8px; border-radius: 8px;">Đang tải...</div>  
                 </div>  
+
+                <!-- Quản Lý Vòng Quay May Mắn -->
+                <div class="card" id="khuVucQuanLyVongQuay" style="margin-bottom:15px;">  
+                    <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">🎡 Tùy Chỉnh Phần Thưởng Vòng Quay May Mắn</h3>  
+                    <div class="form-group"><label>Tên phần thưởng (VD: 50,000đ, 100 Robux, Voucher...):</label><input type="text" id="wheelPrizeName" class="form-control" placeholder="Nhập tên phần thưởng"></div>  
+                    <button class="action-btn" style="background:#10b981; margin-bottom:12px;" onclick="adminThemPhanThuongVongQuay()">Thêm Phần Thưởng Mới</button>  
+                    <h4 style="font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-align: left;">Danh sách phần thưởng hiện tại:</h4>  
+                    <div id="adminWheelPrizesList" style="font-size: 11px; color: #cbd5e1; text-align: left; background: rgba(15,23,42,0.6); padding: 8px; border-radius: 8px;">Đang tải...</div>  
+                </div>  
+
                 <div class="card" style="margin-bottom:15px;">  
                     <h3 style="font-size:14px; color:#38bdf8; margin-bottom:10px; text-align: left;">📦 Quản Lý Đơn Hàng Khách Đặt</h3>  
                     <div style="margin-bottom: 8px;">  
@@ -448,8 +497,16 @@
                         <input type="text" id="newProName" class="form-control" placeholder="Nhập tên sản phẩm">  
                     </div>  
                     <div class="form-group">  
-                        <label>Giá tiền (VNĐ):</label>  
-                        <input type="number" id="newProPrice" class="form-control" placeholder="Nhập giá tiền">  
+                        <label>Giá tiền gốc (VNĐ):</label>  
+                        <input type="number" id="newProPrice" class="form-control" placeholder="Nhập giá tiền gốc">  
+                    </div>  
+                    <div class="form-group">  
+                        <label>Giá Sale Khuyến Mãi (VNĐ - Để trống nếu không sale):</label>  
+                        <input type="number" id="newProSalePrice" class="form-control" placeholder="Nhập giá sale">  
+                    </div>  
+                    <div class="form-group">  
+                        <label>Thời gian kết thúc Sale:</label>  
+                        <input type="datetime-local" id="newProSaleTime" class="form-control">  
                     </div>  
                     <div class="form-group">  
                         <label>Số lượng kho:</label>  
@@ -494,8 +551,16 @@
                         <input type="text" id="adProductNameEdit" class="form-control" placeholder="Sửa tên sản phẩm">  
                     </div>  
                     <div class="form-group">  
-                        <label>Giá tiền mới (VNĐ):</label>  
-                        <input type="number" id="adProductPriceEdit" class="form-control" placeholder="Sửa giá tiền">  
+                        <label>Giá gốc mới (VNĐ):</label>  
+                        <input type="number" id="adProductPriceEdit" class="form-control" placeholder="Sửa giá gốc">  
+                    </div>  
+                    <div class="form-group">  
+                        <label>Giá Sale mới (VNĐ):</label>  
+                        <input type="number" id="adProductSalePriceEdit" class="form-control" placeholder="Sửa giá sale">  
+                    </div>  
+                    <div class="form-group">  
+                        <label>Thời gian kết thúc Sale mới:</label>  
+                        <input type="datetime-local" id="adProductSaleTimeEdit" class="form-control">  
                     </div>  
                     <div class="form-group">  
                         <label>Số lượng kho mới:</label>  
@@ -770,31 +835,22 @@
       
     const defaultDatabaseSanPham = {  
         muaacc: [  
-            { id: 101, name: "Acc King Legacy VIP", price: 150000, stock: 1, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
+            { id: 101, name: "Acc King Legacy VIP", price: 150000, salePrice: 120000, saleTime: "", stock: 1, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
         ],  
         caythue: [  
-            { id: 1, name: "Cày Level Max King Legacy", price: 50000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
+            { id: 1, name: "Cày Level Max King Legacy", price: 50000, salePrice: 0, saleTime: "", stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
         ],  
         itemnguyenlieu: [  
-            { id: 4, name: "Donate ĐTP King Legacy", price: 1000, stock: 50, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
+            { id: 4, name: "Donate ĐTP King Legacy", price: 1000, salePrice: 0, saleTime: "", stock: 50, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
         ],  
         giftgamepass: [  
-            { id: 7, name: "Gamepass X2 Drop / X2 Money", price: 120000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
+            { id: 7, name: "Gamepass X2 Drop / X2 Money", price: 120000, salePrice: 0, saleTime: "", stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
         ],  
         robux120h: [  
-            { id: 201, name: "Robux 120h - Rate 100", price: 100, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },  
-            { id: 202, name: "Robux 120h - Rate 110", price: 110, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },  
-            { id: 203, name: "Robux 120h - Rate 120", price: 120, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },  
-            { id: 204, name: "Robux 120h - Rate 130", price: 130, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },  
-            { id: 205, name: "Robux 120h - Rate 140", price: 140, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },  
-            { id: 206, name: "Robux 120h - Rate 150", price: 150, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },  
-            { id: 207, name: "Robux 120h - Rate 160", price: 160, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },  
-            { id: 208, name: "Robux 120h - Rate 170", price: 170, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },  
-            { id: 209, name: "Robux 120h - Rate 180", price: 180, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false },  
-            { id: 210, name: "Robux 120h - Rate 190", price: 190, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
+            { id: 201, name: "Robux 120h - Rate 100", price: 100, salePrice: 0, saleTime: "", stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
         ],  
         robuxglobal: [  
-            { id: 301, name: "Gói 800 Robux Global", price: 180000, stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
+            { id: 301, name: "Gói 800 Robux Global", price: 180000, salePrice: 0, saleTime: "", stock: 99, image: "https://i.ibb.co/8gBbLMmj/Screenshot-2026-10-06-13-37-02-747-com-miui-gallery-edit.jpg", soldOut: false }  
         ]  
     };  
 
@@ -820,6 +876,7 @@
     let databaseVouchers = {};  
     let moneyHistory = [];  
     let adminStatus = true;  
+    let maintenanceMode = false;
     let allOrders = [];  
     let appliedVoucherCode = null;  
     let discountAmountGlobal = 0;  
@@ -828,6 +885,7 @@
         "https://i.ibb.co/6V8qTFz/FB-IMG-1791121966996.jpg",
         "https://i.ibb.co/tPsgyfKT/IMG-20261004-214345.jpg"
     ];
+    let danhSachPhanThuongVongQuay = ["50,000 VNĐ", "100 Robux", "Mã Giảm Giá 20%", "Chúc bạn may mắn lần sau", "Acc King Legacy VIP", "10,000 VNĐ"];
     let currentBannerIndex = 0;
     let bannerInterval = null;
 
@@ -838,6 +896,31 @@
         setTimeout(() => { bar.style.width = '70%'; }, 50);
         setTimeout(() => { bar.style.width = '100%'; }, 250);
         setTimeout(() => { bar.style.width = '0%'; }, 600);
+    }
+
+    function dongPopupWelcome() {
+        document.getElementById('popupWelcome').style.display = 'none';
+        let noticeModal = document.getElementById('popupNotice');
+        noticeModal.style.display = 'flex';
+        
+        // Đếm ngược 5 giây cho bảng thông báo
+        let btnClose = document.getElementById('btnCloseNotice');
+        let countdown = 5;
+        btnClose.innerText = `Vui lòng chờ web load... (${countdown}s)`;
+        
+        let timer = setInterval(() => {
+            countdown--;
+            if(countdown > 0) {
+                btnClose.innerText = `Vui lòng chờ web load... (${countdown}s)`;
+            } else {
+                clearInterval(timer);
+                btnClose.innerText = "ĐÓNG";
+                btnClose.disabled = false;
+                btnClose.style.background = "linear-gradient(to right, #0284c7, #38bdf8)";
+                btnClose.style.cursor = "pointer";
+            }
+        }, 1000);
+        chayLoadingBar();
     }
 
     function dongPopupNotice() {   
@@ -1123,10 +1206,12 @@
                     }
                     if(data.ctvList) danhSachCTV = data.ctvList;  
                     if(typeof data.adminStatus !== 'undefined') adminStatus = data.adminStatus;  
+                    if(typeof data.maintenanceMode !== 'undefined') maintenanceMode = data.maintenanceMode;
                     if(data.orders) allOrders = data.orders;  
                     if(data.vouchers) databaseVouchers = data.vouchers;  
                     if(data.moneyHistory) moneyHistory = data.moneyHistory;  
                     if(data.banners && Array.isArray(data.banners)) danhSachBanner = data.banners;
+                    if(data.wheelPrizes && Array.isArray(data.wheelPrizes)) danhSachPhanThuongVongQuay = data.wheelPrizes;
                 } else {  
                     await saveFirebaseData();  
                 }  
@@ -1138,8 +1223,25 @@
         loadDanhSachDanhMucAdmin();
         loadLichSuCongTienAdmin();  
         loadDanhSachBannerAdmin();
+        loadDanhSachVongQuayAdmin();
         initBannerSlider();
+        kiemTraCheDoBaoTri();
     }  
+
+    function kiemTraCheDoBaoTri() {
+        if(maintenanceMode) {
+            let role = localStorage.getItem('sinek_role');
+            if(role !== 'admin' && role !== 'ctv') {
+                document.body.innerHTML = `
+                    <div style="background: #020617; color: #f8fafc; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+                        <h1 style="color: #ef4444; font-size: 26px; margin-bottom: 10px;">🚨 WEB ĐANG TRONG THỜI GIAN BẢO TRÌ</h1>
+                        <p style="color: #94a3b8; font-size: 14px; max-width: 400px; line-height: 1.6;">Hệ thống Sinek Store đang nâng cấp và sửa lỗi. Quý khách vui lòng quay lại sau ít phút hoặc liên hệ trực tiếp qua Zalo Admin để được hỗ trợ!</p>
+                        <a href="https://zalo.me/0794221549" style="margin-top: 20px; background: #0284c7; color: #fff; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold;">💬 Liên Hệ Zalo Admin</a>
+                    </div>
+                `;
+            }
+        }
+    }
 
     async function saveFirebaseData() {  
         try {  
@@ -1151,10 +1253,12 @@
                     categories: danhSachDanhMuc,
                     ctvList: danhSachCTV,  
                     adminStatus: adminStatus,  
+                    maintenanceMode: maintenanceMode,
                     orders: allOrders,  
                     vouchers: databaseVouchers,  
                     moneyHistory: moneyHistory,
-                    banners: danhSachBanner
+                    banners: danhSachBanner,
+                    wheelPrizes: danhSachPhanThuongVongQuay
                 })  
             });  
         } catch(e) {}  
@@ -1166,6 +1270,8 @@
     function capNhatGiaoDienTrangThaiAdmin() {  
         let label = document.getElementById('adminHeaderStatusLabel');  
         let btnToggle = document.getElementById('btnToggleAdminStatus');  
+        let btnMaint = document.getElementById('btnToggleMaintenance');
+        
         if(adminStatus) {  
             if(label) label.innerText = "Online";  
             if(btnToggle) { btnToggle.innerText = "Online"; btnToggle.style.background = "#10b981"; }  
@@ -1173,6 +1279,16 @@
             if(label) label.innerText = "Offline";  
             if(btnToggle) { btnToggle.innerText = "Offline"; btnToggle.style.background = "#ef4444"; }  
         }  
+
+        if(btnMaint) {
+            if(maintenanceMode) {
+                btnMaint.innerText = "Đang Bật";
+                btnMaint.style.background = "#ef4444";
+            } else {
+                btnMaint.innerText = "Đang Tắt";
+                btnMaint.style.background = "#64748b";
+            }
+        }
     }  
 
     async function toggleAdminStatus() {  
@@ -1180,6 +1296,13 @@
         await saveFirebaseData();  
         capNhatGiaoDienTrangThaiAdmin();  
     }  
+
+    async function toggleMaintenanceMode() {
+        maintenanceMode = !maintenanceMode;
+        await saveFirebaseData();
+        capNhatGiaoDienTrangThaiAdmin();
+        showToast(maintenanceMode ? 'Đã bật chế độ bảo trì web!' : 'Đã tắt chế độ bảo trì web!', 'success');
+    }
 
     window.onload = async function() {  
         try {  
@@ -1228,6 +1351,8 @@
             document.getElementById('pageHome').style.display = 'block';  
             renderCategoryGrid();  
             initBannerSlider();
+        } else if(tabName === 'wheel') {
+            document.getElementById('pageWheel').style.display = 'block';
         } else if(tabName === 'deposit') {  
             if(!currentUser) {  
                 showToast('Vui lòng đăng nhập tài khoản trước khi nạp tiền!', 'error');  
@@ -1291,15 +1416,30 @@
             let btnText = (keyDM === 'robuxglobal' || keyDM === 'robux120h') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Mua Ngay') : ((keyDM === 'giftgamepass') ? (isSoldOut ? 'Tạm Hết Hàng' : 'Xác Nhận Đặt Trước') : (isSoldOut ? 'Tạm Hết Hàng' : 'Đặt Đơn'));  
             let btnStyle = isSoldOut ? 'background: #64748b; cursor: not-allowed;' : '';  
               
+            let activeSale = false;
+            let displayPriceHtml = '';
+            let finalPriceToBuy = sp.price;
+
+            if(sp.salePrice && sp.salePrice > 0) {
+                if(!sp.saleTime || new Date(sp.saleTime) > new Date()) {
+                    activeSale = true;
+                    finalPriceToBuy = sp.salePrice;
+                    displayPriceHtml = `<span style="text-decoration: line-through; color: #94a3b8; font-size: 11px; margin-right: 6px;">${sp.price.toLocaleString()} đ</span><b style="color: #ef4444;">${sp.salePrice.toLocaleString()} đ</b>`;
+                }
+            }
+            if(!activeSale) {
+                displayPriceHtml = `<b style="color: #38bdf8;">${keyDM === 'robux120h' ? sp.price + ' đ / 1RB' : sp.price.toLocaleString() + ' đ'}</b>`;
+            }
+
             let onclickAttr = '';  
             if(!isSoldOut) {  
                 let formType = (typeof catInfo === 'object' && catInfo.formType) ? catInfo.formType : 'item';
-                if(keyDM === 'muaacc' || formType === 'acc') onclickAttr = `onclick="kiemTraTruocKhiMoModal('acc', '${sp.name}', ${sp.price})"`;  
-                else if(keyDM === 'caythue' || formType === 'ct') onclickAttr = `onclick="kiemTraTruocKhiMoModal('ct', '${sp.name}', ${sp.price})"`;  
-                else if(keyDM === 'giftgamepass' || formType === 'gp') onclickAttr = `onclick="kiemTraTruocKhiMoModal('gp', '${sp.name}', ${sp.price})"`;  
-                else if(keyDM === 'robux120h' || formType === 'rbx120h') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbx120h', '${sp.name}', ${sp.price})"`;  
-                else if(formType === 'custom') onclickAttr = `onclick="kiemTraTruocKhiMoModal('custom', '${sp.name}', ${sp.price}, '${keyDM}')"`;
-                else onclickAttr = `onclick="kiemTraTruocKhiMoModal('it', '${sp.name}', ${sp.price})"`;  
+                if(keyDM === 'muaacc' || formType === 'acc') onclickAttr = `onclick="kiemTraTruocKhiMoModal('acc', '${sp.name}', ${finalPriceToBuy})"`;  
+                else if(keyDM === 'caythue' || formType === 'ct') onclickAttr = `onclick="kiemTraTruocKhiMoModal('ct', '${sp.name}', ${finalPriceToBuy})"`;  
+                else if(keyDM === 'giftgamepass' || formType === 'gp') onclickAttr = `onclick="kiemTraTruocKhiMoModal('gp', '${sp.name}', ${finalPriceToBuy})"`;  
+                else if(keyDM === 'robux120h' || formType === 'rbx120h') onclickAttr = `onclick="kiemTraTruocKhiMoModal('rbx120h', '${sp.name}', ${finalPriceToBuy})"`;  
+                else if(formType === 'custom') onclickAttr = `onclick="kiemTraTruocKhiMoModal('custom', '${sp.name}', ${finalPriceToBuy}, '${keyDM}')"`;
+                else onclickAttr = `onclick="kiemTraTruocKhiMoModal('it', '${sp.name}', ${finalPriceToBuy})"`;  
             }  
               
             let productImg = sp.image || fixedImage;  
@@ -1310,7 +1450,7 @@
                 <div class="card" ${isSoldOut ? 'style="opacity: 0.6;"' : ''}>  
                     ${mediaHTML}  
                     <div class="card-title">${sp.name}</div>  
-                    <div class="card-desc" style="color: #38bdf8; font-weight: bold; margin-bottom: 4px;">${keyDM === 'robux120h' ? sp.price + ' đ / 1RB' : sp.price.toLocaleString() + ' đ'}</div>  
+                    <div class="card-desc" style="font-weight: bold; margin-bottom: 4px;">${displayPriceHtml}</div>  
                     ${stockHTML}  
                     <button class="action-btn" ${btnStyle} ${onclickAttr}>${btnText}</button>  
                 </div>  
@@ -1318,6 +1458,26 @@
         });  
         document.getElementById('productList').innerHTML = listHTML;  
     }
+    function quayVongQuayMayMan() {
+        let resultEl = document.getElementById('wheelResultBox');
+        let wheelCircle = document.getElementById('wheelCircle');
+        
+        if(!danhSachPhanThuongVongQuay || danhSachPhanThuongVongQuay.length === 0) {
+            showToast('Vòng quay chưa được cấu hình phần thưởng!', 'error');
+            return;
+        }
+
+        resultEl.innerText = "🎡 Đang quay thưởng...";
+        wheelCircle.style.transform = `rotate(${Math.floor(720 + Math.random() * 720)}deg)`;
+        wheelCircle.style.transition = "transform 3s cubic-bezier(0.15, 0.9, 0.2, 1)";
+
+        setTimeout(() => {
+            let randomReward = danhSachPhanThuongVongQuay[Math.floor(Math.random() * danhSachPhanThuongVongQuay.length)];
+            resultEl.innerText = `🎉 Chúc mừng bạn đã quay trúng: ${randomReward}`;
+            showToast(`Trúng thưởng: ${randomReward}`, 'success');
+        }, 3000);
+    }
+
     function kiemTraTruocKhiMoModal(loai, ten, gia, keyDM = '') {  
         if(!currentUser) {  
             showToast('Vui lòng Đăng Nhập hoặc Đăng Ký tài khoản trước khi mua hàng!', 'error');  
@@ -2001,20 +2161,61 @@
         let html = '<div class="scrollable-box-container">';  
         arrayDon.forEach(h => {  
             let badgeColor = h.status.includes('Chờ Duyệt') ? '#fbbf24' : (h.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');  
+            if(h.status.includes('Đã Hủy')) badgeColor = '#ef4444';
+
             let displayDetails = h.details;  
             if(displayDetails && displayDetails.includes('Mật khẩu:')) {  
                 displayDetails = displayDetails.replace(/(- Mật khẩu: )(.*)/g, '$1••••••••');  
             }  
 
+            let canCancel = h.status.includes('Chờ Duyệt');
+            let originalIndex = allOrders.findIndex(item => item.code === h.code);
+
             html += `<div style="background:rgba(15,23,42,0.5); border:1px solid rgba(255,255,255,0.15); padding:10px; border-radius:12px; margin-bottom:8px; text-align:left;">  
                 <b style="color:#38bdf8;">Mã đơn: ${h.code}</b> | Trạng thái: <b style="color:${badgeColor};">${h.status}</b><br>  
                 <span>Sản phẩm: ${h.item}</span><br><span>Tổng giá: ${h.price.toLocaleString()}đ</span><br>  
                 <pre style="font-size:11px; color:#94a3b8; font-family:inherit; white-space:pre-wrap; margin-top:4px;">${displayDetails}</pre>  
-                <span style="font-size:10px; color:#64748b;">Thời gian: ${h.time}</span></div>`;  
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                    <span style="font-size:10px; color:#64748b;">Thời gian đặt: ${h.time}</span>
+                    ${canCancel ? `<button onclick="khachHuyDonHang(${originalIndex})" style="background:#ef4444; color:#fff; border:none; padding:3px 8px; border-radius:6px; font-size:10px; cursor:pointer;">❌ Hủy Đơn / Hoàn Tiền</button>` : ''}
+                </div>
+            </div>`;  
         });  
         html += '</div>';  
         container.innerHTML = html;  
     }  
+
+    async function khachHuyDonHang(index) {
+        if(confirm('Bạn có chắc chắn muốn hủy đơn hàng này và yêu cầu hoàn tiền vào số dư không?')) {
+            let don = allOrders[index];
+            if(!don.status.includes('Chờ Duyệt')) {
+                showToast('Đơn hàng đã được xử lý, không thể hủy!', 'error');
+                return;
+            }
+
+            // Hoàn tiền lại cho khách nếu đơn trừ tiền web
+            if(don.webUser && don.webUser !== 'Khách vãng lai') {
+                try {
+                    let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + don.webUser + ".json");
+                    let uData = await res.json();
+                    if(uData) {
+                        uData.balance = (uData.balance || 0) + don.price;
+                        await fetch(FIREBASE_DB_URL + "sinek_users/" + don.webUser + ".json", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(uData)
+                        });
+                    }
+                } catch(e) {}
+            }
+
+            allOrders[index].status = '❌ Đã Hủy & Đã Hoàn Tiền';
+            await saveFirebaseData();
+            hienThiLichSu();
+            capNhatGiaoDienUser();
+            showToast('Đã hủy đơn hàng và hoàn tiền thành công!', 'success');
+        }
+    }
 
     function guiTheCaoZalo() {  
         let tTypeSelect = document.getElementById('cardType');  
@@ -2117,6 +2318,7 @@
         document.getElementById('adminPanelBox').style.display = 'block';  
 
         let khuVucTrangThaiShop = document.getElementById('khuVucTrangThaiShop');  
+        let khuVucBaoTriWeb = document.getElementById('khuVucBaoTriWeb');
         let khuVucThemSP = document.getElementById('khuVucThemSanPham');  
         let khuVucSuaTien = document.getElementById('khuVucBienDongTien');  
         let khuVucLichSuTien = document.getElementById('khuVucLichSuCongTien');  
@@ -2125,6 +2327,7 @@
         let khuVucQuanLyCTV = document.getElementById('khuVucQuanLyCTV');  
         let khuVucQuanLyDanhMuc = document.getElementById('khuVucQuanLyDanhMuc');
         let khuVucQuanLyBanner = document.getElementById('khuVucQuanLyBanner');
+        let khuVucQuanLyVongQuay = document.getElementById('khuVucQuanLyVongQuay');
 
         let savedKey = localStorage.getItem('sinek_ctv_key');  
         let ctvData = (role === 'ctv' && savedKey) ? danhSachCTV[savedKey] : null;  
@@ -2132,12 +2335,14 @@
 
         if(role === 'ctv') {  
             if(khuVucTrangThaiShop) khuVucTrangThaiShop.style.display = 'none';  
+            if(khuVucBaoTriWeb) khuVucBaoTriWeb.style.display = 'none';
             if(khuVucThemSP) khuVucThemSP.style.display = 'none';  
             if(khuVucSuaSP) khuVucSuaSP.style.display = 'none';  
             if(khuVucVoucher) khuVucVoucher.style.display = 'none';  
             if(khuVucQuanLyCTV) khuVucQuanLyCTV.style.display = 'none';  
             if(khuVucQuanLyDanhMuc) khuVucQuanLyDanhMuc.style.display = 'none';
             if(khuVucQuanLyBanner) khuVucQuanLyBanner.style.display = 'none';
+            if(khuVucQuanLyVongQuay) khuVucQuanLyVongQuay.style.display = 'none';
 
             if(canHandleMoney) {  
                 if(khuVucSuaTien) khuVucSuaTien.style.display = 'block';  
@@ -2148,6 +2353,7 @@
             }  
         } else {  
             if(khuVucTrangThaiShop) khuVucTrangThaiShop.style.display = 'flex';  
+            if(khuVucBaoTriWeb) khuVucBaoTriWeb.style.display = 'flex';
             if(khuVucThemSP) khuVucThemSP.style.display = 'block';  
             if(khuVucSuaTien) khuVucSuaTien.style.display = 'block';  
             if(khuVucLichSuTien) khuVucLichSuTien.style.display = 'block';  
@@ -2156,6 +2362,7 @@
             if(khuVucQuanLyCTV) khuVucQuanLyCTV.style.display = 'block';  
             if(khuVucQuanLyDanhMuc) khuVucQuanLyDanhMuc.style.display = 'block';
             if(khuVucQuanLyBanner) khuVucQuanLyBanner.style.display = 'block';
+            if(khuVucQuanLyVongQuay) khuVucQuanLyVongQuay.style.display = 'block';
 
             loadDanhSachSanPhamAdmin();  
             loadDanhSachVoucherAdmin();  
@@ -2163,8 +2370,45 @@
             loadDanhSachDanhMucAdmin();
             loadLichSuCongTienAdmin();  
             loadDanhSachBannerAdmin();
+            loadDanhSachVongQuayAdmin();
         }  
         loadQuanLyDonHangAdmin();  
+    }
+
+    async function adminThemPhanThuongVongQuay() {
+        let name = document.getElementById('wheelPrizeName').value.trim();
+        if(!name) { showToast('Vui lòng nhập tên phần thưởng!', 'error'); return; }
+        danhSachPhanThuongVongQuay.push(name);
+        await saveFirebaseData();
+        document.getElementById('wheelPrizeName').value = '';
+        loadDanhSachVongQuayAdmin();
+        showToast('Thêm phần thưởng vòng quay thành công!', 'success');
+    }
+
+    async function adminXoaPhanThuongVongQuay(index) {
+        if(confirm('Bạn có chắc muốn xóa phần thưởng này khỏi vòng quay?')) {
+            danhSachPhanThuongVongQuay.splice(index, 1);
+            await saveFirebaseData();
+            loadDanhSachVongQuayAdmin();
+            showToast('Đã xóa phần thưởng!', 'success');
+        }
+    }
+
+    function loadDanhSachVongQuayAdmin() {
+        let container = document.getElementById('adminWheelPrizesList');
+        if(!container) return;
+        if(!danhSachPhanThuongVongQuay || danhSachPhanThuongVongQuay.length === 0) {
+            container.innerHTML = 'Chưa có phần thưởng nào.';
+            return;
+        }
+        let html = '';
+        danhSachPhanThuongVongQuay.forEach((item, idx) => {
+            html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <span>🎁 ${item}</span>
+                <button onclick="adminXoaPhanThuongVongQuay(${idx})" style="background:#ef4444; color:#fff; border:none; padding:2px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Xóa</button>
+            </div>`;
+        });
+        container.innerHTML = html;
     }
 
     async function adminThemBannerMoi() {
@@ -2259,7 +2503,7 @@
                     <button onclick="adminToggleQuyenTienCTV('${username}')" style="background:${btnToggleBg}; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">${btnToggleText}</button>  
                     <button onclick="adminXoaCTV('${username}')" style="background:#ef4444; color:#fff; border:none; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;">Xóa</button>  
                 </div>  
-            </div>`;  
+            `;  
         }  
         container.innerHTML = html;  
     }  
@@ -2474,6 +2718,8 @@
         filteredOrders.forEach((o, index) => {  
             let originalIndex = allOrders.findIndex(item => item.code === o.code);  
             let badgeColor = o.status.includes('Chờ Duyệt') ? '#fbbf24' : (o.status === '🔄 Đang Xử Lý' ? '#38bdf8' : '#10b981');  
+            if(o.status.includes('Đã Hủy')) badgeColor = '#ef4444';
+
             let nguoiDuyetHTML = o.handledBy ? `<br><span style="color: #10b981; font-weight: bold;">👤 Người duyệt/xử lý: ${o.handledBy}</span>` : `<br><span style="color: #94a3b8; font-style: italic;">👤 Người duyệt: Chưa có ai nhận đơn</span>`;  
               
             let displayDetails = o.details;  
@@ -2486,10 +2732,12 @@
                 ${nguoiDuyetHTML}<br>  
                 <span>Khách đặt: <b>${o.webUser}</b></span><br><span>Sản phẩm: ${o.item} (${o.price.toLocaleString()}đ)</span><br>  
                 <pre style="font-size:11px; color:#cbd5e1; font-family:inherit; white-space:pre-wrap; margin-top:4px; background:rgba(15,23,42,0.7); padding:6px; border-radius:8px;">${displayDetails}</pre>  
+                <div style="font-size:10px; color:#94a3b8; margin: 4px 0;">⏰ Thời gian đặt: ${o.time || 'Không rõ'}</div>
                 <div style="display:flex; gap:6px; margin-top:8px;">  
                     <button class="action-btn" style="background:#38bdf8; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${originalIndex}, '🔄 Đang Xử Lý')">Nhận Đơn</button>  
                     <button class="action-btn" style="background:#10b981; font-size:11px; padding:4px;" onclick="adminDoiTrangThaiDon(${originalIndex}, '✅ Thành Công')">Hoàn Thành</button>  
-                    <button class="action-btn" style="background:#ef4444; font-size:11px; padding:4px;" onclick="adminXoaDonHang(${originalIndex})">Xóa</button>  
+                    <button class="action-btn" style="background:#ef4444; font-size:11px; padding:4px;" onclick="adminHuyVaHoanTienDonHang(${originalIndex})">Hủy & Hoàn Tiền</button>  
+                    <button class="action-btn" style="background:#64748b; font-size:11px; padding:4px;" onclick="adminXoaDonHang(${originalIndex})">Xóa</button>  
                 </div></div>`;  
         });  
         html += '</div>';  
@@ -2504,6 +2752,30 @@
         loadQuanLyDonHangAdmin();  
         showToast('Đã cập nhật trạng thái đơn thành: ' + trangThaiMoi, 'success');  
     }  
+
+    async function adminHuyVaHoanTienDonHang(index) {
+        if(confirm('Bạn có muốn hủy đơn hàng này và hoàn lại tiền cho khách không?')) {
+            let don = allOrders[index];
+            if(don.webUser && don.webUser !== 'Khách vãng lai') {
+                try {
+                    let res = await fetch(FIREBASE_DB_URL + "sinek_users/" + don.webUser + ".json");
+                    let uData = await res.json();
+                    if(uData) {
+                        uData.balance = (uData.balance || 0) + don.price;
+                        await fetch(FIREBASE_DB_URL + "sinek_users/" + don.webUser + ".json", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(uData)
+                        });
+                    }
+                } catch(e) {}
+            }
+            allOrders[index].status = '❌ Admin Đã Hủy & Hoàn Tiền';
+            await saveFirebaseData();
+            loadQuanLyDonHangAdmin();
+            showToast('Đã hủy đơn và hoàn tiền cho khách!', 'success');
+        }
+    }
 
     async function adminXoaDonHang(index) {  
         if(confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {  
@@ -2591,6 +2863,8 @@
         let cat = document.getElementById('newProCategory').value;  
         let name = document.getElementById('newProName').value.trim();  
         let price = parseInt(document.getElementById('newProPrice').value);  
+        let salePrice = parseInt(document.getElementById('newProSalePrice').value) || 0;
+        let saleTime = document.getElementById('newProSaleTime').value;
         let stock = parseInt(document.getElementById('newProStock').value) || 1;  
         let imageInput = document.getElementById('newProImageFile');  
 
@@ -2602,25 +2876,27 @@
             let reader = new FileReader();  
             reader.onload = async function(e) {  
                 let base64Image = e.target.result;  
-                await luuSanPhamVaoFirebase(cat, name, price, stock, base64Image);  
+                await luuSanPhamVaoFirebase(cat, name, price, salePrice, saleTime, stock, base64Image);  
             };  
             reader.readAsDataURL(file);  
         } else {  
-            await luuSanPhamVaoFirebase(cat, name, price, stock, defaultImg);  
+            await luuSanPhamVaoFirebase(cat, name, price, salePrice, saleTime, stock, defaultImg);  
         }  
     }  
 
-    async function luuSanPhamVaoFirebase(cat, name, price, stock, imageUrl) {  
+    async function luuSanPhamVaoFirebase(cat, name, price, salePrice, saleTime, stock, imageUrl) {  
         if(!databaseSanPham[cat]) { databaseSanPham[cat] = []; }  
 
         let newId = Date.now();  
-        databaseSanPham[cat].push({ id: newId, name: name, price: price, stock: stock, image: imageUrl, soldOut: false });  
+        databaseSanPham[cat].push({ id: newId, name: name, price: price, salePrice: salePrice, saleTime: saleTime, stock: stock, image: imageUrl, soldOut: false });  
         memoryProductCache[cat] = null;  
         await saveFirebaseData();  
         loadDanhSachSanPhamAdmin();  
         showToast(`Thêm sản phẩm "${name}" thành công!`, 'success');  
         document.getElementById('newProName').value = '';  
         document.getElementById('newProPrice').value = '';  
+        document.getElementById('newProSalePrice').value = '';
+        document.getElementById('newProSaleTime').value = '';
         document.getElementById('newProImageFile').value = '';  
     }  
 
@@ -2654,6 +2930,8 @@
         if(spObj) {  
             document.getElementById('adProductNameEdit').value = spObj.name;  
             document.getElementById('adProductPriceEdit').value = spObj.price;  
+            document.getElementById('adProductSalePriceEdit').value = spObj.salePrice || '';
+            document.getElementById('adProductSaleTimeEdit').value = spObj.saleTime || '';
             document.getElementById('adProductStock').value = spObj.stock;  
             let btn = document.getElementById('btnToggleSoldOut');  
             if(spObj.soldOut) {  
@@ -2671,6 +2949,8 @@
         if(!spObj) { showToast('Chưa chọn sản phẩm nào!', 'error'); return; }  
         let newName = document.getElementById('adProductNameEdit').value.trim();  
         let newPrice = parseInt(document.getElementById('adProductPriceEdit').value);  
+        let newSalePrice = parseInt(document.getElementById('adProductSalePriceEdit').value) || 0;
+        let newSaleTime = document.getElementById('adProductSaleTimeEdit').value;
         let newStock = parseInt(document.getElementById('adProductStock').value);  
 
         if(!newName || isNaN(newPrice) || isNaN(newStock)) { showToast('Vui lòng điền đầy đủ thông tin hợp lệ!', 'error'); return; }  
@@ -2679,6 +2959,8 @@
         if(targetSp) {  
             targetSp.name = newName;  
             targetSp.price = newPrice;  
+            targetSp.salePrice = newSalePrice;
+            targetSp.saleTime = newSaleTime;
             targetSp.stock = newStock;  
             memoryProductCache[dm] = null;  
             await saveFirebaseData();  
@@ -2873,7 +3155,6 @@
         taiNoiDungChatHienTai();
         showToast('Đã gửi thông tin liên hệ của Admin & CTV!', 'success');
     }
-
     async function guiTinNhanChat() {  
         let txtInput = document.getElementById('chatInputText');  
         let msg = txtInput.value.trim();  
