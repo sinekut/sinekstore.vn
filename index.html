@@ -861,6 +861,7 @@
     ];
     let currentBannerIndex = 0;
     let bannerInterval = null;
+    let liveSaleInterval = null;
 
     function chayLoadingBar() {
         let bar = document.getElementById('globalLoadingBar');
@@ -1155,6 +1156,7 @@
         loadDanhSachBannerAdmin();
         initBannerSlider();
         kiemTraCheDoBaoTri();
+        tuDongXoaDonHangCu();
     }  
 
     function kiemTraCheDoBaoTri() {
@@ -1336,21 +1338,14 @@
             let btnText = isSoldOut ? 'Tạm Hết Hàng' : 'Mua Ngay';  
             let btnStyle = isSoldOut ? 'background: #64748b; cursor: not-allowed;' : '';  
               
-            let activeSale = false;
             let displayPriceHtml = '';
             let finalPriceToBuy = sp.price;
             let saleTimerHtml = '';
 
             if(sp.salePrice && sp.salePrice > 0 && sp.saleEndTime && sp.saleEndTime > now) {
-                activeSale = true;
                 finalPriceToBuy = sp.salePrice;
-                let timeLeft = sp.saleEndTime - now;
-                let hours = Math.floor(timeLeft / (1000 * 60 * 60));
-                let mins = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                let secs = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                
                 displayPriceHtml = `<span style="text-decoration: line-through; color: #94a3b8; font-size: 11px; margin-right: 4px;">${sp.price.toLocaleString()} đ</span><b style="color: #ef4444;">${sp.salePrice.toLocaleString()} đ</b>`;
-                saleTimerHtml = `<div style="font-size: 10px; color: #fbbf24; background: rgba(251,191,36,0.15); padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; border: 1px dashed rgba(251,191,36,0.4);">🔥 Sale kết thúc: ${hours}h ${mins}m ${secs}s</div>`;
+                saleTimerHtml = `<div class="sale-timer-badge" data-end="${sp.saleEndTime}" style="font-size: 10px; color: #fbbf24; background: rgba(251,191,36,0.15); padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; border: 1px dashed rgba(251,191,36,0.4);">🔥 Đang tính giờ...</div>`;
             } else {
                 displayPriceHtml = `<b style="color: #38bdf8;">${keyDM === 'robux120h' ? sp.price + ' đ / 1RB' : sp.price.toLocaleString() + ' đ'}</b>`;
             }
@@ -1380,7 +1375,49 @@
                 </div>  
             `;  
         });  
-        document.getElementById('productList').innerHTML = listHTML;  
+        document.getElementById('productList').innerHTML = listHTML;
+        startLiveSaleCountdown();
+    }
+
+    // Bộ đếm thời gian sale chạy trực tiếp từng giây không cần load lại trang
+    function startLiveSaleCountdown() {
+        if (window._saleInterval) clearInterval(window._saleInterval);
+        window._saleInterval = setInterval(() => {
+            let now = Date.now();
+            let saleTimers = document.querySelectorAll('.sale-timer-badge');
+            saleTimers.forEach(el => {
+                let endTime = parseInt(el.getAttribute('data-end') || 0);
+                let timeLeft = endTime - now;
+                if (timeLeft > 0) {
+                    let hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                    let mins = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    let secs = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                    el.innerText = `🔥 Sale kết thúc: ${hours}h ${mins}m ${secs}s`;
+                } else {
+                    el.innerText = `🔥 Đã kết thúc Sale`;
+                }
+            });
+        }, 1000);
+    }
+
+    // Tự động dọn dẹp đơn hàng đã hoàn thành quá 1 tuần (7 ngày)
+    async function tuDongXoaDonHangCu() {
+        if (!allOrders || allOrders.length === 0) return;
+        let now = Date.now();
+        let oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+        let initialLength = allOrders.length;
+        
+        allOrders = allOrders.filter(o => {
+            if (!o.status.includes('Thành Công') && !o.status.includes('Đã Hủy')) return true;
+            if (o.timestamp && (now - o.timestamp > oneWeekMs)) {
+                return false; 
+            }
+            return true;
+        });
+
+        if (allOrders.length < initialLength) {
+            await saveFirebaseData();
+        }
     }
     function kiemTraTruocKhiMoModal(loai, ten, gia, keyDM, productId) {  
         if(!currentUser) {  
@@ -1833,12 +1870,14 @@
     }  
 
     async function luuVaTaoDonHang(chiTietDon) {  
-        if(appliedVoucherCode && databaseVouchers[appliedVoucherCode]) {  
+        if (appliedVoucherCode && databaseVouchers[appliedVoucherCode]) {  
             databaseVouchers[appliedVoucherCode].stock -= 1;  
-            if(databaseVouchers[appliedVoucherCode].stock < 0) databaseVouchers[appliedVoucherCode].stock = 0;  
+            if (databaseVouchers[appliedVoucherCode].stock < 0) databaseVouchers[appliedVoucherCode].stock = 0;  
         }  
+        chiTietDon.timestamp = Date.now();
         allOrders.unshift(chiTietDon);  
         await saveFirebaseData();  
+        tuDongXoaDonHangCu();
     }  
 
     async function xacNhanThanhToanMuaAcc() {  
@@ -2372,7 +2411,7 @@
     }  
 
     async function adminXoaCTV(username) {  
-        if(confirm(`Bạn có chắc muốn xóa CTV [${username}] không?`)) {  
+        if(confirm(`Kể chắc muốn xóa CTV [${username}] không?`)) {  
             delete danhSachCTV[username];  
             await saveFirebaseData();  
             loadDanhSachCTVAdmin();  
